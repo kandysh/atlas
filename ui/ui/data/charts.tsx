@@ -34,11 +34,11 @@ export type Project = {
 };
 
 /* =======================
-   Utils (data shaping)
+   Data Selectors
 ======================= */
 
-export function getStatusData(projects: Project[]) {
-  return Object.values(
+const statusData = (projects: Project[]) =>
+  Object.values(
     projects.reduce(
       (acc, p) => {
         acc[p.status] ??= { name: p.status, value: 0 };
@@ -48,10 +48,9 @@ export function getStatusData(projects: Project[]) {
       {} as Record<string, { name: string; value: number }>,
     ),
   );
-}
 
-export function getHoursSavedByTheme(projects: Project[]) {
-  return Object.values(
+const hrsByTheme = (projects: Project[]) =>
+  Object.values(
     projects.reduce(
       (acc, p) => {
         acc[p.theme] ??= { theme: p.theme, hrs: 0 };
@@ -61,10 +60,9 @@ export function getHoursSavedByTheme(projects: Project[]) {
       {} as Record<string, { theme: string; hrs: number }>,
     ),
   );
-}
 
-export function getToolUsage(projects: Project[]) {
-  return Object.values(
+const toolsUsage = (projects: Project[]) =>
+  Object.values(
     projects.reduce(
       (acc, p) => {
         p.toolsUsed.forEach((tool) => {
@@ -75,6 +73,33 @@ export function getToolUsage(projects: Project[]) {
       },
       {} as Record<string, { tool: string; count: number }>,
     ),
+  );
+
+/* =======================
+   Shared UI
+======================= */
+
+function ChartCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border bg-background p-4 shadow-sm">
+      <div className="mb-3">
+        <h3 className="text-sm font-semibold">{title}</h3>
+        {subtitle && (
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
+        )}
+      </div>
+
+      {/* CRITICAL: explicit height */}
+      <div className="w-full h-[300px]">{children}</div>
+    </div>
   );
 }
 
@@ -89,79 +114,101 @@ const STATUS_COLORS = {
 };
 
 export function StatusPieChart({ projects }: { projects: Project[] }) {
-  const data = getStatusData(projects);
+  const data = statusData(projects);
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie data={data} dataKey="value" nameKey="name" label>
-          {data.map((d) => (
-            <Cell
-              key={d.name}
-              fill={STATUS_COLORS[d.name as keyof typeof STATUS_COLORS]}
-            />
-          ))}
-        </Pie>
-        <Tooltip />
-      </PieChart>
-    </ResponsiveContainer>
+    <ChartCard
+      title="Initiative Status"
+      subtitle="Distribution across lifecycle stages"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            outerRadius={90}
+            label
+          >
+            {data.map((d) => (
+              <Cell
+                key={d.name}
+                fill={STATUS_COLORS[d.name as keyof typeof STATUS_COLORS]}
+              />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    </ChartCard>
   );
 }
 
 export function HoursSavedByThemeChart({ projects }: { projects: Project[] }) {
-  const data = getHoursSavedByTheme(projects);
+  const data = hrsByTheme(projects);
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data}>
-        <XAxis dataKey="theme" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="hrs" name="Annual Hours Saved" />
-      </BarChart>
-    </ResponsiveContainer>
+    <ChartCard title="Annual Hours Saved" subtitle="Value delivered by theme">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data}>
+          <XAxis dataKey="theme" tick={{ fontSize: 12 }} />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="hrs" radius={[6, 6, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartCard>
   );
 }
 
 export function DevTimeVsImpactChart({ projects }: { projects: Project[] }) {
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <ScatterChart>
-        <XAxis dataKey="developmentTime" name="Development Time" unit="hrs" />
-        <YAxis dataKey="annualHrsSaved" name="Annual Hours Saved" unit="hrs" />
-        <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-        <Scatter data={projects} />
-      </ScatterChart>
-    </ResponsiveContainer>
+    <ChartCard
+      title="Effort vs Impact"
+      subtitle="Development time vs annual hours saved"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <ScatterChart>
+          <XAxis dataKey="developmentTime" name="Dev Time" unit=" hrs" />
+          <YAxis dataKey="annualHrsSaved" name="Impact" unit=" hrs" />
+          <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+          <Scatter data={projects} />
+        </ScatterChart>
+      </ResponsiveContainer>
+    </ChartCard>
+  );
+}
+
+export function ToolsUsageChart({ projects }: { projects: Project[] }) {
+  const data = toolsUsage(projects);
+
+  return (
+    <ChartCard title="Tools Usage" subtitle="Adoption across initiatives">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart layout="vertical" data={data}>
+          <XAxis type="number" />
+          <YAxis type="category" dataKey="tool" />
+          <Tooltip />
+          <Bar dataKey="count" radius={[0, 6, 6, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartCard>
   );
 }
 
 export function TimeReductionChart({ projects }: { projects: Project[] }) {
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <BarChart data={projects}>
-        <XAxis dataKey="title" hide />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="currentTimeItakes" name="Before" />
-        <Bar dataKey="developmentTime" name="After" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
-export function ToolsUsageChart({ projects }: { projects: Project[] }) {
-  const data = getToolUsage(projects);
-
-  return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart layout="vertical" data={data}>
-        <XAxis type="number" />
-        <YAxis type="category" dataKey="tool" />
-        <Tooltip />
-        <Bar dataKey="count" name="Usage Count" />
-      </BarChart>
-    </ResponsiveContainer>
+    <ChartCard title="Time Reduction" subtitle="Before vs after automation">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={projects}>
+          <XAxis dataKey="title" hide />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="currentTimeItakes" name="Before" />
+          <Bar dataKey="developmentTime" name="After" />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartCard>
   );
 }
