@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { DataTable } from "@/components/data-table"
-import { Sidebar } from "@/components/sidebar"
-import { InsightsView } from "@/components/insights-view"
-import { useState } from "react"
+import { DataTable } from "@/components/data-table";
+import { Sidebar } from "@/components/sidebar";
+import { InsightsView } from "@/components/insights-view";
+import { useState } from "react";
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState("active")
+  const [currentView, setCurrentView] = useState("active");
   const [tasks, setTasks] = useState([
     {
       id: "1",
@@ -53,14 +53,14 @@ export default function Home() {
       dueDate: "2024-03-25",
       tags: ["Backend", "Performance"],
     },
-  ])
+  ]);
 
-  const activeTasks = tasks.filter((task) => task.status !== "Done")
-  const completedTasks = tasks.filter((task) => task.status === "Done")
+  const activeTasks = tasks.filter((task) => task.status !== "Done");
+  const completedTasks = tasks.filter((task) => task.status === "Done");
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} />
+      {/*<Sidebar currentView={currentView} onViewChange={setCurrentView} />*/}
 
       <main className="flex-1 p-6 overflow-auto">
         <div className="mx-auto max-w-7xl space-y-6">
@@ -68,8 +68,12 @@ export default function Home() {
             <>
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-semibold tracking-tight text-balance">Active Board</h1>
-                  <p className="text-sm text-muted-foreground mt-1">Manage and track your team's work</p>
+                  <h1 className="text-3xl font-semibold tracking-tight text-balance">
+                    Active Board
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Manage and track your team's work
+                  </p>
                 </div>
               </div>
               <DataTable initialTasks={activeTasks} onTasksChange={setTasks} />
@@ -80,11 +84,18 @@ export default function Home() {
             <>
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-semibold tracking-tight text-balance">Completed Tasks</h1>
-                  <p className="text-sm text-muted-foreground mt-1">View all finished tasks</p>
+                  <h1 className="text-3xl font-semibold tracking-tight text-balance">
+                    Completed Tasks
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    View all finished tasks
+                  </p>
                 </div>
               </div>
-              <DataTable initialTasks={completedTasks} onTasksChange={setTasks} />
+              <DataTable
+                initialTasks={completedTasks}
+                onTasksChange={setTasks}
+              />
             </>
           )}
 
@@ -92,5 +103,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  )
+  );
 }
