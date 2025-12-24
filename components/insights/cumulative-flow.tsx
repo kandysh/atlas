@@ -22,7 +22,7 @@ export const description = "A line chart with dots";
 const chartConfig = {
   remaining: {
     label: "Remaining",
-    color: "var(--chart-1)",
+    color: "var(--chart-3)",
   },
 } satisfies ChartConfig;
 
