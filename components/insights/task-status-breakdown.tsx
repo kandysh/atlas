@@ -53,10 +53,6 @@ export function TasksStatusBreakdownDonut({
 }: TasksStatusBreakdownDonutProps) {
   const totalTasks = chartData.reduce((acc, curr) => acc + curr.count, 0);
 
-  const maxIndex = chartData.reduce((max, item, index) => {
-    return item.count > chartData[max].count ? index : max;
-  }, 0);
-
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
@@ -79,14 +75,18 @@ export function TasksStatusBreakdownDonut({
               nameKey="status"
               innerRadius={60}
               strokeWidth={5}
-              shape={({ outerRadius = 0, ...props }: PieSectorShapeProps) => (
-                <Sector
-                  {...props}
-                  outerRadius={
-                    props.index === maxIndex ? outerRadius + 10 : outerRadius
-                  }
-                />
-              )}
+              shape={({ outerRadius = 0, ...props }: PieSectorShapeProps) => {
+                return (
+                  <Sector
+                    {...props}
+                    outerRadius={
+                      props.name === "Completed"
+                        ? outerRadius + 10
+                        : outerRadius
+                    }
+                  />
+                );
+              }}
             >
               <Label
                 content={({ viewBox }) => {
