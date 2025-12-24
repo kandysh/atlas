@@ -1,6 +1,5 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
 import { Label, Pie, PieChart, Sector } from "recharts";
 import { PieSectorShapeProps } from "recharts/types/polar/Pie";
 
@@ -18,7 +17,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { useMemo } from "react";
 
 export const description = "A donut chart with an active sector";
 
@@ -53,15 +51,11 @@ type TasksStatusBreakdownDonutProps = {
 export function TasksStatusBreakdownDonut({
   chartData,
 }: TasksStatusBreakdownDonutProps) {
-  const totalTasks = useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.count, 0);
-  }, []);
+  const totalTasks = chartData.reduce((acc, curr) => acc + curr.count, 0);
 
-  const maxIndex = useMemo(() => {
-    return chartData.reduce((max, item, index) => {
-      return item.count > chartData[max].count ? index : max;
-    }, 0);
-  }, []);
+  const maxIndex = chartData.reduce((max, item, index) => {
+    return item.count > chartData[max].count ? index : max;
+  }, 0);
 
   return (
     <Card className="flex flex-col">
@@ -129,7 +123,7 @@ export function TasksStatusBreakdownDonut({
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 leading-none font-medium">
-          Completed Trend by 5.2% this month <TrendingUp className="h-4 w-4" />
+          {/*Completed Trend by 5.2% this month <TrendingUp className="h-4 w-4" />*/}
         </div>
         <div className="text-muted-foreground leading-none">
           Showing total tasks for the last 12 months

@@ -3,14 +3,8 @@ import { Task } from "@/data/project";
 
 export const mockDataToDonut = (mockData: Task[]): DonutChartData[] => {
   const statusCounts = mockData.reduce(
-    (acc, task, idx) => {
-      if (task.status === "pending") {
-        acc.pending += 1;
-      } else if (task.status === "completed") {
-        acc.completed += 1;
-      } else if (task.status === "in-progress") {
-        acc["in-progress"] += 1;
-      }
+    (acc, task) => {
+      acc[task.status] += 1;
       return acc;
     },
     {

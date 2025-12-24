@@ -1,8 +1,10 @@
+"use client";
 import { TasksStatusBreakdownDonut } from "@/components/insights/task-status-breakdown";
-import { mockTasks } from "@/data/mock-tasks";
-import { mockDataToDonut } from "@/lib/data-transformation";
+import { useTasks, useTasksWithStatusCount } from "@/lib/tasks/tasks.query";
 
 export default function InsightsPage() {
+  const { data: tasks } = useTasks();
+  const { data: donutData } = useTasksWithStatusCount(tasks!);
   return (
     <div className="space-y-6">
       <div>
@@ -14,7 +16,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <TasksStatusBreakdownDonut chartData={mockDataToDonut(mockTasks)} />
+        <TasksStatusBreakdownDonut chartData={donutData || []} />
       </div>
     </div>
   );
