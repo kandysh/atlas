@@ -35,12 +35,10 @@ export default function InsightsPage() {
           Analytics and performance metrics
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(480px,1fr))] gap-4">
         <TasksStatusBreakdownDonut chartData={donutData || []} />
         <ToolsUsedChart chartData={toolsUsedData || []} />
         <ChartLineInteractive chartData={throughPutOverTimeData || []} />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <CycleTimeChart chartData={cycleTimeData || []} />
         <HoursSavedWorkedChart chartData={hoursSavedWorkedData || []} />
         <CumulativeFlowChart chartData={remainingWorkTrendData || []} />
