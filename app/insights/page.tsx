@@ -1,5 +1,6 @@
 "use client";
 import { TasksStatusBreakdownDonut } from "@/components/insights/task-status-breakdown";
+import { ChartLineInteractive } from "@/components/insights/throughput-over-time";
 import { useTasks, useTasksWithStatusCount } from "@/lib/tasks/tasks.query";
 
 export default function InsightsPage() {
@@ -18,6 +19,7 @@ export default function InsightsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <TasksStatusBreakdownDonut chartData={donutData || []} />
       </div>
+      <ChartLineInteractive />
     </div>
   );
 }
