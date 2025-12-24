@@ -1,11 +1,18 @@
 "use client";
 import { TasksStatusBreakdownDonut } from "@/components/insights/task-status-breakdown";
 import { ChartLineInteractive } from "@/components/insights/throughput-over-time";
-import { useTasks, useTasksWithStatusCount } from "@/lib/tasks/tasks.query";
+import {
+  useTasks,
+  useTasksWithStatusCount,
+  useTasksWithThroughputOverTime,
+} from "@/lib/tasks/tasks.query";
 
 export default function InsightsPage() {
   const { data: tasks } = useTasks();
   const { data: donutData } = useTasksWithStatusCount(tasks!);
+  const { data: throughPutOverTimeData } = useTasksWithThroughputOverTime(
+    tasks!,
+  );
   return (
     <div className="space-y-6">
       <div>
@@ -19,7 +26,7 @@ export default function InsightsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <TasksStatusBreakdownDonut chartData={donutData || []} />
       </div>
-      <ChartLineInteractive />
+      <ChartLineInteractive chartData={throughPutOverTimeData || []} />
     </div>
   );
 }

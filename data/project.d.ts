@@ -15,7 +15,7 @@ export interface Task {
   tools: string[];
   otherUseCases: string;
   tags: string[];
-  completionDate: Date;
+  completionDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

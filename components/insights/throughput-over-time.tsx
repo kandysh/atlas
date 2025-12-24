@@ -16,8 +16,8 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { mockDataToThroughputOverTime } from "@/lib/data-transformation";
 import { mockTasks } from "@/data/mock-tasks";
+import { CANCELLED } from "node:dns/promises";
 
 export type ThroughPutOverTimeData = {
   date: string;
@@ -28,14 +28,12 @@ export type ThroughPutOverTimeData = {
 export const description =
   "An interactive line chart showing completed tasks and hours saved over time.";
 
-const chartData = mockDataToThroughputOverTime(mockTasks);
-
 const chartConfig = {
   throughput: {
     label: "Throughput",
   },
   hours: {
-    label: "Hours",
+    label: "Hours Saved",
     color: "var(--chart-1)",
   },
   count: {
@@ -44,8 +42,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ChartLineInteractive() {
-  console.log(chartData);
+export function ChartLineInteractive({
+  chartData,
+}: {
+  chartData: ThroughPutOverTimeData[];
+}) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("hours");
 
@@ -54,7 +55,7 @@ export function ChartLineInteractive() {
       hours: chartData.reduce((acc, curr) => acc + curr.hours, 0),
       count: chartData.reduce((acc, curr) => acc + curr.count, 0),
     }),
-    [],
+    [chartData],
   );
 
   return (

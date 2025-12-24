@@ -1,4 +1,5 @@
 export const taskKeys = {
   all: ["tasks"],
-  statusCount: () => [...taskKeys.all, "statusCount"],
+  allTaskWithStatusCount: () => [...taskKeys.all, "statusCount"],
+  allTaskWithThroughputOverTime: () => [...taskKeys.all, "throughputOverTime"],
 };
