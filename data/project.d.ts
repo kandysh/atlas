@@ -20,14 +20,13 @@ export interface Project {
   updatedAt: Date;
 }
 
-export interface Task
-  extends Omit<
-    Project,
-    | "problemStatement"
-    | "solutionDesign"
-    | "benefits"
-    | "teamsInvolved"
-    | "otherUseCases"
-    | "createdAt"
-    | "updatedAt"
-  > {}
+export type Task = Omit<
+  Project,
+  | "problemStatement"
+  | "solutionDesign"
+  | "benefits"
+  | "teamsInvolved"
+  | "otherUseCases"
+  | "createdAt"
+  | "updatedAt"
+>;
