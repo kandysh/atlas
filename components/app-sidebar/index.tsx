@@ -89,7 +89,6 @@ export function AppSidebar() {
       <SidebarFooter className="border-t p-3">
         <NavUser />
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }

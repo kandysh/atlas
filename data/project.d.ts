@@ -1,4 +1,4 @@
-export interface Project {
+export interface Task {
   id: string;
   owner: string;
   title: string;
@@ -20,13 +20,13 @@ export interface Project {
   updatedAt: Date;
 }
 
-export type Task = Omit<
-  Project,
-  | "problemStatement"
-  | "solutionDesign"
-  | "benefits"
-  | "teamsInvolved"
-  | "otherUseCases"
-  | "createdAt"
-  | "updatedAt"
->;
+// export type Task = Omit<
+//   Project,
+//   | "problemStatement"
+//   | "solutionDesign"
+//   | "benefits"
+//   | "teamsInvolved"
+//   | "otherUseCases"
+//   | "createdAt"
+//   | "updatedAt"
+// >;

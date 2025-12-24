@@ -31,7 +31,7 @@ export default function RootLayout({
       >
         <SidebarProvider>
           <AppSidebar />
-          <main>{children}</main>
+          <main className="flex-1 p-6 overflow-auto">{children}</main>
         </SidebarProvider>
       </body>
     </html>
