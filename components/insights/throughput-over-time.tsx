@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
 import {
   Card,
@@ -59,9 +59,9 @@ export function ChartLineInteractive({
   );
 
   return (
-    <Card className="py-4 sm:py-0">
+    <Card className="py-0">
       <CardHeader className="flex flex-col items-stretch border-b p-0! sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
+        <div className="flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 sm:py-0!">
           <CardTitle>Throughput Chart.</CardTitle>
           <CardDescription>
             Shows the total hours saved and tasks completed over time.
@@ -74,7 +74,7 @@ export function ChartLineInteractive({
               <button
                 key={chart}
                 data-active={activeChart === chart}
-                className="data-[active=true]:bg-muted/50 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
+                className="data-[active=true]:bg-muted/50 relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
                 onClick={() => setActiveChart(chart)}
               >
                 <span className="text-muted-foreground text-xs">
@@ -93,7 +93,7 @@ export function ChartLineInteractive({
           config={chartConfig}
           className="aspect-auto h-62.5 w-full"
         >
-          <LineChart
+          <BarChart
             accessibilityLayer
             data={chartData}
             margin={{
@@ -128,14 +128,8 @@ export function ChartLineInteractive({
                 />
               }
             />
-            <Line
-              dataKey={activeChart}
-              type="monotone"
-              stroke={`var(--color-${activeChart})`}
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
+            <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>

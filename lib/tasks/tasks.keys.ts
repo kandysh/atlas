@@ -3,4 +3,6 @@ export const taskKeys = {
   allTaskWithStatusCount: () => [...taskKeys.all, "statusCount"],
   allTaskWithThroughputOverTime: () => [...taskKeys.all, "throughputOverTime"],
   allTasksWithCycleTime: () => [...taskKeys.all, "cycleTime"],
+  allTasksWithHoursSavedWorked: () => [...taskKeys.all, "hoursSavedWorked"],
+  allTasksRemainingWorkTrend: () => [...taskKeys.all, "remainingWorkTrend"],
 };

@@ -1,10 +1,14 @@
 "use client";
+import { CumulativeFlowChart } from "@/components/insights/cumulative-flow";
 import CycleTimeChart from "@/components/insights/cycle-time";
+import HoursSavedWorkedChart from "@/components/insights/hours-saved-worked";
 import { TasksStatusBreakdownDonut } from "@/components/insights/task-status-breakdown";
 import { ChartLineInteractive } from "@/components/insights/throughput-over-time";
 import {
   useTasks,
+  useTasksRemainingWorkTrend,
   useTasksWithCycleTime,
+  useTasksWithHoursSavedWorked,
   useTasksWithStatusCount,
   useTasksWithThroughputOverTime,
 } from "@/lib/tasks/tasks.query";
@@ -16,6 +20,8 @@ export default function InsightsPage() {
     tasks!,
   );
   const { data: cycleTimeData } = useTasksWithCycleTime(tasks!);
+  const { data: hoursSavedWorkedData } = useTasksWithHoursSavedWorked(tasks!);
+  const { data: remainingWorkTrendData } = useTasksRemainingWorkTrend(tasks!);
   return (
     <div className="space-y-6">
       <div>
@@ -31,6 +37,8 @@ export default function InsightsPage() {
       </div>
       <ChartLineInteractive chartData={throughPutOverTimeData || []} />
       <CycleTimeChart chartData={cycleTimeData || []} />
+      <HoursSavedWorkedChart chartData={hoursSavedWorkedData || []} />
+      <CumulativeFlowChart chartData={remainingWorkTrendData || []} />
     </div>
   );
 }

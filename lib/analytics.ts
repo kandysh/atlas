@@ -127,3 +127,98 @@ export const mockDataForCycleTime = (tasks: Task[]) => {
 
   return rollingAvg;
 };
+
+export interface MonthlyHoursPoint {
+  month: string;
+  worked: number;
+  saved: number;
+  net: number;
+}
+
+export const mockDataForHoursSavedWorked = (
+  tasks: Task[],
+): MonthlyHoursPoint[] => {
+  const monthlyMap = new Map<string, { worked: number; saved: number }>();
+
+  tasks
+    .filter((t) => t.status === "completed")
+    .forEach((task) => {
+      const month = task.completionDate!.toISOString().slice(0, 7); // yyyy-MM
+
+      const prev = monthlyMap.get(month) ?? {
+        worked: 0,
+        saved: 0,
+      };
+
+      monthlyMap.set(month, {
+        worked: prev.worked + task.workedHrs,
+        saved: prev.saved + task.savedHrs,
+      });
+    });
+
+  // sort months chronologically
+  return Array.from(monthlyMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, values]) => ({
+      month,
+      worked: values.worked,
+      saved: values.saved,
+      net: values.saved - values.worked,
+    }));
+};
+
+export interface RemaingWorkTrend {
+  month: string;
+  remaining: number;
+}
+
+export const mockDataForRemainingWorkTrend = (tasks: Task[]) => {
+  if (tasks.length === 0) return [];
+
+  const createdDates = tasks.map((t) => t.createdAt);
+  const start = new Date(Math.min(...createdDates.map((d) => d.getTime())));
+  const end = new Date(
+    Math.max(
+      ...tasks
+        .filter((t) => t.status === "completed" && t.completionDate)
+        .map((t) => t.completionDate!.getTime()),
+    ),
+  );
+
+  const createdPerMonth = new Map<string, number>();
+  const completedPerMonth = new Map<string, number>();
+
+  tasks.forEach((task) => {
+    const createdMonth = task.createdAt.toISOString().slice(0, 7);
+    createdPerMonth.set(
+      createdMonth,
+      (createdPerMonth.get(createdMonth) ?? 0) + 1,
+    );
+
+    if (task.status === "completed" && task.completionDate) {
+      const completedMonth = task.completionDate.toISOString().slice(0, 7);
+      completedPerMonth.set(
+        completedMonth,
+        (completedPerMonth.get(completedMonth) ?? 0) + 1,
+      );
+    }
+  });
+
+  const points: RemaingWorkTrend[] = [];
+  let totalCreated = 0;
+  let totalCompleted = 0;
+
+  for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
+    const month = d.toISOString().slice(0, 7);
+
+    totalCreated += createdPerMonth.get(month) ?? 0;
+    totalCompleted += completedPerMonth.get(month) ?? 0;
+
+    points.push({
+      month: new Date(month).toLocaleDateString("en-US", { month: "long" }),
+      remaining: totalCreated - totalCompleted,
+    });
+  }
+
+  return points;
+};

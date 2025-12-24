@@ -1,6 +1,5 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
 import {
@@ -17,36 +16,36 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { RollingCycle } from "@/lib/analytics";
+import { MonthlyHoursPoint } from "@/lib/analytics";
 
 export const description = "A multiple line chart";
 
 const chartConfig = {
-  cycle: {
-    label: "Cycle Time",
-  },
-  rollingAvg: {
-    label: "Rolling",
+  worked: {
+    label: "Worked",
     color: "var(--chart-1)",
   },
-  avgCycleDays: {
-    label: "Average",
+  saved: {
+    label: "Saved",
     color: "var(--chart-2)",
+  },
+  net: {
+    label: "Net",
+    color: "var(--chart-3)",
   },
 } satisfies ChartConfig;
 
-export default function CycleTimeChart({
+export default function HoursSavedWorkedChart({
   chartData,
 }: {
-  chartData: RollingCycle[];
+  chartData: MonthlyHoursPoint[];
 }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cycle Time Trend</CardTitle>
+        <CardTitle>Monthly Cumulative Hours</CardTitle>
         <CardDescription>
-          Average time (in days) taken to complete tasks each month, shown
-          alongside a rolling average to highlight long-term delivery trends.
+          Gives a cumulative view of hours worked and saved over time.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -65,27 +64,38 @@ export default function CycleTimeChart({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) =>
+                new Date(value).toLocaleDateString("en-US", {
+                  month: "long",
+                })
+              }
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Line
-              dataKey="rollingAvg"
-              type="monotone"
-              stroke={chartConfig.rollingAvg.color}
-              strokeWidth={2}
-              dot={false}
+            <ChartTooltip
+              cursor={false}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(value) =>
+                    new Date(value).toLocaleDateString("en-US", {
+                      month: "long",
+                    })
+                  }
+                />
+              }
             />
-            <Line
-              dataKey="avgCycleDays"
-              type="monotone"
-              stroke={chartConfig.avgCycleDays.color}
-              strokeWidth={2}
-              dot={false}
-            />
+            {["worked", "saved", "net"].map((key) => (
+              <Line
+                key={key}
+                dataKey={key}
+                type="linear"
+                stroke={chartConfig[key as keyof typeof chartConfig].color}
+                strokeWidth={2}
+                dot={false}
+              />
+            ))}
           </LineChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
+      {/*<CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 leading-none font-medium">
@@ -99,7 +109,7 @@ export default function CycleTimeChart({
             </div>
           </div>
         </div>
-      </CardFooter>
+      </CardFooter>*/}
     </Card>
   );
 }
