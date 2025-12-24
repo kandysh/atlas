@@ -1,5 +1,6 @@
 import { DonutChartData } from "@/components/insights/task-status-breakdown";
 import { ThroughPutOverTimeData } from "@/components/insights/throughput-over-time";
+import { ToolsUsed } from "@/components/insights/tools-used";
 import { Task } from "@/data/project";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
@@ -221,4 +222,25 @@ export const mockDataForRemainingWorkTrend = (tasks: Task[]) => {
   }
 
   return points;
+};
+
+export const mockDataForToolsUsed = (tasks: Task[]): ToolsUsed[] => {
+  if (tasks.length === 0) return [];
+  const toolMap = new Map<string, number>();
+
+  tasks.forEach((task) => {
+    if (task.tools.length > 0) {
+      task.tools.forEach((tool) => {
+        toolMap.set(
+          tool.toLowerCase(),
+          (toolMap.get(tool.toLowerCase()) ?? 0) + 1,
+        );
+      });
+    }
+  });
+
+  return Array.from(toolMap.entries()).map(([tool, count]) => ({
+    tool,
+    count,
+  }));
 };

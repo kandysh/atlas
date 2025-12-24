@@ -4,9 +4,11 @@ import CycleTimeChart from "@/components/insights/cycle-time";
 import HoursSavedWorkedChart from "@/components/insights/hours-saved-worked";
 import { TasksStatusBreakdownDonut } from "@/components/insights/task-status-breakdown";
 import { ChartLineInteractive } from "@/components/insights/throughput-over-time";
+import { ToolsUsedChart } from "@/components/insights/tools-used";
 import {
   useTasks,
   useTasksRemainingWorkTrend,
+  useTasksToolUsed,
   useTasksWithCycleTime,
   useTasksWithHoursSavedWorked,
   useTasksWithStatusCount,
@@ -22,6 +24,7 @@ export default function InsightsPage() {
   const { data: cycleTimeData } = useTasksWithCycleTime(tasks!);
   const { data: hoursSavedWorkedData } = useTasksWithHoursSavedWorked(tasks!);
   const { data: remainingWorkTrendData } = useTasksRemainingWorkTrend(tasks!);
+  const { data: toolsUsedData } = useTasksToolUsed(tasks!);
   return (
     <div className="space-y-6">
       <div>
@@ -39,6 +42,7 @@ export default function InsightsPage() {
       <CycleTimeChart chartData={cycleTimeData || []} />
       <HoursSavedWorkedChart chartData={hoursSavedWorkedData || []} />
       <CumulativeFlowChart chartData={remainingWorkTrendData || []} />
+      <ToolsUsedChart chartData={toolsUsedData || []} />
     </div>
   );
 }

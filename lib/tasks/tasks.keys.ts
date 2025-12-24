@@ -5,4 +5,5 @@ export const taskKeys = {
   allTasksWithCycleTime: () => [...taskKeys.all, "cycleTime"],
   allTasksWithHoursSavedWorked: () => [...taskKeys.all, "hoursSavedWorked"],
   allTasksRemainingWorkTrend: () => [...taskKeys.all, "remainingWorkTrend"],
+  allTasksToolsUsed: () => [...taskKeys.all, "toolsUsed"],
 };

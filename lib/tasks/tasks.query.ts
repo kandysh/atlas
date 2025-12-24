@@ -5,6 +5,7 @@ import {
   mockDataForCycleTime,
   mockDataForHoursSavedWorked,
   mockDataForRemainingWorkTrend,
+  mockDataForToolsUsed,
   mockDataToDonut,
   mockDataToThroughputOverTime,
 } from "../analytics";
@@ -62,6 +63,14 @@ export const useTasksRemainingWorkTrend = (mockData: Task[]) => {
     queryKey: taskKeys.allTasksRemainingWorkTrend(),
     queryFn: () => {
       return mockDataForRemainingWorkTrend(mockData);
+    },
+  });
+};
+export const useTasksToolUsed = (mockData: Task[]) => {
+  return useQuery({
+    queryKey: taskKeys.allTasksToolsUsed(),
+    queryFn: () => {
+      return mockDataForToolsUsed(mockData);
     },
   });
 };
