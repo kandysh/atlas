@@ -1,8 +1,10 @@
 "use client";
+import CycleTimeChart from "@/components/insights/cycle-time";
 import { TasksStatusBreakdownDonut } from "@/components/insights/task-status-breakdown";
 import { ChartLineInteractive } from "@/components/insights/throughput-over-time";
 import {
   useTasks,
+  useTasksWithCycleTime,
   useTasksWithStatusCount,
   useTasksWithThroughputOverTime,
 } from "@/lib/tasks/tasks.query";
@@ -13,6 +15,7 @@ export default function InsightsPage() {
   const { data: throughPutOverTimeData } = useTasksWithThroughputOverTime(
     tasks!,
   );
+  const { data: cycleTimeData } = useTasksWithCycleTime(tasks!);
   return (
     <div className="space-y-6">
       <div>
@@ -27,6 +30,7 @@ export default function InsightsPage() {
         <TasksStatusBreakdownDonut chartData={donutData || []} />
       </div>
       <ChartLineInteractive chartData={throughPutOverTimeData || []} />
+      <CycleTimeChart chartData={cycleTimeData || []} />
     </div>
   );
 }

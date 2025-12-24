@@ -1,7 +1,11 @@
 "use client";
 import { mockTasks } from "@/data/mock-tasks";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { mockDataToDonut, mockDataToThroughputOverTime } from "../analytics";
+import { useQuery } from "@tanstack/react-query";
+import {
+  mockDataForCycleTime,
+  mockDataToDonut,
+  mockDataToThroughputOverTime,
+} from "../analytics";
 import { taskKeys } from "./tasks.keys";
 import { Task } from "@/data/project";
 
@@ -15,7 +19,6 @@ export const useTasks = () => {
 };
 
 export const useTasksWithStatusCount = (mockData: Task[]) => {
-  const queryClient = useQueryClient();
   return useQuery({
     queryKey: taskKeys.allTaskWithStatusCount(),
     queryFn: () => {
@@ -25,11 +28,19 @@ export const useTasksWithStatusCount = (mockData: Task[]) => {
 };
 
 export const useTasksWithThroughputOverTime = (mockData: Task[]) => {
-  const queryClient = useQueryClient();
   return useQuery({
     queryKey: taskKeys.allTaskWithThroughputOverTime(),
     queryFn: () => {
       return mockDataToThroughputOverTime(mockData);
+    },
+  });
+};
+
+export const useTasksWithCycleTime = (mockData: Task[]) => {
+  return useQuery({
+    queryKey: taskKeys.allTasksWithCycleTime(),
+    queryFn: () => {
+      return mockDataForCycleTime(mockData);
     },
   });
 };
