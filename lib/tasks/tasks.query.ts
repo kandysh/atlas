@@ -11,13 +11,15 @@ import {
 } from "../analytics";
 import { taskKeys } from "./tasks.keys";
 import { Task } from "@/data/project";
-import { CLIENT_PUBLIC_FILES_PATH } from "next/dist/shared/lib/constants";
 
-export const useTasks = () => {
+export const useTasks = (assetClass: string) => {
   return useQuery({
     queryKey: taskKeys.all,
     queryFn: () => {
-      return mockTasks;
+      if (assetClass === "All") return mockTasks;
+      return mockTasks.filter(
+        (x) => x.assetClass.toLowerCase() === assetClass.toLowerCase(),
+      );
     },
   });
 };
@@ -71,6 +73,15 @@ export const useTasksToolUsed = (mockData: Task[]) => {
     queryKey: taskKeys.allTasksToolsUsed(),
     queryFn: () => {
       return mockDataForToolsUsed(mockData);
+    },
+  });
+};
+
+export const useTaskAssestClasses = () => {
+  return useQuery({
+    queryKey: taskKeys.assestClasses(),
+    queryFn: () => {
+      return new Set(mockTasks.map((x) => x.assetClass.toLowerCase()));
     },
   });
 };
