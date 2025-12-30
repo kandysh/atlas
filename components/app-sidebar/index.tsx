@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/theme/theme-toggler";
 import {
   CheckCircle2,
   ChevronDown,
@@ -20,9 +19,11 @@ import {
   LayoutDashboard,
   ListTodo,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import InsightsIcon from "../ui/icons/insights";
 import NavUser from "./nav-user";
-import { usePathname } from "next/navigation";
 
 export function AppSidebar() {
   const [tasksExpanded, setTasksExpanded] = useState(true);
@@ -34,9 +35,14 @@ export function AppSidebar() {
       variant="sidebar"
       className="w-64 bg-card border-r border-border h-screen sticky top-0 flex flex-col"
     >
-      <div className="p-6 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground">Workspace</h2>
-        <p className="text-xs text-muted-foreground mt-1">Project Management</p>
+      <div className="p-6 border-b border-border flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Workspace</h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            Project Management
+          </p>
+        </div>
+        <ThemeToggle />
       </div>
 
       <SidebarContent className="flex-1 p-4 px-2 space-y-1">
