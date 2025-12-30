@@ -7,7 +7,8 @@ export interface Task {
   theme: string[];
   problemStatement: string;
   solutionDesign: string;
-  status: "pending" | "in-progress" | "completed";
+  status: "todo" | "pending" | "in-progress" | "completed" | "blocked";
+  priority?: "low" | "medium" | "high" | "urgent";
   benefits: string;
   currentHrs: number;
   savedHrs: number;

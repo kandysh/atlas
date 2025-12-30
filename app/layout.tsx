@@ -4,7 +4,8 @@ import ReactQueryProvider from "@/providers/react-query-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/providers/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,18 +28,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReactQueryProvider>
-          <ThemeProvider defaultTheme="darrk" attribute="class" enableSystem>
+        <ThemeProvider defaultTheme="dark" attribute="class" enableSystem>
+          <ReactQueryProvider>
             <SidebarProvider>
               <AppSidebar />
               <main className="flex-1 p-6 overflow-auto">{children}</main>
             </SidebarProvider>
-          </ThemeProvider>
-        </ReactQueryProvider>
+          </ReactQueryProvider>
+        </ThemeProvider>
+        <Toaster position="top-right" />
       </body>
     </html>
   );

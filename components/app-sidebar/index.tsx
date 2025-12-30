@@ -66,7 +66,7 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <Link
-                      href="/tasks/active"
+                      href="/tasks"
                       className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
                         currentPath === "/tasks/active"
                           ? "bg-primary/10 text-primary font-medium"
@@ -82,7 +82,7 @@ export function AppSidebar() {
                 <SidebarMenuItem className="mt-2">
                   <SidebarMenuButton asChild>
                     <Link
-                      href="/tasks/completed"
+                      href="/completed"
                       className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
                         currentPath === "/tasks/completed"
                           ? "bg-primary/10 text-primary font-medium"

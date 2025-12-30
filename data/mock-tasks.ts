@@ -38,6 +38,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Designed a role-based dashboard with cohort metrics, status tracking, and exports.",
     status: "completed",
+    priority: "high",
     benefits:
       "Improved operational visibility and reduced follow-ups by HR teams.",
     currentHrs: 80,

@@ -12,27 +12,39 @@ export const mockDataToDonut = (mockData: Task[]): DonutChartData[] => {
       return acc;
     },
     {
+      todo: 0,
       pending: 0,
       completed: 0,
       "in-progress": 0,
+      blocked: 0,
     },
   );
 
   return [
     {
+      status: "To Do",
+      count: statusCounts.todo,
+      fill: "var(--chart-1)",
+    },
+    {
       status: "Pending",
       count: statusCounts.pending,
-      fill: "var(--chart-1)",
+      fill: "var(--chart-2)",
     },
     {
       status: "Completed",
       count: statusCounts.completed,
-      fill: "var(--chart-2)",
+      fill: "var(--chart-3)",
     },
     {
       status: "In Progress",
       count: statusCounts["in-progress"],
-      fill: "var(--chart-3)",
+      fill: "var(--chart-4)",
+    },
+    {
+      status: "Blocked",
+      count: statusCounts.blocked,
+      fill: "var(--chart-5)",
     },
   ];
 };
