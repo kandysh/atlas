@@ -8,6 +8,7 @@ import {
   EditableTextCell,
   EditableNumberCell,
   EditableOwnerCell,
+  EditableComboboxCell,
 } from "./editable-cells";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
@@ -20,7 +21,10 @@ import {
 } from "@/src/components/ui/dropdown-menu";
 import { Badge } from "@/src/components/ui/badge";
 
-export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
+export const createColumns = (
+  uniqueOwners: string[],
+  uniqueAssetClasses: string[],
+): ColumnDef<Task>[] => [
   {
     accessorKey: "title",
     header: ({ column }) => {
@@ -75,10 +79,7 @@ export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
       };
 
       return (
-        <StatusCell
-          value={row.original.status}
-          onChange={handleStatusChange}
-        />
+        <StatusCell value={row.original.status} onChange={handleStatusChange} />
       );
     },
     filterFn: (row, id, value) => {
@@ -131,9 +132,11 @@ export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
       };
 
       return (
-        <EditableTextCell
+        <EditableComboboxCell
           value={row.original.assetClass}
           onChange={handleAssetClassChange}
+          options={uniqueAssetClasses}
+          onAddOption={() => {}}
         />
       );
     },
@@ -145,7 +148,8 @@ export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
       const teams = row.original.teamsInvolved;
       if (teams.length === 0)
         return <span className="text-muted-foreground">-</span>;
-      if (teams.length === 1) return <Badge variant="secondary">{teams[0]}</Badge>;
+      if (teams.length === 1)
+        return <Badge variant="secondary">{teams[0]}</Badge>;
       return (
         <div className="flex items-center gap-1">
           <Badge variant="secondary">{teams[0]}</Badge>
@@ -230,4 +234,4 @@ export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
 ];
 
 // Default export with empty owners array (for backwards compatibility)
-export const columns = createColumns([]);
+export const columns = createColumns([], []);

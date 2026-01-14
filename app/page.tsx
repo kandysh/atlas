@@ -8,22 +8,25 @@ import { useWorkspace } from "@/src/providers";
 
 export default function Page() {
   const { currentWorkspace } = useWorkspace();
-  
+
   // Filter out completed tasks for active board
   const activeTasks: Task[] = mockTasks.filter(
-    (task) => task.status !== "completed"
+    (task) => task.status !== "completed",
   );
 
   // Get unique owners for dropdown
-  const uniqueOwners = Array.from(new Set(mockTasks.map(t => t.owner))).sort();
-  const columns = createColumns(uniqueOwners);
+  const uniqueOwners = Array.from(
+    new Set(mockTasks.map((t) => t.owner)),
+  ).sort();
+  const uniqueAssetClasses = Array.from(
+    new Set(mockTasks.map((t) => t.assetClass)),
+  ).sort();
+  const columns = createColumns(uniqueOwners, uniqueAssetClasses);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Active Tasks
-        </h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Active Tasks</h1>
         <p className="text-sm text-muted-foreground mt-1">
           {currentWorkspace?.name} • {activeTasks.length} active tasks
         </p>
