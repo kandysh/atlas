@@ -434,10 +434,18 @@ export function EditableComboboxCell({
 }: EditableComboboxCellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const selectedRef = useRef<HTMLDivElement>(null);
 
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchValue.toLowerCase())
   );
+
+  // Scroll to selected item when dropdown opens
+  useEffect(() => {
+    if (isOpen && selectedRef.current) {
+      selectedRef.current.scrollIntoView({ block: "nearest" });
+    }
+  }, [isOpen]);
 
   const handleSelect = (selectedValue: string) => {
     onChange(selectedValue);
@@ -505,6 +513,7 @@ export function EditableComboboxCell({
                   key={option}
                   value={option}
                   onSelect={() => handleSelect(option)}
+                  ref={value === option ? selectedRef : null}
                 >
                   <Check
                     className={cn(
