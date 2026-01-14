@@ -67,7 +67,18 @@ export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Status
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const handleStatusChange = (newStatus: Status) => {
         console.log("Update status", row.original.id, newStatus);
@@ -87,7 +98,18 @@ export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
   },
   {
     accessorKey: "priority",
-    header: "Priority",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Priority
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const handlePriorityChange = (newPriority: Priority) => {
         console.log("Update priority", row.original.id, newPriority);
@@ -101,10 +123,24 @@ export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
         />
       );
     },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
   },
   {
     accessorKey: "owner",
-    header: "Owner",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Owner
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const handleOwnerChange = (newOwner: string) => {
         console.log("Update owner", row.original.id, newOwner);
@@ -119,6 +155,9 @@ export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
           onAddOption={() => {}}
         />
       );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
     },
   },
   {

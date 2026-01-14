@@ -4,6 +4,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { Task } from "@/src/lib/types";
 import { DataTable } from "@/src/components/ui/data-table";
+import { DataTableToolbar } from "./data-table-toolbar";
+import { DataTableEmptyState } from "@/src/components/ui/data-table-empty-state";
 import { TaskDetailDrawer } from "./task-detail-drawer";
 
 interface TasksDataTableProps {
@@ -44,12 +46,25 @@ export function TasksDataTable({ columns, data }: TasksDataTableProps) {
       <DataTable
         columns={columns}
         data={data}
-        searchPlaceholder="Search tasks..."
         onRowClick={handleRowClick}
-        onAdd={handleAddTask}
-        onDeleteSelected={handleDeleteSelected}
-        addButtonLabel="Add Task"
-        emptyStateMessage="No tasks found."
+        toolbar={(table) => (
+          <DataTableToolbar
+            table={table}
+            onAdd={handleAddTask}
+            onDeleteSelected={handleDeleteSelected}
+            addButtonLabel="Add Task"
+            deleteButtonLabel="Delete"
+            searchPlaceholder="Search tasks..."
+          />
+        )}
+        emptyState={
+          <DataTableEmptyState
+            title="No tasks"
+            description="Get started by creating your first task."
+            actionLabel="Add Task"
+            onAction={handleAddTask}
+          />
+        }
       />
 
       <TaskDetailDrawer
