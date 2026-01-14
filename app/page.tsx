@@ -1,27 +1,45 @@
 "use client";
 
 import { TasksDataTable } from "@/src/components/features/tasks";
-import { createColumns } from "@/src/components/features/tasks";
 import { mockTasks } from "@/src/data";
 import { Task } from "@/src/lib/types";
 import { useWorkspace } from "@/src/providers";
+import { useWorkspaceTasks } from "@/src/lib/query/hooks";
+import { useTaskEvents } from "@/src/hooks/useTaskEvents";
 
 export default function Page() {
   const { currentWorkspace } = useWorkspace();
-
+  const workspaceId = currentWorkspace?.id || "1";
+  
+  // Fetch tasks from API
+  const { data, isLoading, error } = useWorkspaceTasks(workspaceId, 0);
+  
+  // Connect to SSE for live updates
+  useTaskEvents(workspaceId, 0);
+  
+  // Use mock data as fallback during development
+  const tasks = data?.tasks || mockTasks;
+  
   // Filter out completed tasks for active board
-  const activeTasks: Task[] = mockTasks.filter(
-    (task) => task.status !== "completed",
+  const activeTasks: Task[] = tasks.filter(
+    (task) => task.status !== "completed"
   );
 
-  // Get unique owners for dropdown
-  const uniqueOwners = Array.from(
-    new Set(mockTasks.map((t) => t.owner)),
-  ).sort();
-  const uniqueAssetClasses = Array.from(
-    new Set(mockTasks.map((t) => t.assetClass)),
-  ).sort();
-  const columns = createColumns(uniqueOwners, uniqueAssetClasses);
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Active Tasks
+          </h1>
+          <p className="text-sm text-destructive mt-1">
+            Error loading tasks. Using mock data.
+          </p>
+        </div>
+        <TasksDataTable data={activeTasks} workspaceId={workspaceId} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -29,10 +47,11 @@ export default function Page() {
         <h1 className="text-3xl font-semibold tracking-tight">Active Tasks</h1>
         <p className="text-sm text-muted-foreground mt-1">
           {currentWorkspace?.name} • {activeTasks.length} active tasks
+          {isLoading && " • Loading..."}
         </p>
       </div>
 
-      <TasksDataTable columns={columns} data={activeTasks} />
+      <TasksDataTable data={activeTasks} workspaceId={workspaceId} />
     </div>
   );
 }

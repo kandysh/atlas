@@ -11,6 +11,8 @@ import {
   ColumnFiltersState,
   getPaginationRowModel,
   RowSelectionState,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
 } from "@tanstack/react-table";
 import { useState, ReactNode } from "react";
 import { Button } from "@/src/components/ui/button";
@@ -20,6 +22,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
+import { DataTableEmptyState } from "./data-table-empty-state";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,6 +51,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnVisibility, setColumnVisibility] = useState({});
 
   const table = useReactTable({
     data,
@@ -56,15 +60,19 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
       columnFilters,
       globalFilter,
       rowSelection,
+      columnVisibility,
     },
     initialState: {
       pagination: {
@@ -176,7 +184,7 @@ export function DataTable<TData, TValue>({
                       (enableRowSelection ? 1 : 0) +
                       (enableDragHandle ? 1 : 0)
                     }
-                    className="h-24 text-center text-muted-foreground"
+                    className="h-24 text-center"
                   >
                     {emptyStateMessage}
                   </td>

@@ -25,6 +25,7 @@ import { format } from "date-fns";
 export const createColumns = (
   uniqueOwners: string[],
   uniqueAssetClasses: string[],
+  onUpdate?: (taskId: string, field: string, value: any) => void
 ): ColumnDef<Task>[] => [
   {
     accessorKey: "title",
@@ -42,13 +43,11 @@ export const createColumns = (
     },
     cell: ({ row }) => {
       const handleTitleChange = (newTitle: string) => {
-        console.log("Update title", row.original.id, newTitle);
-        // TODO: Call API to update
+        onUpdate?.(row.original.id, "title", newTitle);
       };
 
       const handleProblemChange = (newProblem: string) => {
-        console.log("Update problem", row.original.id, newProblem);
-        // TODO: Call API to update
+        onUpdate?.(row.original.id, "problemStatement", newProblem);
       };
 
       return (
@@ -86,8 +85,7 @@ export const createColumns = (
     },
     cell: ({ row }) => {
       const handleStatusChange = (newStatus: Status) => {
-        console.log("Update status", row.original.id, newStatus);
-        // TODO: Call API to update
+        onUpdate?.(row.original.id, "status", newStatus);
       };
 
       return (
@@ -114,8 +112,7 @@ export const createColumns = (
     },
     cell: ({ row }) => {
       const handlePriorityChange = (newPriority: Priority) => {
-        console.log("Update priority", row.original.id, newPriority);
-        // TODO: Call API to update
+        onUpdate?.(row.original.id, "priority", newPriority);
       };
 
       return (
@@ -145,8 +142,7 @@ export const createColumns = (
     },
     cell: ({ row }) => {
       const handleOwnerChange = (newOwner: string) => {
-        console.log("Update owner", row.original.id, newOwner);
-        // TODO: Call API to update
+        onUpdate?.(row.original.id, "owner", newOwner);
       };
 
       return (
@@ -178,8 +174,7 @@ export const createColumns = (
     },
     cell: ({ row }) => {
       const handleAssetClassChange = (newAssetClass: string) => {
-        console.log("Update asset class", row.original.id, newAssetClass);
-        // TODO: Call API to update
+        onUpdate?.(row.original.id, "assetClass", newAssetClass);
       };
 
       return (
@@ -230,8 +225,7 @@ export const createColumns = (
     },
     cell: ({ row }) => {
       const handleHoursChange = (newHours: number) => {
-        console.log("Update estimated hours", row.original.id, newHours);
-        // TODO: Call API to update
+        onUpdate?.(row.original.id, "currentHrs", newHours);
       };
 
       return (
@@ -259,8 +253,7 @@ export const createColumns = (
     },
     cell: ({ row }) => {
       const handleWorkedChange = (newHours: number) => {
-        console.log("Update worked hours", row.original.id, newHours);
-        // TODO: Call API to update
+        onUpdate?.(row.original.id, "workedHrs", newHours);
       };
 
       return (
