@@ -229,4 +229,16 @@
         scrollbar-width: thin;
         scrollbar-color: oklch(0.25 0.01 264) oklch(0.13 0.01 264);
     }
+
+    /* Hide number input spinners completely */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
 }
