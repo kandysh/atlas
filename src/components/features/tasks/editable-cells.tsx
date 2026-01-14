@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Calendar } from "@/src/components/ui/calendar";
@@ -219,16 +219,31 @@ export function EditableOwnerCell({
 }: EditableOwnerCellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const selectedRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchValue.toLowerCase()),
   );
 
-  // Scroll to selected item when dropdown opens
-  useEffect(() => {
-    if (isOpen && selectedRef.current) {
-      selectedRef.current.scrollIntoView({ block: "nearest" });
+  // Callback ref to scroll to selected item
+  const selectedRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (node && isOpen) {
+      // Small delay to ensure the list is rendered
+      setTimeout(() => {
+        const listElement = node.closest('[data-slot="command-list"]');
+        if (listElement && node) {
+          const listRect = listElement.getBoundingClientRect();
+          const nodeRect = node.getBoundingClientRect();
+          
+          // Check if item is not in view
+          if (nodeRect.top < listRect.top || nodeRect.bottom > listRect.bottom) {
+            node.scrollIntoView({ 
+              behavior: "smooth",
+              block: "center"
+            });
+          }
+        }
+      }, 50);
     }
   }, [isOpen]);
 
@@ -303,7 +318,7 @@ export function EditableOwnerCell({
             onValueChange={setSearchValue}
             onKeyDown={handleKeyDown}
           />
-          <CommandList className="max-h-[200px]">
+          <CommandList className="max-h-[200px]" ref={listRef}>
             <CommandEmpty className="py-2 px-3 text-sm text-muted-foreground">
               Type and press Enter to add
             </CommandEmpty>
@@ -514,16 +529,31 @@ export function EditableComboboxCell({
 }: EditableComboboxCellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const selectedRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchValue.toLowerCase()),
   );
 
-  // Scroll to selected item when dropdown opens
-  useEffect(() => {
-    if (isOpen && selectedRef.current) {
-      selectedRef.current.scrollIntoView({ block: "nearest" });
+  // Callback ref to scroll to selected item
+  const selectedRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (node && isOpen) {
+      // Small delay to ensure the list is rendered
+      setTimeout(() => {
+        const listElement = node.closest('[data-slot="command-list"]');
+        if (listElement && node) {
+          const listRect = listElement.getBoundingClientRect();
+          const nodeRect = node.getBoundingClientRect();
+          
+          // Check if item is not in view
+          if (nodeRect.top < listRect.top || nodeRect.bottom > listRect.bottom) {
+            node.scrollIntoView({ 
+              behavior: "smooth",
+              block: "center"
+            });
+          }
+        }
+      }, 50);
     }
   }, [isOpen]);
 
@@ -571,7 +601,7 @@ export function EditableComboboxCell({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-62.5 p-0" align="start">
+      <PopoverContent className="w-[250px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder={placeholder}
@@ -579,7 +609,7 @@ export function EditableComboboxCell({
             onValueChange={setSearchValue}
             onKeyDown={handleKeyDown}
           />
-          <CommandList>
+          <CommandList className="max-h-[200px]" ref={listRef}>
             <CommandEmpty className="py-2 px-3 text-sm text-muted-foreground">
               Type and press Enter to add
             </CommandEmpty>
