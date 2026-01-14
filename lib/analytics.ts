@@ -1,40 +1,51 @@
 import { DonutChartData } from "@/components/insights/task-status-breakdown";
 import { ThroughPutOverTimeData } from "@/components/insights/throughput-over-time";
 import { ToolsUsed } from "@/components/insights/tools-used";
-import { Task } from "@/data/project";
+import { Task, Status } from "@/data/project";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
 export const mockDataToDonut = (mockData: Task[]): DonutChartData[] => {
   const statusCounts = mockData.reduce(
     (acc, task) => {
-      acc[task.status] += 1;
+      acc[task.status] = (acc[task.status] || 0) + 1;
       return acc;
     },
-    {
-      pending: 0,
-      completed: 0,
-      "in-progress": 0,
-    },
+    {} as Record<Status, number>,
   );
 
   return [
     {
-      status: "Pending",
-      count: statusCounts.pending,
+      status: "To Do",
+      count: statusCounts.todo || 0,
       fill: "var(--chart-1)",
     },
     {
-      status: "Completed",
-      count: statusCounts.completed,
+      status: "In Progress",
+      count: statusCounts["in-progress"] || 0,
       fill: "var(--chart-2)",
     },
     {
-      status: "In Progress",
-      count: statusCounts["in-progress"],
+      status: "Testing",
+      count: statusCounts.testing || 0,
       fill: "var(--chart-3)",
     },
-  ];
+    {
+      status: "Done",
+      count: statusCounts.done || 0,
+      fill: "var(--chart-4)",
+    },
+    {
+      status: "Completed",
+      count: statusCounts.completed || 0,
+      fill: "var(--chart-5)",
+    },
+    {
+      status: "Blocked",
+      count: statusCounts.blocked || 0,
+      fill: "hsl(var(--destructive))",
+    },
+  ].filter(item => item.count > 0);
 };
 
 export const mockDataToThroughputOverTime = (

@@ -1,7 +1,6 @@
 "use client";
 
-import { Label, Pie, PieChart, Sector } from "recharts";
-import { PieSectorShapeProps } from "recharts/types/polar/Pie";
+import { Label, Pie, PieChart } from "recharts";
 
 import {
   Card,
@@ -75,18 +74,6 @@ export function TasksStatusBreakdownDonut({
               nameKey="status"
               innerRadius={60}
               strokeWidth={5}
-              shape={({ outerRadius = 0, ...props }: PieSectorShapeProps) => {
-                return (
-                  <Sector
-                    {...props}
-                    outerRadius={
-                      props.name === "Completed"
-                        ? outerRadius + 10
-                        : outerRadius
-                    }
-                  />
-                );
-              }}
             >
               <Label
                 content={({ viewBox }) => {
