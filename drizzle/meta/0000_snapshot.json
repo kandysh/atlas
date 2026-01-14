@@ -1,5 +1,5 @@
 {
-  "id": "b096c0ca-1af3-451f-89ac-f448947ca61c",
+  "id": "c3a8ee6e-7152-4007-b09e-4b9d8268c512",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -52,6 +52,19 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "visible": {
+          "name": "visible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "cell_type": {
+          "name": "cell_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -205,6 +218,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "display_id": {
+          "name": "display_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sequence_number": {
+          "name": "sequence_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "data": {
           "name": "data",
           "type": "jsonb",
@@ -241,7 +266,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "workspace_sequence_idx": {
+          "name": "workspace_sequence_idx",
+          "columns": [
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sequence_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "tasks_workspace_id_workspaces_id_fk": {
           "name": "tasks_workspace_id_workspaces_id_fk",
@@ -258,7 +305,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "tasks_display_id_unique": {
+          "name": "tasks_display_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "display_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -415,6 +470,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "numeric_id": {
+          "name": "numeric_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -466,6 +527,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "workspaces_numeric_id_unique": {
+          "name": "workspaces_numeric_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "numeric_id"
+          ]
+        },
         "workspaces_slug_unique": {
           "name": "workspaces_slug_unique",
           "nullsNotDistinct": false,

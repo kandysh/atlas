@@ -8,6 +8,7 @@ import {
   pgEnum,
   index,
   serial,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -75,8 +76,8 @@ export const fieldConfigs = pgTable("field_configs", {
     [key: string]: any;
   }>(),
   order: integer("order").notNull().default(0),
-  visible: text("visible").notNull().default("true"), // "true" | "false" | "detail-only"
-  cellType: text("cell_type"), // Maps to specific cell component type
+  visible: boolean("visible").notNull().default(true),
+  cellType: text("cell_type"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -8,6 +8,8 @@ CREATE TABLE "field_configs" (
 	"type" "field_type" NOT NULL,
 	"options" jsonb,
 	"order" integer DEFAULT 0 NOT NULL,
+	"visible" boolean DEFAULT true NOT NULL,
+	"cell_type" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -25,11 +27,14 @@ CREATE TABLE "task_comments" (
 CREATE TABLE "tasks" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"workspace_id" uuid NOT NULL,
+	"display_id" text NOT NULL,
+	"sequence_number" integer NOT NULL,
 	"data" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"subtasks" jsonb DEFAULT '[]'::jsonb,
 	"version" integer DEFAULT 1 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "tasks_display_id_unique" UNIQUE("display_id")
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
@@ -53,11 +58,13 @@ CREATE TABLE "workspace_members" (
 --> statement-breakpoint
 CREATE TABLE "workspaces" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"numeric_id" serial NOT NULL,
 	"name" text NOT NULL,
 	"slug" text NOT NULL,
 	"owner_user_id" uuid NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "workspaces_numeric_id_unique" UNIQUE("numeric_id"),
 	CONSTRAINT "workspaces_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
@@ -68,4 +75,5 @@ ALTER TABLE "task_comments" ADD CONSTRAINT "task_comments_user_id_users_id_fk" F
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "workspace_members" ADD CONSTRAINT "workspace_members_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "workspace_members" ADD CONSTRAINT "workspace_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "workspaces" ADD CONSTRAINT "workspaces_owner_user_id_users_id_fk" FOREIGN KEY ("owner_user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "workspaces" ADD CONSTRAINT "workspaces_owner_user_id_users_id_fk" FOREIGN KEY ("owner_user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "workspace_sequence_idx" ON "tasks" USING btree ("workspace_id","sequence_number");

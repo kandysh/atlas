@@ -4,7 +4,9 @@ import { NewFieldConfig } from "@/src/lib/db/schema";
  * Generate default field configurations for a new workspace
  * Based on the Task type in project.ts
  */
-export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig, "id" | "createdAt" | "updatedAt">[] {
+export function getDefaultFieldConfigs(
+  workspaceId: string,
+): Omit<NewFieldConfig, "id" | "createdAt" | "updatedAt">[] {
   return [
     {
       workspaceId,
@@ -13,7 +15,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: true },
       order: 0,
-      visible: "true",
+      visible: true,
       cellType: "editable-text",
     },
     {
@@ -23,7 +25,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "select",
       options: { choices: [], required: true },
       order: 1,
-      visible: "true",
+      visible: true,
       cellType: "editable-owner",
     },
     {
@@ -32,12 +34,19 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       name: "Status",
       type: "select",
       options: {
-        choices: ["todo", "in-progress", "testing", "done", "completed", "blocked"],
+        choices: [
+          "todo",
+          "in-progress",
+          "testing",
+          "done",
+          "completed",
+          "blocked",
+        ],
         defaultValue: "todo",
         required: true,
       },
       order: 2,
-      visible: "true",
+      visible: true,
       cellType: "status",
     },
     {
@@ -51,7 +60,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
         required: true,
       },
       order: 3,
-      visible: "true",
+      visible: true,
       cellType: "priority",
     },
     {
@@ -61,7 +70,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "select",
       options: { choices: [], required: false },
       order: 4,
-      visible: "true",
+      visible: true,
       cellType: "editable-combobox",
     },
     {
@@ -71,7 +80,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "select",
       options: { choices: [], required: false },
       order: 5,
-      visible: "false",
+      visible: false,
       cellType: "editable-combobox",
     },
     {
@@ -81,7 +90,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "multiselect",
       options: { choices: [], required: false },
       order: 6,
-      visible: "true",
+      visible: true,
       cellType: "badge-list",
     },
     {
@@ -91,7 +100,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: false },
       order: 7,
-      visible: "detail-only",
+      visible: false,
       cellType: "editable-text",
     },
     {
@@ -101,7 +110,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: false },
       order: 8,
-      visible: "detail-only",
+      visible: false,
       cellType: "editable-text",
     },
     {
@@ -111,7 +120,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: false },
       order: 9,
-      visible: "detail-only",
+      visible: false,
       cellType: "editable-text",
     },
     {
@@ -121,7 +130,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "number",
       options: { defaultValue: 0, required: false, suffix: "h" },
       order: 10,
-      visible: "true",
+      visible: true,
       cellType: "editable-number",
     },
     {
@@ -131,7 +140,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "number",
       options: { defaultValue: 0, required: false, suffix: "h" },
       order: 11,
-      visible: "true",
+      visible: true,
       cellType: "editable-number",
     },
     {
@@ -141,7 +150,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "number",
       options: { defaultValue: 0, required: false, suffix: "h" },
       order: 12,
-      visible: "false",
+      visible: false,
       cellType: "editable-number",
     },
     {
@@ -151,7 +160,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "multiselect",
       options: { choices: [], required: false },
       order: 13,
-      visible: "detail-only",
+      visible: false,
       cellType: "editable-tags",
     },
     {
@@ -161,7 +170,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "multiselect",
       options: { choices: [], required: false },
       order: 14,
-      visible: "detail-only",
+      visible: false,
       cellType: "editable-tags",
     },
     {
@@ -171,7 +180,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: false },
       order: 15,
-      visible: "detail-only",
+      visible: false,
       cellType: "editable-text",
     },
     {
@@ -181,7 +190,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "date",
       options: { required: false },
       order: 16,
-      visible: "detail-only",
+      visible: true,
       cellType: "editable-date",
     },
   ];

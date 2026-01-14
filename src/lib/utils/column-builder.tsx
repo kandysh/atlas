@@ -32,7 +32,7 @@ type UniqueValuesMap = Record<string, string[]>;
  */
 export function extractUniqueFieldValues(
   tasks: Task[],
-  fieldConfigs: FieldConfig[]
+  fieldConfigs: FieldConfig[],
 ): UniqueValuesMap {
   const uniqueValues: UniqueValuesMap = {};
 
@@ -40,7 +40,7 @@ export function extractUniqueFieldValues(
     (config) =>
       config.type === "select" ||
       config.cellType === "editable-owner" ||
-      config.cellType === "editable-combobox"
+      config.cellType === "editable-combobox",
   );
 
   selectFields.forEach((field) => {
@@ -60,19 +60,19 @@ export function extractUniqueFieldValues(
 export function buildColumnsFromFieldConfigs(
   fieldConfigs: FieldConfig[],
   tasks: Task[],
-  onUpdate?: (taskId: string, field: string, value: any) => void
+  onUpdate?: (taskId: string, field: string, value: any) => void,
 ): ColumnDef<Task>[] {
   const uniqueValues = extractUniqueFieldValues(tasks, fieldConfigs);
 
   const visibleFields = fieldConfigs
-    .filter((config) => config.visible === "true")
+    .filter((config) => config.visible)
     .sort((a, b) => a.order - b.order);
 
   const columns: ColumnDef<Task>[] = visibleFields.map((fieldConfig) =>
-    createColumnFromFieldConfig(fieldConfig, onUpdate, uniqueValues)
+    createColumnFromFieldConfig(fieldConfig, onUpdate, uniqueValues),
   );
 
-  columns.push(createCreatedAtColumn(), createActionsColumn());
+  columns.push(createActionsColumn());
 
   return columns;
 }
@@ -83,7 +83,7 @@ export function buildColumnsFromFieldConfigs(
 function createColumnFromFieldConfig(
   fieldConfig: FieldConfig,
   onUpdate?: (taskId: string, field: string, value: any) => void,
-  uniqueValues: UniqueValuesMap = {}
+  uniqueValues: UniqueValuesMap = {},
 ): ColumnDef<Task> {
   const { key, name, type } = fieldConfig;
 
@@ -99,7 +99,8 @@ function createColumnFromFieldConfig(
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => renderCell(row.original, fieldConfig, onUpdate, uniqueValues),
+    cell: ({ row }) =>
+      renderCell(row.original, fieldConfig, onUpdate, uniqueValues),
   };
 
   if (type === "select" || type === "multiselect") {
@@ -107,31 +108,6 @@ function createColumnFromFieldConfig(
   }
 
   return column;
-}
-
-/**
- * Create the createdAt timestamp column
- */
-function createCreatedAtColumn(): ColumnDef<Task> {
-  return {
-    accessorKey: "createdAt",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="-ml-4"
-      >
-        Created
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="text-sm text-muted-foreground">
-        {format(new Date(row.original.createdAt), "MMM d, yyyy")}
-      </div>
-    ),
-    sortingFn: "datetime",
-  };
 }
 
 /**
@@ -169,7 +145,7 @@ function renderCell(
   task: Task,
   fieldConfig: FieldConfig,
   onUpdate?: (taskId: string, field: string, value: any) => void,
-  uniqueValues: UniqueValuesMap = {}
+  uniqueValues: UniqueValuesMap = {},
 ): React.ReactNode {
   const { key, cellType, type, options } = fieldConfig;
   const value = (task as Record<string, any>)[key];
@@ -187,7 +163,12 @@ function renderCell(
     case "editable-owner":
       return renderEditableOwnerCell(value, handleChange, fieldOptions);
     case "editable-combobox":
-      return renderEditableComboboxCell(value, handleChange, fieldOptions, options);
+      return renderEditableComboboxCell(
+        value,
+        handleChange,
+        fieldOptions,
+        options,
+      );
     case "editable-text":
       return renderEditableTextCell(value, handleChange, key);
     case "editable-number":
@@ -203,28 +184,24 @@ function renderCell(
   }
 }
 
-function renderStatusCell(value: any, handleChange: (value: Status) => void): React.ReactNode {
-  return (
-    <StatusCell
-      value={value as Status}
-      onChange={handleChange}
-    />
-  );
+function renderStatusCell(
+  value: any,
+  handleChange: (value: Status) => void,
+): React.ReactNode {
+  return <StatusCell value={value as Status} onChange={handleChange} />;
 }
 
-function renderPriorityCell(value: any, handleChange: (value: Priority) => void): React.ReactNode {
-  return (
-    <PriorityCell
-      value={value as Priority}
-      onChange={handleChange}
-    />
-  );
+function renderPriorityCell(
+  value: any,
+  handleChange: (value: Priority) => void,
+): React.ReactNode {
+  return <PriorityCell value={value as Priority} onChange={handleChange} />;
 }
 
 function renderEditableOwnerCell(
   value: any,
   handleChange: (value: string) => void,
-  options: string[]
+  options: string[],
 ): React.ReactNode {
   return (
     <EditableOwnerCell
@@ -240,11 +217,12 @@ function renderEditableComboboxCell(
   value: any,
   handleChange: (value: string) => void,
   fieldOptions: string[],
-  configOptions?: any
+  configOptions?: any,
 ): React.ReactNode {
-  const options = fieldOptions.length > 0 
-    ? fieldOptions 
-    : ((configOptions?.choices as string[]) || []);
+  const options =
+    fieldOptions.length > 0
+      ? fieldOptions
+      : (configOptions?.choices as string[]) || [];
 
   return (
     <EditableComboboxCell
@@ -259,7 +237,7 @@ function renderEditableComboboxCell(
 function renderEditableTextCell(
   value: any,
   handleChange: (value: string) => void,
-  key: string
+  key: string,
 ): React.ReactNode {
   const isTitle = key === "title";
   return (
@@ -275,7 +253,7 @@ function renderEditableTextCell(
 function renderEditableNumberCell(
   value: any,
   handleChange: (value: number) => void,
-  options?: any
+  options?: any,
 ): React.ReactNode {
   const suffix = (options?.suffix as string) || "";
   return (
@@ -290,7 +268,7 @@ function renderEditableNumberCell(
 function renderEditableTagsCell(
   value: any,
   handleChange: (value: string[]) => void,
-  fieldName: string
+  fieldName: string,
 ): React.ReactNode {
   return (
     <EditableTagsCell
@@ -303,15 +281,15 @@ function renderEditableTagsCell(
 
 function renderBadgeList(value: any): React.ReactNode {
   const items = value || [];
-  
+
   if (items.length === 0) {
     return <span className="text-muted-foreground">-</span>;
   }
-  
+
   if (items.length === 1) {
     return <Badge variant="secondary">{items[0]}</Badge>;
   }
-  
+
   return (
     <div className="flex items-center gap-1">
       <Badge variant="secondary">{items[0]}</Badge>
@@ -323,7 +301,7 @@ function renderBadgeList(value: any): React.ReactNode {
 function renderFallbackCell(
   value: any,
   type: string,
-  handleChange: (value: any) => void
+  handleChange: (value: any) => void,
 ): React.ReactNode {
   switch (type) {
     case "text":
