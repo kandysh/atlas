@@ -82,7 +82,10 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* User Footer */}
-      <SidebarFooter className="p-4 border-t border-border">
+      <SidebarFooter className={cn(
+        "border-t border-border transition-all",
+        state === "collapsed" ? "p-2" : "p-4"
+      )}>
         <NavUser />
       </SidebarFooter>
       
