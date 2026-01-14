@@ -44,11 +44,7 @@ export function AppSidebar() {
   const currentPath = usePathname();
 
   return (
-    <Sidebar
-      collapsible="icon"
-      variant="sidebar"
-      className="w-64 bg-card border-r border-border h-screen sticky top-0 flex flex-col"
-    >
+    <Sidebar collapsible="icon">
       {/* Workspace Header */}
       <SidebarHeader className="p-4 border-b border-border">
         <WorkspaceToggler />
@@ -61,7 +57,7 @@ export function AppSidebar() {
             const isActive = currentPath === item.href;
             return (
               <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild isActive={isActive}>
                   <Link
                     href={item.href}
                     className={cn(

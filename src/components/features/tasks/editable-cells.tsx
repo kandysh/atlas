@@ -209,8 +209,8 @@ interface EditableOwnerCellProps {
   className?: string;
 }
 
-export function EditableOwnerCell({ 
-  value, 
+export function EditableOwnerCell({
+  value,
   onChange,
   options,
   onAddOption,
@@ -222,7 +222,7 @@ export function EditableOwnerCell({
   const selectedRef = useRef<HTMLDivElement>(null);
 
   const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(searchValue.toLowerCase())
+    option.toLowerCase().includes(searchValue.toLowerCase()),
   );
 
   // Scroll to selected item when dropdown opens
@@ -242,11 +242,11 @@ export function EditableOwnerCell({
     if (e.key === "Enter") {
       e.preventDefault();
       const trimmed = searchValue.trim();
-      
+
       // If there's a filtered option, select the first one
       if (filteredOptions.length > 0) {
         handleSelect(filteredOptions[0]);
-      } 
+      }
       // Otherwise, add the new value
       else if (trimmed && !options.includes(trimmed)) {
         onAddOption?.(trimmed);
@@ -277,7 +277,7 @@ export function EditableOwnerCell({
           className={cn(
             "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 w-auto",
             !value && "text-muted-foreground",
-            className
+            className,
           )}
         >
           {value ? (
@@ -295,11 +295,7 @@ export function EditableOwnerCell({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent 
-        className="p-0" 
-        align="start"
-        style={{ width: "var(--radix-popover-trigger-width)" }}
-      >
+      <PopoverContent className="w-[250px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder={placeholder}
@@ -330,7 +326,7 @@ export function EditableOwnerCell({
                   <Check
                     className={cn(
                       "ml-auto h-4 w-4",
-                      value === option ? "opacity-100" : "opacity-0"
+                      value === option ? "opacity-100" : "opacity-0",
                     )}
                   />
                 </CommandItem>
