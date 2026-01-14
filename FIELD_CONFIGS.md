@@ -55,12 +55,26 @@ The `buildColumnsFromFieldConfigs` utility function in `src/lib/utils/column-bui
 ```typescript
 import { buildColumnsFromFieldConfigs } from "@/src/lib/utils/column-builder";
 
+// Automatically extracts unique values for select fields from task data
 const columns = buildColumnsFromFieldConfigs(
   fieldConfigs,
-  handleUpdate,
-  uniqueOwners,
-  uniqueAssetClasses
+  tasks,
+  handleUpdate
 );
+```
+
+The function automatically extracts unique values for all select-type fields (select, editable-owner, editable-combobox) from the task data, eliminating the need to manually pass unique values.
+
+### Extracting Unique Values
+
+If you need to extract unique values separately, use the `extractUniqueFieldValues` function:
+
+```typescript
+import { extractUniqueFieldValues } from "@/src/lib/utils/column-builder";
+
+// Returns a map where keys match field keys
+const uniqueValues = extractUniqueFieldValues(tasks, fieldConfigs);
+// Example result: { owner: ["John", "Jane"], assetClass: ["Equity", "Fixed Income"] }
 ```
 
 ### Fetching Field Configs

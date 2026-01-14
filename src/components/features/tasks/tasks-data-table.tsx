@@ -99,15 +99,14 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
     if (!isLoadingFields && fieldConfigs.length > 0) {
       return buildColumnsFromFieldConfigs(
         fieldConfigs,
-        handleTaskUpdate,
-        uniqueOwners,
-        uniqueAssetClasses
+        data,
+        handleTaskUpdate
       );
     }
     
     // Fallback to static columns if field configs are not available
     return createColumns(uniqueOwners, uniqueAssetClasses, handleTaskUpdate);
-  }, [externalColumns, fieldConfigs, isLoadingFields, uniqueOwners, uniqueAssetClasses, handleTaskUpdate]);
+  }, [externalColumns, fieldConfigs, isLoadingFields, data, handleTaskUpdate]);
 
   return (
     <>
