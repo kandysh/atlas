@@ -7,7 +7,7 @@ export const mockTasks: Task[] = [
     title: "Automated mentor–mentee matching",
     assetClass: "People Tech",
     teamsInvolved: ["HR", "Engineering"],
-    theme: ["automation", "matching"],
+    theme: "Automation",
     problemStatement:
       "Manual mentor assignment was slow, inconsistent, and did not scale beyond small cohorts.",
     solutionDesign:
@@ -33,7 +33,7 @@ export const mockTasks: Task[] = [
     title: "Mentoring program admin dashboard",
     assetClass: "Internal Tools",
     teamsInvolved: ["HR"],
-    theme: ["visibility", "operations"],
+    theme: "Operations",
     problemStatement:
       "Program admins lacked visibility into cohort progress and mentor engagement.",
     solutionDesign:
@@ -58,7 +58,7 @@ export const mockTasks: Task[] = [
     title: "Bulk user onboarding automation",
     assetClass: "Platform",
     teamsInvolved: ["Engineering", "Operations"],
-    theme: ["automation"],
+    theme: "Automation",
     problemStatement:
       "Bulk onboarding users via spreadsheets was error-prone and time consuming.",
     solutionDesign:
@@ -82,7 +82,7 @@ export const mockTasks: Task[] = [
     title: "Role-based access control (RBAC)",
     assetClass: "Security",
     teamsInvolved: ["Engineering", "Security"],
-    theme: ["compliance", "access-control"],
+    theme: "Compliance",
     problemStatement:
       "All users had the same permissions, leading to security and compliance risks.",
     solutionDesign:
@@ -106,7 +106,7 @@ export const mockTasks: Task[] = [
     title: "Self-serve cohort creation",
     assetClass: "Internal Tools",
     teamsInvolved: ["HR", "Engineering"],
-    theme: ["self-serve", "scale"],
+    theme: "Self-Service",
     problemStatement:
       "Creating cohorts required engineering intervention for every request.",
     solutionDesign:
@@ -130,7 +130,7 @@ export const mockTasks: Task[] = [
     title: "LLM-based resume review assistant",
     assetClass: "AI Platform",
     teamsInvolved: ["Engineering", "Product"],
-    theme: ["ai", "automation"],
+    theme: "AI & Automation",
     problemStatement:
       "Manual resume reviews were inconsistent and slow during hiring drives.",
     solutionDesign:
@@ -154,7 +154,7 @@ export const mockTasks: Task[] = [
     title: "Observability setup for mentoring services",
     assetClass: "Platform",
     teamsInvolved: ["Engineering"],
-    theme: ["reliability", "observability"],
+    theme: "Observability",
     problemStatement:
       "Production issues were hard to debug due to lack of tracing and metrics.",
     solutionDesign:
@@ -179,7 +179,7 @@ export const mockTasks: Task[] = [
     title: "Mentor feedback sentiment analysis",
     assetClass: "Analytics",
     teamsInvolved: ["Engineering", "HR"],
-    theme: ["analytics", "ai"],
+    theme: "Analytics",
     problemStatement:
       "Qualitative mentor feedback was hard to summarize at scale.",
     solutionDesign:
@@ -203,7 +203,7 @@ export const mockTasks: Task[] = [
     title: "Legacy data migration for mentoring cohorts",
     assetClass: "Data",
     teamsInvolved: ["Engineering", "Operations"],
-    theme: ["migration", "tech-debt"],
+    theme: "Tech Debt",
     problemStatement:
       "Historical cohort data existed in inconsistent legacy formats.",
     solutionDesign:
@@ -227,7 +227,7 @@ export const mockTasks: Task[] = [
     title: "Slack notifications for cohort milestones",
     assetClass: "Integrations",
     teamsInvolved: ["Engineering"],
-    theme: ["notifications", "engagement"],
+    theme: "Engagement",
     problemStatement:
       "Users missed important cohort milestones due to email fatigue.",
     solutionDesign:
@@ -251,7 +251,7 @@ export const mockTasks: Task[] = [
     title: "Configurable workflow states for tasks",
     assetClass: "Product Platform",
     teamsInvolved: ["Engineering", "Product"],
-    theme: ["customization", "scale"],
+    theme: "Customization",
     problemStatement:
       "Hardcoded task statuses did not fit all teams' workflows.",
     solutionDesign:
@@ -275,7 +275,7 @@ export const mockTasks: Task[] = [
     title: "Cohort progress email digests",
     assetClass: "Integrations",
     teamsInvolved: ["Engineering", "HR"],
-    theme: ["engagement", "automation"],
+    theme: "Engagement",
     problemStatement:
       "Mentors and mentees were missing weekly progress summaries.",
     solutionDesign:
@@ -299,7 +299,7 @@ export const mockTasks: Task[] = [
     title: "Mobile-friendly cohort dashboard",
     assetClass: "UX",
     teamsInvolved: ["Design", "Engineering"],
-    theme: ["ux", "mobile"],
+    theme: "User Experience",
     problemStatement:
       "Cohort dashboards were not usable on small screens, limiting adoption.",
     solutionDesign:
@@ -323,7 +323,7 @@ export const mockTasks: Task[] = [
     title: "Program-level KPIs and reporting",
     assetClass: "Analytics",
     teamsInvolved: ["Product", "HR", "Engineering"],
-    theme: ["reporting", "metrics"],
+    theme: "Reporting",
     problemStatement:
       "Stakeholders lacked consolidated KPIs to measure program success.",
     solutionDesign:
@@ -347,7 +347,7 @@ export const mockTasks: Task[] = [
     title: "Mentor availability calendar sync",
     assetClass: "Integrations",
     teamsInvolved: ["Engineering"],
-    theme: ["calendar", "integrations"],
+    theme: "Integrations",
     problemStatement:
       "Mentor availability was stored in multiple calendars causing mismatches.",
     solutionDesign:
@@ -371,7 +371,7 @@ export const mockTasks: Task[] = [
     title: "Automated mentor onboarding flow",
     assetClass: "People Tech",
     teamsInvolved: ["HR", "Engineering"],
-    theme: ["automation", "onboarding"],
+    theme: "Onboarding",
     problemStatement:
       "New mentors required a manual checklist-driven onboarding that was time consuming.",
     solutionDesign:
@@ -395,7 +395,7 @@ export const mockTasks: Task[] = [
     title: "Consent & privacy audit for feedback data",
     assetClass: "Security",
     teamsInvolved: ["Security", "Legal", "Engineering"],
-    theme: ["compliance", "privacy"],
+    theme: "Privacy",
     problemStatement:
       "Stored feedback data lacked consistent consent metadata and retention rules.",
     solutionDesign:
@@ -419,7 +419,7 @@ export const mockTasks: Task[] = [
     title: "Experiment: AI-based mentor recommendations",
     assetClass: "AI Platform",
     teamsInvolved: ["Engineering", "Data Science"],
-    theme: ["ai", "experimentation"],
+    theme: "AI & Experimentation",
     problemStatement:
       "Current matching lacked contextual signals from interactions and outcomes.",
     solutionDesign:
@@ -443,7 +443,7 @@ export const mockTasks: Task[] = [
     title: "Fast fail workflow for cohort creation",
     assetClass: "Product Platform",
     teamsInvolved: ["Engineering", "Product"],
-    theme: ["reliability", "workflows"],
+    theme: "Workflow Automation",
     problemStatement:
       "Cohort creation could leave partial side-effects when upstream services failed.",
     solutionDesign:
@@ -467,7 +467,7 @@ export const mockTasks: Task[] = [
     title: "Accessibility audit and fixes",
     assetClass: "UX",
     teamsInvolved: ["Design", "Engineering"],
-    theme: ["accessibility", "quality"],
+    theme: "Accessibility",
     problemStatement:
       "The web app did not meet basic WCAG checks across key flows.",
     solutionDesign:

@@ -7,7 +7,7 @@ export interface Task {
   title: string;
   assetClass: string;
   teamsInvolved: string[];
-  theme: string[];
+  theme: string;
   problemStatement: string;
   solutionDesign: string;
   status: Status;

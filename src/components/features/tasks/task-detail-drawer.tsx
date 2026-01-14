@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Calendar, User, Clock, Briefcase, Users, Tag, FileText } from "lucide-react";
+import { X, Calendar, User, Clock, Briefcase, Users, Tag, FileText, CircleDot, Flag, Palette } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { StatusCell } from "./status-cell";
 import { PriorityCell } from "./priority-cell";
@@ -28,7 +28,7 @@ export function TaskDetailDrawer({
   // Get unique values for dropdowns from all tasks
   const uniqueOwners = Array.from(new Set(mockTasks.map(t => t.owner))).sort();
   const uniqueAssetClasses = Array.from(new Set(mockTasks.map(t => t.assetClass))).sort();
-  const uniqueThemes = Array.from(new Set(mockTasks.flatMap(t => t.theme))).sort();
+  const uniqueThemes = Array.from(new Set(mockTasks.map(t => t.theme))).sort();
 
   const formatDateTime = (date: Date | null | undefined) => {
     if (!date) return "Not set";
@@ -147,9 +147,7 @@ export function TaskDetailDrawer({
                 {/* Status */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="h-4 w-4 rounded bg-muted flex items-center justify-center">
-                      <div className="h-2 w-2 rounded-full bg-foreground/40" />
-                    </div>
+                    <CircleDot className="h-4 w-4" />
                     Status
                   </div>
                   <StatusCell
@@ -163,9 +161,7 @@ export function TaskDetailDrawer({
                 {/* Priority */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="h-4 w-4 rounded bg-muted flex items-center justify-center">
-                      <div className="h-2 w-2 rounded-full bg-foreground/40" />
-                    </div>
+                    <Flag className="h-4 w-4" />
                     Priority
                   </div>
                   <PriorityCell
@@ -209,14 +205,15 @@ export function TaskDetailDrawer({
                 {/* Theme */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Tag className="h-4 w-4" />
+                    <Palette className="h-4 w-4" />
                     Theme
                   </div>
-                  <EditableTagsCell
-                    value={task.theme || []}
+                  <EditableComboboxCell
+                    value={task.theme}
                     onChange={(value) => onUpdate(task.id, "theme", value)}
-                    placeholder="Add theme..."
-                    className="flex-1 max-w-[300px]"
+                    options={uniqueThemes}
+                    onAddOption={() => {}}
+                    placeholder="Select theme..."
                   />
                 </div>
 
