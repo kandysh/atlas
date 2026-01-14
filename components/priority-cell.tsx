@@ -1,18 +1,28 @@
-"use client"
+"use client";
 
-import { AlertCircle, ArrowDown, ArrowUp, Signal } from "lucide-react"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useState } from "react"
-
-type Priority = "low" | "medium" | "high" | "urgent"
+import { AlertCircle, ArrowDown, ArrowUp, Signal } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Priority } from "@/data/project";
 
 type PriorityCellProps = {
-  value: Priority
-  onChange: (value: Priority) => void
-}
+  value: Priority;
+  onChange: (value: Priority) => void;
+};
 
 const priorityConfig = {
   low: {
@@ -39,12 +49,12 @@ const priorityConfig = {
     color: "text-red-500",
     bgColor: "bg-red-500/10",
   },
-}
+};
 
 export function PriorityCell({ value, onChange }: PriorityCellProps) {
-  const config = priorityConfig[value]
-  const Icon = config.icon
-  const [open, setOpen] = useState(false)
+  const config = priorityConfig[value];
+  const Icon = config.icon;
+  const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -67,33 +77,51 @@ export function PriorityCell({ value, onChange }: PriorityCellProps) {
           <span className="text-sm">{config.label}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0 bg-card border-border shadow-lg" align="start">
+      <PopoverContent
+        className="w-[200px] p-0 bg-card border-border shadow-lg"
+        align="start"
+      >
         <Command className="bg-card">
-          <CommandInput placeholder="Search priority..." className="h-9 text-sm border-none focus:ring-0" />
+          <CommandInput
+            placeholder="Search priority..."
+            className="h-9 text-sm border-none focus:ring-0"
+          />
           <CommandList>
-            <CommandEmpty className="py-4 text-sm text-muted-foreground text-center">No priority found.</CommandEmpty>
+            <CommandEmpty className="py-4 text-sm text-muted-foreground text-center">
+              No priority found.
+            </CommandEmpty>
             <CommandGroup className="p-1">
-              {(Object.entries(priorityConfig) as [Priority, (typeof priorityConfig)[Priority]][]).map(([key, cfg]) => {
-                const ItemIcon = cfg.icon
+              {(
+                Object.entries(priorityConfig) as [
+                  Priority,
+                  (typeof priorityConfig)[Priority],
+                ][]
+              ).map(([key, cfg]) => {
+                const ItemIcon = cfg.icon;
                 return (
                   <CommandItem
                     key={key}
                     value={cfg.label}
                     onSelect={() => {
-                      onChange(key)
-                      setOpen(false)
+                      onChange(key);
+                      setOpen(false);
                     }}
                     className="gap-2 transition-all duration-200 hover:bg-muted/50 cursor-pointer rounded-sm"
                   >
-                    <ItemIcon className={cn("h-3.5 w-3.5 transition-all duration-200", cfg.color)} />
+                    <ItemIcon
+                      className={cn(
+                        "h-3.5 w-3.5 transition-all duration-200",
+                        cfg.color,
+                      )}
+                    />
                     <span>{cfg.label}</span>
                   </CommandItem>
-                )
+                );
               })}
             </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

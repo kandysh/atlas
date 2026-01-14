@@ -1,26 +1,26 @@
 "use client";
 
-export default function Page() {
-  // TODO: Filter tasks where status !== "completed"
-  // const activeTasks = tasks.filter(t => t.status !== "completed");
+export default function CompletedPage() {
+  // TODO: Filter tasks where status === "completed"
+  // const completedTasks = tasks.filter(t => t.status === "completed");
   
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight text-balance">
-          Active Tasks
+          Completed Tasks
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your active tasks and projects (excludes completed)
+          View all completed tasks in your workspace
         </p>
       </div>
 
       <div className="rounded-lg border border-border bg-card p-12 text-center">
         <p className="text-muted-foreground">
-          Your active tasks will appear here
+          Completed tasks will appear here
         </p>
         <p className="text-xs text-muted-foreground mt-2">
-          Tasks with status: To Do, In Progress, Testing, Done, or Blocked
+          Tasks marked as "Completed" are archived here
         </p>
       </div>
     </div>

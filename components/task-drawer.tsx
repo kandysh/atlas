@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 type Task = {
   id: string
   name: string
-  status: "todo" | "in-progress" | "done" | "blocked"
+  status: "todo" | "in-progress" | "testing" | "done" | "completed" | "blocked"
   priority: "low" | "medium" | "high" | "urgent"
   assignee: string
   dueDate: string

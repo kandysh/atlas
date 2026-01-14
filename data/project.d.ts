@@ -1,13 +1,14 @@
 export interface Task {
   id: string;
-  owner: string;
+  owner: string; // assignee
   title: string;
   assetClass: string;
   teamsInvolved: string[];
   theme: string[];
   problemStatement: string;
   solutionDesign: string;
-  status: "pending" | "in-progress" | "completed";
+  status: Status;
+  priority: Priority;
   benefits: string;
   currentHrs: number;
   savedHrs: number;
@@ -20,13 +21,5 @@ export interface Task {
   updatedAt: Date;
 }
 
-// export type Task = Omit<
-//   Project,
-//   | "problemStatement"
-//   | "solutionDesign"
-//   | "benefits"
-//   | "teamsInvolved"
-//   | "otherUseCases"
-//   | "createdAt"
-//   | "updatedAt"
-// >;
+type Status = "todo" | "in-progress" | "testing" | "done" | "completed" | "blocked";
+type Priority = "low" | "medium" | "high" | "urgent";
