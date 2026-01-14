@@ -7,7 +7,8 @@ import { PriorityCell } from "./priority-cell";
 import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/lib/utils";
 import { Task, Status, Priority } from "@/src/lib/types";
-import { EditableTextCell, EditableNumberCell, EditableDateCell, EditableTagsCell } from "./editable-cells";
+import { EditableTextCell, EditableNumberCell, EditableDateCell, EditableTagsCell, EditableComboboxCell } from "./editable-cells";
+import { mockTasks } from "@/src/data";
 
 type TaskDetailDrawerProps = {
   task: Task | null;
@@ -23,6 +24,11 @@ export function TaskDetailDrawer({
   onUpdate,
 }: TaskDetailDrawerProps) {
   if (!task) return null;
+
+  // Get unique values for dropdowns from all tasks
+  const uniqueOwners = Array.from(new Set(mockTasks.map(t => t.owner))).sort();
+  const uniqueAssetClasses = Array.from(new Set(mockTasks.map(t => t.assetClass))).sort();
+  const uniqueThemes = Array.from(new Set(mockTasks.flatMap(t => t.theme))).sort();
 
   const formatDateTime = (date: Date | null | undefined) => {
     if (!date) return "Not set";
@@ -176,10 +182,12 @@ export function TaskDetailDrawer({
                     <User className="h-4 w-4" />
                     Owner
                   </div>
-                  <EditableTextCell
+                  <EditableComboboxCell
                     value={task.owner}
                     onChange={(value) => onUpdate(task.id, "owner", value)}
-                    className="text-sm"
+                    options={uniqueOwners}
+                    onAddOption={() => {}} // Option will be added when onChange is called
+                    placeholder="Select owner..."
                   />
                 </div>
 
@@ -189,10 +197,26 @@ export function TaskDetailDrawer({
                     <Briefcase className="h-4 w-4" />
                     Asset Class
                   </div>
-                  <EditableTextCell
+                  <EditableComboboxCell
                     value={task.assetClass}
                     onChange={(value) => onUpdate(task.id, "assetClass", value)}
-                    className="text-sm"
+                    options={uniqueAssetClasses}
+                    onAddOption={() => {}} // Option will be added when onChange is called
+                    placeholder="Select asset class..."
+                  />
+                </div>
+
+                {/* Theme */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Tag className="h-4 w-4" />
+                    Theme
+                  </div>
+                  <EditableTagsCell
+                    value={task.theme || []}
+                    onChange={(value) => onUpdate(task.id, "theme", value)}
+                    placeholder="Add theme..."
+                    className="flex-1 max-w-[300px]"
                   />
                 </div>
 

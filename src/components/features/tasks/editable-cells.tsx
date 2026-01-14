@@ -7,7 +7,8 @@ import { Calendar } from "@/src/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/ui/popover";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
-import { Calendar as CalendarIcon, X } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/src/components/ui/command";
+import { Calendar as CalendarIcon, X, ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 interface EditableTextCellProps {
@@ -411,5 +412,113 @@ export function EditableTagsCell({
         )}
       </div>
     </div>
+  );
+}
+
+interface EditableComboboxCellProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  onAddOption?: (option: string) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+export function EditableComboboxCell({
+  value,
+  onChange,
+  options,
+  onAddOption,
+  placeholder = "Select or type...",
+  className,
+}: EditableComboboxCellProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  const filteredOptions = options.filter((option) =>
+    option.toLowerCase().includes(searchValue.toLowerCase())
+  );
+
+  const handleSelect = (selectedValue: string) => {
+    onChange(selectedValue);
+    setIsOpen(false);
+    setSearchValue("");
+  };
+
+  const handleAddNew = () => {
+    const trimmed = searchValue.trim();
+    if (trimmed && !options.includes(trimmed)) {
+      onAddOption?.(trimmed);
+      onChange(trimmed);
+      setIsOpen(false);
+      setSearchValue("");
+    }
+  };
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          role="combobox"
+          aria-expanded={isOpen}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "justify-between text-left font-normal hover:bg-accent/50 min-w-[150px]",
+            !value && "text-muted-foreground",
+            className
+          )}
+        >
+          <span className="truncate">{value || placeholder}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[250px] p-0" align="start">
+        <Command>
+          <CommandInput
+            placeholder={placeholder}
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
+          <CommandList>
+            <CommandEmpty>
+              <div className="py-2 px-3">
+                <p className="text-sm text-muted-foreground mb-2">
+                  No option found.
+                </p>
+                {searchValue.trim() && onAddOption && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleAddNew}
+                  >
+                    Add "{searchValue.trim()}"
+                  </Button>
+                )}
+              </div>
+            </CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={option}
+                  value={option}
+                  onSelect={() => handleSelect(option)}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === option ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {option}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
