@@ -65,7 +65,8 @@ export function extractUniqueFieldValues(
   selectFields.forEach((field) => {
     const values = tasks
       .map((task) => (task as Record<string, any>)[field.key])
-      .filter((value) => value != null && value !== "");
+      .filter((value) => value != null && value !== "")
+      .map((value) => String(value)); // Ensure all values are strings
 
     uniqueValues[field.key] = Array.from(new Set(values)).sort();
   });
@@ -242,10 +243,15 @@ function renderEditableComboboxCell(
   fieldOptions: string[],
   configOptions?: any,
 ): React.ReactNode {
-  const options =
+  const rawOptions =
     fieldOptions.length > 0
       ? fieldOptions
       : (configOptions?.choices as string[]) || [];
+  
+  // Ensure all options are strings and filter out null/undefined
+  const options = rawOptions
+    .filter((opt) => opt != null)
+    .map((opt) => String(opt));
 
   return (
     <EditableComboboxCell

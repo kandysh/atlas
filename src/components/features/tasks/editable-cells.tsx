@@ -222,7 +222,12 @@ export function EditableOwnerCell({
   const [searchValue, setSearchValue] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
 
-  const filteredOptions = options.filter((option) =>
+  // Ensure options are strings and filter safely
+  const safeOptions = options.filter((opt): opt is string => 
+    typeof opt === "string" && opt.length > 0
+  );
+
+  const filteredOptions = safeOptions.filter((option) =>
     option.toLowerCase().includes(searchValue.toLowerCase()),
   );
 
@@ -264,7 +269,7 @@ export function EditableOwnerCell({
         handleSelect(filteredOptions[0]);
       }
       // Otherwise, add the new value
-      else if (trimmed && !options.includes(trimmed)) {
+      else if (trimmed && !safeOptions.includes(trimmed)) {
         onAddOption?.(trimmed);
         onChange(trimmed);
         setIsOpen(false);
@@ -532,7 +537,12 @@ export function EditableComboboxCell({
   const [searchValue, setSearchValue] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
 
-  const filteredOptions = options.filter((option) =>
+  // Ensure options are strings and filter safely
+  const safeOptions = options.filter((opt): opt is string => 
+    typeof opt === "string" && opt.length > 0
+  );
+
+  const filteredOptions = safeOptions.filter((option) =>
     option.toLowerCase().includes(searchValue.toLowerCase()),
   );
 
@@ -574,7 +584,7 @@ export function EditableComboboxCell({
         handleSelect(filteredOptions[0]);
       }
       // Otherwise, add the new value
-      else if (trimmed && !options.includes(trimmed)) {
+      else if (trimmed && !safeOptions.includes(trimmed)) {
         onAddOption?.(trimmed);
         onChange(trimmed);
         setIsOpen(false);

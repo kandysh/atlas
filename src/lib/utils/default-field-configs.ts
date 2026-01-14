@@ -81,7 +81,7 @@ export function getDefaultFieldConfigs(
       workspaceId,
       key: "teamsInvolved",
       name: "Teams Involved",
-      type: "editable-combobox",
+      type: "editable-tags",
       options: { choices: [], required: false },
       order: 6,
       visible: true,
