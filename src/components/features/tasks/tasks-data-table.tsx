@@ -1,16 +1,19 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Task } from "@/src/lib/types";
 import { DataTable } from "@/src/components/ui/data-table";
-import { DataTableToolbar } from "./data-table-toolbar";
-import { DataTableEmptyState } from "@/src/components/ui/data-table-empty-state";
 import { TaskDetailDrawer } from "./task-detail-drawer";
-import { useCreateTask, useUpdateTask } from "@/src/lib/query/hooks";
-import { useWorkspace } from "@/src/providers";
-import { createColumns } from "./columns";
 import { TasksToolbar } from "./tasks-toolbar";
+import { 
+  useCreateTask, 
+  useUpdateTask, 
+  useWorkspaceFields 
+} from "@/src/lib/query/hooks";
+import { useWorkspace } from "@/src/providers";
+import { buildColumnsFromFieldConfigs } from "@/src/lib/utils/column-builder";
+import { createColumns } from "./columns";
 
 interface TasksDataTableProps {
   columns?: ColumnDef<Task, unknown>[];
@@ -18,25 +21,27 @@ interface TasksDataTableProps {
   workspaceId?: string;
 }
 
-export function TasksDataTable({ columns: externalColumns, data, workspaceId }: TasksDataTableProps) {
+export function TasksDataTable({ 
+  columns: externalColumns, 
+  data, 
+  workspaceId 
+}: TasksDataTableProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { currentWorkspace } = useWorkspace();
   
-  // Use workspaceId from props or fallback to context
   const activeWorkspaceId = workspaceId || currentWorkspace?.id || "1";
   
   const createTaskMutation = useCreateTask(activeWorkspaceId);
   const updateTaskMutation = useUpdateTask(activeWorkspaceId, 0);
+  const { data: fieldsData, isLoading: isLoadingFields } = useWorkspaceFields(activeWorkspaceId);
+  
+  const fieldConfigs = fieldsData?.fields || [];
 
-  // Extract unique values for filters
+  // Extract unique values for legacy toolbar filters
   const { uniqueOwners, uniqueAssetClasses } = useMemo(() => {
-    const owners = Array.from(new Set(data.map((task) => task.owner))).filter(
-      Boolean
-    );
-    const assetClasses = Array.from(
-      new Set(data.map((task) => task.assetClass))
-    ).filter(Boolean);
+    const owners = Array.from(new Set(data.map((task) => task.owner))).filter(Boolean);
+    const assetClasses = Array.from(new Set(data.map((task) => task.assetClass))).filter(Boolean);
 
     return {
       uniqueOwners: owners.sort(),
@@ -44,50 +49,58 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
     };
   }, [data]);
 
-  const handleRowClick = (task: Task) => {
+  const handleRowClick = useCallback((task: Task) => {
     setSelectedTask(task);
     setIsDrawerOpen(true);
-  };
+  }, []);
 
-  const handleAddTask = () => {
-    // Create a new task with default data
+  const handleAddTask = useCallback(() => {
     createTaskMutation.mutate({
       title: "New Task",
       status: "todo",
       priority: "medium",
     });
-  };
+  }, [createTaskMutation]);
 
-  const handleDeleteSelected = (selectedIds: string[]) => {
-    console.log("Delete selected tasks", selectedIds);
+  const handleDeleteSelected = useCallback((selectedIds: string[]) => {
     // TODO: Implement delete functionality
-  };
+    console.log("Delete selected tasks", selectedIds);
+  }, []);
 
-  const handleTaskUpdate = (
+  const handleTaskUpdate = useCallback((
     displayId: string,
     field: string,
     value: unknown
   ) => {
-    // Update task using mutation with optimistic update
     updateTaskMutation.mutate({
       displayId,
       patch: { [field]: value },
     });
     
-    // Update the selected task in the drawer if it's the same task
-    if (selectedTask && selectedTask.id === displayId) {
-      setSelectedTask({
-        ...selectedTask,
-        [field]: value,
-      });
-    }
-  };
+    setSelectedTask((prev) => 
+      prev && prev.id === displayId 
+        ? { ...prev, [field]: value } 
+        : prev
+    );
+  }, [updateTaskMutation]);
   
-  // Create columns with update handler if not provided
-  const columns = useMemo(
-    () => externalColumns || createColumns(uniqueOwners, uniqueAssetClasses, handleTaskUpdate),
-    [externalColumns, uniqueOwners, uniqueAssetClasses, handleTaskUpdate]
-  );
+  const columns = useMemo(() => {
+    if (externalColumns) return externalColumns;
+    
+    if (!isLoadingFields && fieldConfigs.length > 0) {
+      return buildColumnsFromFieldConfigs(fieldConfigs, data, handleTaskUpdate);
+    }
+    
+    return createColumns(uniqueOwners, uniqueAssetClasses, handleTaskUpdate);
+  }, [
+    externalColumns, 
+    fieldConfigs, 
+    isLoadingFields, 
+    data, 
+    handleTaskUpdate, 
+    uniqueOwners, 
+    uniqueAssetClasses
+  ]);
 
   return (
     <>
