@@ -1,5 +1,5 @@
 {
-  "id": "c3a8ee6e-7152-4007-b09e-4b9d8268c512",
+  "id": "d9e0e023-00f0-41f2-8d91-59ea8cd3e09b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -59,12 +59,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": true
-        },
-        "cell_type": {
-          "name": "cell_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -557,7 +551,16 @@
         "multiselect",
         "date",
         "checkbox",
-        "number"
+        "number",
+        "editable-text",
+        "editable-number",
+        "editable-date",
+        "editable-tags",
+        "editable-combobox",
+        "editable-owner",
+        "status",
+        "priority",
+        "badge-list"
       ]
     },
     "public.role": {

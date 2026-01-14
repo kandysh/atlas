@@ -14,6 +14,8 @@ import {
   EditableComboboxCell,
   EditableTagsCell,
   EditableDateCell,
+  EditableCheckboxCell,
+  EditableMultiselectCell,
 } from "@/src/components/features/tasks/editable-cells";
 import { Button } from "@/src/components/ui/button";
 import {
@@ -24,6 +26,23 @@ import {
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
 import { Badge } from "@/src/components/ui/badge";
+
+export type CellType =
+  | "text"
+  | "select"
+  | "multiselect"
+  | "date"
+  | "checkbox"
+  | "number"
+  | "editable-text"
+  | "editable-number"
+  | "editable-date"
+  | "editable-tags"
+  | "editable-combobox"
+  | "editable-owner"
+  | "status"
+  | "priority"
+  | "badge-list";
 
 type UniqueValuesMap = Record<string, string[]>;
 
@@ -39,8 +58,8 @@ export function extractUniqueFieldValues(
   const selectFields = fieldConfigs.filter(
     (config) =>
       config.type === "select" ||
-      config.cellType === "editable-owner" ||
-      config.cellType === "editable-combobox",
+      config.type === "editable-owner" ||
+      config.type === "editable-combobox",
   );
 
   selectFields.forEach((field) => {
@@ -147,7 +166,7 @@ function renderCell(
   onUpdate?: (taskId: string, field: string, value: any) => void,
   uniqueValues: UniqueValuesMap = {},
 ): React.ReactNode {
-  const { key, cellType, type, options } = fieldConfig;
+  const { key, type, options } = fieldConfig;
   const value = (task as Record<string, any>)[key];
   const fieldOptions = uniqueValues[key] || [];
 
@@ -155,7 +174,7 @@ function renderCell(
     onUpdate?.(task.id, key, newValue);
   };
 
-  switch (cellType) {
+  switch (type) {
     case "status":
       return renderStatusCell(value, handleChange);
     case "priority":
@@ -179,6 +198,10 @@ function renderCell(
       return renderEditableTagsCell(value, handleChange, fieldConfig.name);
     case "badge-list":
       return renderBadgeList(value);
+    case "checkbox":
+      return <EditableCheckboxCell value={value || false} onChange={handleChange} />;
+    case "multiselect":
+      return renderEditableMultiselectCell(value, handleChange, fieldOptions, options, fieldConfig.name);
     default:
       return renderFallbackCell(value, type, handleChange);
   }
@@ -295,6 +318,28 @@ function renderBadgeList(value: any): React.ReactNode {
       <Badge variant="secondary">{items[0]}</Badge>
       <Badge variant="secondary">+{items.length - 1}</Badge>
     </div>
+  );
+}
+
+function renderEditableMultiselectCell(
+  value: any,
+  handleChange: (value: string[]) => void,
+  fieldOptions: string[],
+  configOptions?: any,
+  fieldName?: string,
+): React.ReactNode {
+  const options =
+    fieldOptions.length > 0
+      ? fieldOptions
+      : (configOptions?.choices as string[]) || [];
+
+  return (
+    <EditableMultiselectCell
+      value={value || []}
+      onChange={handleChange}
+      options={options}
+      placeholder={`Select ${fieldName?.toLowerCase() || "items"}...`}
+    />
   );
 }
 

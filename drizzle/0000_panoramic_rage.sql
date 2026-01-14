@@ -1,4 +1,4 @@
-CREATE TYPE "public"."field_type" AS ENUM('text', 'select', 'multiselect', 'date', 'checkbox', 'number');--> statement-breakpoint
+CREATE TYPE "public"."field_type" AS ENUM('text', 'select', 'multiselect', 'date', 'checkbox', 'number', 'editable-text', 'editable-number', 'editable-date', 'editable-tags', 'editable-combobox', 'editable-owner', 'status', 'priority', 'badge-list');--> statement-breakpoint
 CREATE TYPE "public"."role" AS ENUM('owner', 'admin', 'member', 'viewer');--> statement-breakpoint
 CREATE TABLE "field_configs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -9,7 +9,6 @@ CREATE TABLE "field_configs" (
 	"options" jsonb,
 	"order" integer DEFAULT 0 NOT NULL,
 	"visible" boolean DEFAULT true NOT NULL,
-	"cell_type" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );

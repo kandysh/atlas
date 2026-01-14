@@ -21,6 +21,15 @@ export const fieldTypeEnum = pgEnum("field_type", [
   "date",
   "checkbox",
   "number",
+  "editable-text",
+  "editable-number",
+  "editable-date",
+  "editable-tags",
+  "editable-combobox",
+  "editable-owner",
+  "status",
+  "priority",
+  "badge-list",
 ]);
 
 // Workspaces Table
@@ -73,11 +82,11 @@ export const fieldConfigs = pgTable("field_configs", {
     choices?: string[];
     defaultValue?: string | number | boolean;
     required?: boolean;
+    suffix?: string;
     [key: string]: any;
   }>(),
   order: integer("order").notNull().default(0),
   visible: boolean("visible").notNull().default(true),
-  cellType: text("cell_type"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -26,6 +26,7 @@ import {
   Check,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
+import { Checkbox } from "@/src/components/ui/checkbox";
 
 interface EditableTextCellProps {
   value: string;
@@ -625,6 +626,147 @@ export function EditableComboboxCell({
                     className={cn(
                       "mr-2 h-4 w-4",
                       value === option ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                  {option}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+interface EditableCheckboxCellProps {
+  value: boolean;
+  onChange: (value: boolean) => void;
+  className?: string;
+}
+
+export function EditableCheckboxCell({
+  value,
+  onChange,
+  className,
+}: EditableCheckboxCellProps) {
+  return (
+    <div className={cn("flex items-center", className)}>
+      <Checkbox
+        checked={value}
+        onCheckedChange={(checked) => onChange(checked === true)}
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
+}
+
+interface EditableMultiselectCellProps {
+  value: string[];
+  onChange: (value: string[]) => void;
+  options?: string[];
+  placeholder?: string;
+  className?: string;
+}
+
+export function EditableMultiselectCell({
+  value = [],
+  onChange,
+  options = [],
+  placeholder = "Select items...",
+  className,
+}: EditableMultiselectCellProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  const filteredOptions = searchValue
+    ? options.filter((option) =>
+        option.toLowerCase().includes(searchValue.toLowerCase()),
+      )
+    : options;
+
+  const handleToggle = (option: string) => {
+    const newValue = value.includes(option)
+      ? value.filter((v) => v !== option)
+      : [...value, option];
+    onChange(newValue);
+  };
+
+  const handleRemove = (option: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange(value.filter((v) => v !== option));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && searchValue && !options.includes(searchValue)) {
+      e.preventDefault();
+      onChange([...value, searchValue]);
+      setSearchValue("");
+    }
+  };
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          role="combobox"
+          aria-expanded={isOpen}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "h-auto min-h-8 justify-start gap-1 font-normal hover:bg-muted/50 transition-all duration-200 w-full",
+            value.length === 0 && "text-muted-foreground",
+            className,
+          )}
+        >
+          {value.length === 0 ? (
+            <span className="text-sm">{placeholder}</span>
+          ) : (
+            <div className="flex flex-wrap gap-1">
+              {value.map((item) => (
+                <Badge
+                  key={item}
+                  variant="secondary"
+                  className="text-xs px-2 py-0"
+                >
+                  {item}
+                  <button
+                    onClick={(e) => handleRemove(item, e)}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+          <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[250px] p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search or add..."
+            value={searchValue}
+            onValueChange={setSearchValue}
+            onKeyDown={handleKeyDown}
+          />
+          <CommandList className="max-h-[200px]">
+            <CommandEmpty className="py-2 px-3 text-sm text-muted-foreground">
+              Type and press Enter to add
+            </CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={option}
+                  value={option}
+                  onSelect={() => handleToggle(option)}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value.includes(option) ? "opacity-100" : "opacity-0",
                     )}
                   />
                   {option}
