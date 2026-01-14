@@ -2,8 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Task, Status, Priority } from "@/data/project";
-import { StatusCell } from "@/components/status-cell";
-import { PriorityCell } from "@/components/priority-cell";
+import { StatusCell } from "@/components/tasks-table/status-cell";
+import { PriorityCell } from "@/components/tasks-table/priority-cell";
 import {
   EditableTextCell,
   EditableNumberCell,

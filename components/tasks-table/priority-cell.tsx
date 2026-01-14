@@ -28,26 +28,26 @@ const priorityConfig = {
   low: {
     label: "Low",
     icon: ChevronDown,
-    color: "text-slate-500",
-    bgColor: "bg-slate-500/10",
+    color: "text-priority-low",
+    bgColor: "bg-priority-low/10",
   },
   medium: {
     label: "Medium",
     icon: Minus,
-    color: "text-amber-500",
-    bgColor: "bg-amber-500/10",
+    color: "text-priority-medium",
+    bgColor: "bg-priority-medium/10",
   },
   high: {
     label: "High",
     icon: ChevronUp,
-    color: "text-orange-500",
-    bgColor: "bg-orange-500/10",
+    color: "text-priority-high",
+    bgColor: "bg-priority-high/10",
   },
   urgent: {
     label: "Urgent",
     icon: AlertCircle,
-    color: "text-red-500",
-    bgColor: "bg-red-500/10",
+    color: "text-priority-urgent",
+    bgColor: "bg-priority-urgent/10",
   },
 };
 

@@ -54,10 +54,10 @@ export function InsightsView({ tasks }: InsightsViewProps) {
         <Card className="bg-card border-border hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">{completedTasks}</div>
+            <div className="text-2xl font-bold text-success">{completedTasks}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0}% of total
             </p>
@@ -67,10 +67,10 @@ export function InsightsView({ tasks }: InsightsViewProps) {
         <Card className="bg-card border-border hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
-            <Clock className="h-4 w-4 text-blue-500" />
+            <Clock className="h-4 w-4 text-info" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-500">{inProgressTasks}</div>
+            <div className="text-2xl font-bold text-info">{inProgressTasks}</div>
             <p className="text-xs text-muted-foreground mt-1">{todoTasks} in backlog</p>
           </CardContent>
         </Card>
@@ -78,10 +78,10 @@ export function InsightsView({ tasks }: InsightsViewProps) {
         <Card className="bg-card border-border hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-500" />
+            <AlertCircle className="h-4 w-4 text-error" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">{overdueTasks}</div>
+            <div className="text-2xl font-bold text-error">{overdueTasks}</div>
             <p className="text-xs text-muted-foreground mt-1">{urgentTasks} urgent tasks</p>
           </CardContent>
         </Card>
@@ -94,10 +94,10 @@ export function InsightsView({ tasks }: InsightsViewProps) {
             <CardDescription className="text-muted-foreground">Task distribution by status</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <StatusBar label="Done" count={completedTasks} total={tasks.length} color="bg-green-500" />
-            <StatusBar label="In Progress" count={inProgressTasks} total={tasks.length} color="bg-blue-500" />
-            <StatusBar label="To Do" count={todoTasks} total={tasks.length} color="bg-yellow-500" />
-            <StatusBar label="Blocked" count={blockedTasks} total={tasks.length} color="bg-red-500" />
+            <StatusBar label="Done" count={completedTasks} total={tasks.length} color="bg-success" />
+            <StatusBar label="In Progress" count={inProgressTasks} total={tasks.length} color="bg-info" />
+            <StatusBar label="To Do" count={todoTasks} total={tasks.length} color="bg-warning" />
+            <StatusBar label="Blocked" count={blockedTasks} total={tasks.length} color="bg-error" />
           </CardContent>
         </Card>
 
@@ -107,19 +107,19 @@ export function InsightsView({ tasks }: InsightsViewProps) {
             <CardDescription className="text-muted-foreground">Tasks by priority level</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <StatusBar label="Urgent" count={urgentTasks} total={tasks.length} color="bg-red-500" />
-            <StatusBar label="High" count={highTasks} total={tasks.length} color="bg-orange-500" />
+            <StatusBar label="Urgent" count={urgentTasks} total={tasks.length} color="bg-priority-urgent" />
+            <StatusBar label="High" count={highTasks} total={tasks.length} color="bg-priority-high" />
             <StatusBar
               label="Medium"
               count={tasks.filter((t) => t.priority === "Medium").length}
               total={tasks.length}
-              color="bg-yellow-500"
+              color="bg-priority-medium"
             />
             <StatusBar
               label="Low"
               count={tasks.filter((t) => t.priority === "Low").length}
               total={tasks.length}
-              color="bg-green-500"
+              color="bg-priority-low"
             />
           </CardContent>
         </Card>

@@ -258,7 +258,7 @@ export function TaskDetailDrawer({
                   </div>
                 </div>
                 <div className="bg-muted/30 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-green-500">
+                  <div className="text-2xl font-bold text-success">
                     {task.savedHrs}h
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
