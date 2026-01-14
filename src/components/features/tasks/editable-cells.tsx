@@ -203,36 +203,57 @@ export function EditableNumberCell({
 interface EditableOwnerCellProps {
   value: string;
   onChange: (value: string) => void;
+  options: string[];
+  onAddOption?: (option: string) => void;
+  placeholder?: string;
+  className?: string;
 }
 
-export function EditableOwnerCell({ value, onChange }: EditableOwnerCellProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
-  const inputRef = useRef<HTMLInputElement>(null);
+export function EditableOwnerCell({ 
+  value, 
+  onChange,
+  options,
+  onAddOption,
+  placeholder = "Select owner...",
+  className,
+}: EditableOwnerCellProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const selectedRef = useRef<HTMLDivElement>(null);
 
+  const filteredOptions = options.filter((option) =>
+    option.toLowerCase().includes(searchValue.toLowerCase())
+  );
+
+  // Scroll to selected item when dropdown opens
   useEffect(() => {
-    if (isEditing) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
+    if (isOpen && selectedRef.current) {
+      selectedRef.current.scrollIntoView({ block: "nearest" });
     }
-  }, [isEditing]);
+  }, [isOpen]);
 
-  const handleSave = () => {
-    if (editValue.trim() !== value && editValue.trim() !== "") {
-      onChange(editValue.trim());
-    } else {
-      setEditValue(value); // Revert if empty
-    }
-    setIsEditing(false);
+  const handleSelect = (selectedValue: string) => {
+    onChange(selectedValue);
+    setIsOpen(false);
+    setSearchValue("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleSave();
-    } else if (e.key === "Escape") {
-      setEditValue(value);
-      setIsEditing(false);
+      const trimmed = searchValue.trim();
+      
+      // If there's a filtered option, select the first one
+      if (filteredOptions.length > 0) {
+        handleSelect(filteredOptions[0]);
+      } 
+      // Otherwise, add the new value
+      else if (trimmed && !options.includes(trimmed)) {
+        onAddOption?.(trimmed);
+        onChange(trimmed);
+        setIsOpen(false);
+        setSearchValue("");
+      }
     }
   };
 
@@ -244,36 +265,81 @@ export function EditableOwnerCell({ value, onChange }: EditableOwnerCellProps) {
       .toUpperCase();
   };
 
-  if (isEditing) {
-    return (
-      <Input
-        ref={inputRef}
-        value={editValue}
-        onChange={(e) => setEditValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={handleSave}
-        className="h-8 text-sm"
-      />
-    );
-  }
-
   return (
-    <div
-      className="flex items-center gap-2 cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px]"
-      data-editable="true"
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsEditing(true);
-        setEditValue(value);
-      }}
-    >
-      <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-        <span className="text-xs font-medium text-primary">
-          {getInitials(value)}
-        </span>
-      </div>
-      <span className="text-sm">{value}</span>
-    </div>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          role="combobox"
+          aria-expanded={isOpen}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 w-auto",
+            !value && "text-muted-foreground",
+            className
+          )}
+        >
+          {value ? (
+            <>
+              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <span className="text-xs font-medium text-primary">
+                  {getInitials(value)}
+                </span>
+              </div>
+              <span className="text-sm">{value}</span>
+            </>
+          ) : (
+            <span className="text-sm">{placeholder}</span>
+          )}
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent 
+        className="p-0" 
+        align="start"
+        style={{ width: "var(--radix-popover-trigger-width)" }}
+      >
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder={placeholder}
+            value={searchValue}
+            onValueChange={setSearchValue}
+            onKeyDown={handleKeyDown}
+          />
+          <CommandList className="max-h-[200px]">
+            <CommandEmpty className="py-2 px-3 text-sm text-muted-foreground">
+              Type and press Enter to add
+            </CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={option}
+                  value={option}
+                  onSelect={() => handleSelect(option)}
+                  ref={value === option ? selectedRef : null}
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-medium text-primary">
+                        {getInitials(option)}
+                      </span>
+                    </div>
+                    <span>{option}</span>
+                  </div>
+                  <Check
+                    className={cn(
+                      "ml-auto h-4 w-4",
+                      value === option ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 

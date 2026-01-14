@@ -1,7 +1,7 @@
 "use client";
 
 import { TasksDataTable } from "@/src/components/features/tasks";
-import { columns } from "@/src/components/features/tasks";
+import { createColumns } from "@/src/components/features/tasks";
 import { mockTasks } from "@/src/data";
 import { Task } from "@/src/lib/types";
 import { useWorkspace } from "@/src/providers";
@@ -13,6 +13,10 @@ export default function Page() {
   const activeTasks: Task[] = mockTasks.filter(
     (task) => task.status !== "completed"
   );
+
+  // Get unique owners for dropdown
+  const uniqueOwners = Array.from(new Set(mockTasks.map(t => t.owner))).sort();
+  const columns = createColumns(uniqueOwners);
 
   return (
     <div className="space-y-6">

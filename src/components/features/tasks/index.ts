@@ -1,5 +1,5 @@
 // Task feature components
-export { columns } from "./columns";
+export { columns, createColumns } from "./columns";
 export { TasksDataTable } from "./tasks-data-table";
 export { 
   EditableTextCell, 

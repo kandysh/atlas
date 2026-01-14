@@ -7,7 +7,7 @@ import { PriorityCell } from "./priority-cell";
 import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/lib/utils";
 import { Task, Status, Priority } from "@/src/lib/types";
-import { EditableTextCell, EditableNumberCell, EditableDateCell, EditableTagsCell, EditableComboboxCell } from "./editable-cells";
+import { EditableTextCell, EditableNumberCell, EditableDateCell, EditableTagsCell, EditableComboboxCell, EditableOwnerCell } from "./editable-cells";
 import { mockTasks } from "@/src/data";
 
 type TaskDetailDrawerProps = {
@@ -182,7 +182,7 @@ export function TaskDetailDrawer({
                     <User className="h-4 w-4" />
                     Owner
                   </div>
-                  <EditableComboboxCell
+                  <EditableOwnerCell
                     value={task.owner}
                     onChange={(value) => onUpdate(task.id, "owner", value)}
                     options={uniqueOwners}

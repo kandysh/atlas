@@ -20,7 +20,7 @@ import {
 } from "@/src/components/ui/dropdown-menu";
 import { Badge } from "@/src/components/ui/badge";
 
-export const columns: ColumnDef<Task>[] = [
+export const createColumns = (uniqueOwners: string[]): ColumnDef<Task>[] => [
   {
     accessorKey: "title",
     header: ({ column }) => {
@@ -115,6 +115,8 @@ export const columns: ColumnDef<Task>[] = [
         <EditableOwnerCell
           value={row.original.owner}
           onChange={handleOwnerChange}
+          options={uniqueOwners}
+          onAddOption={() => {}}
         />
       );
     },
@@ -226,3 +228,6 @@ export const columns: ColumnDef<Task>[] = [
     },
   },
 ];
+
+// Default export with empty owners array (for backwards compatibility)
+export const columns = createColumns([]);
