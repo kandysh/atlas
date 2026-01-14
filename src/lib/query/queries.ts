@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { Task, FieldConfig } from "@/src/lib/db";
+import { Task as DbTask, FieldConfig } from "@/src/lib/db";
+import { Task as UiTask } from "@/src/lib/types";
+import { dbTaskToUiTask } from "@/src/lib/utils/task-mapper";
 
 /**
  * Fetch tasks for a workspace with pagination
@@ -7,7 +9,7 @@ import { Task, FieldConfig } from "@/src/lib/db";
 export async function getWorkspaceTasks(
   workspaceId: string,
   page: number = 0
-): Promise<{ tasks: Task[]; page: number; perPage: number; hasMore: boolean }> {
+): Promise<{ tasks: UiTask[]; page: number; perPage: number; hasMore: boolean; dbTasks: DbTask[] }> {
   const response = await fetch(
     `/api/tasks?workspaceId=${workspaceId}&page=${page}`,
     {
@@ -20,7 +22,17 @@ export async function getWorkspaceTasks(
     throw new Error("Failed to fetch tasks");
   }
 
-  return response.json();
+  const data = await response.json();
+  const dbTasks = data.tasks as DbTask[];
+  const uiTasks = dbTasks.map(dbTaskToUiTask);
+
+  return {
+    tasks: uiTasks,
+    dbTasks, // Keep for ID mapping
+    page: data.page,
+    perPage: data.perPage,
+    hasMore: data.hasMore,
+  };
 }
 
 /**
@@ -47,7 +59,7 @@ export async function getWorkspaceFields(
 export async function createTask(
   workspaceId: string,
   data: Record<string, any>
-): Promise<Task> {
+): Promise<DbTask> {
   const response = await fetch("/api/tasks", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -67,7 +79,7 @@ export async function createTask(
 export async function updateTask(
   taskId: string,
   patch: Record<string, any>
-): Promise<Task> {
+): Promise<DbTask> {
   const response = await fetch(`/api/tasks/${taskId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },

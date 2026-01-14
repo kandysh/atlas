@@ -1,13 +1,15 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Task } from "@/src/lib/db";
+import { Task as DbTask } from "@/src/lib/db";
+import { Task as UiTask } from "@/src/lib/types";
 import {
   getWorkspaceTasks,
   getWorkspaceFields,
   createTask as createTaskApi,
   updateTask as updateTaskApi,
 } from "./queries";
+import { dbTaskToUiTask } from "@/src/lib/utils/task-mapper";
 import { toast } from "sonner";
 
 /**
@@ -71,16 +73,33 @@ export function useCreateTask(workspaceId: string) {
 
 /**
  * Hook to update a task with optimistic updates
+ * Takes displayId (TSK-001-0001) and converts it to DB UUID internally
  */
 export function useUpdateTask(workspaceId: string, page: number = 0) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ taskId, patch }: { taskId: string; patch: Record<string, any> }) =>
-      updateTaskApi(taskId, patch),
+    mutationFn: async ({ displayId, patch }: { displayId: string; patch: Record<string, any> }) => {
+      // Get cached data to find the DB task ID
+      const queryKey = queryKeys.tasks(workspaceId, page);
+      const cachedData = queryClient.getQueryData(queryKey) as any;
+      
+      if (!cachedData?.dbTasks) {
+        throw new Error("Cannot update task: no cached data");
+      }
+
+      // Find the DB task by displayId
+      const dbTask = cachedData.dbTasks.find((t: DbTask) => t.displayId === displayId);
+      if (!dbTask) {
+        throw new Error(`Cannot find task with displayId: ${displayId}`);
+      }
+
+      // Call API with the actual DB UUID
+      return updateTaskApi(dbTask.id, patch);
+    },
     
     // Optimistic update
-    onMutate: async ({ taskId, patch }) => {
+    onMutate: async ({ displayId, patch }) => {
       const queryKey = queryKeys.tasks(workspaceId, page);
 
       // Cancel any outgoing refetches
@@ -95,12 +114,11 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
 
         return {
           ...old,
-          tasks: old.tasks.map((task: Task) =>
-            task.id === taskId
+          tasks: old.tasks.map((task: UiTask) =>
+            task.id === displayId
               ? {
                   ...task,
-                  data: { ...task.data, ...patch },
-                  version: task.version + 1,
+                  ...patch,
                   updatedAt: new Date(),
                 }
               : task
@@ -112,8 +130,27 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
       return { previousData, queryKey };
     },
 
-    // On success, show toast
-    onSuccess: () => {
+    // On success, show toast and update with server response
+    onSuccess: (updatedDbTask) => {
+      const queryKey = queryKeys.tasks(workspaceId, page);
+      
+      // Update cache with the server response
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old?.tasks || !old?.dbTasks) return old;
+
+        const updatedUiTask = dbTaskToUiTask(updatedDbTask);
+        
+        return {
+          ...old,
+          tasks: old.tasks.map((task: UiTask) =>
+            task.id === updatedDbTask.displayId ? updatedUiTask : task
+          ),
+          dbTasks: old.dbTasks.map((task: DbTask) =>
+            task.id === updatedDbTask.id ? updatedDbTask : task
+          ),
+        };
+      });
+
       toast.success("Saved");
     },
 

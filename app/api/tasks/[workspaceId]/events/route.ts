@@ -6,9 +6,9 @@ import { registerSseClient, unregisterSseClient } from "@/src/lib/sse/server";
 // GET /api/tasks/[workspaceId]/events
 export async function GET(
   request: NextRequest,
-  { params }: { params: { workspaceId: string } }
+  { params }: { params: Promise<{ workspaceId: string }> }
 ) {
-  const { workspaceId } = params;
+  const { workspaceId } = await params;
   const clientId = `${workspaceId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
   // Create a ReadableStream for SSE
