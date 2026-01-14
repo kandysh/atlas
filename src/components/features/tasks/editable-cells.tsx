@@ -150,7 +150,7 @@ export function EditableNumberCell({
         onChange={(e) => setEditValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleSave}
-        className="h-8 w-24 text-sm"
+        className="h-8 w-24 text-sm pr-6"
       />
     );
   }
