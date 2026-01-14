@@ -80,38 +80,42 @@ export const fieldConfigs = pgTable("field_configs", {
 });
 
 // Tasks Table
-export const tasks = pgTable("tasks", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  workspaceId: uuid("workspace_id")
-    .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
-  displayId: text("display_id").notNull().unique(),
-  sequenceNumber: integer("sequence_number").notNull(),
-  data: jsonb("data")
-    .notNull()
-    .$type<{
-      [key: string]: any;
-    }>()
-    .default({}),
-  subtasks: jsonb("subtasks")
-    .$type<
-      Array<{
-        id: string;
-        title: string;
-        completed: boolean;
+export const tasks = pgTable(
+  "tasks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    displayId: text("display_id").notNull().unique(),
+    sequenceNumber: integer("sequence_number").notNull(),
+    data: jsonb("data")
+      .notNull()
+      .$type<{
         [key: string]: any;
-      }>
-    >()
-    .default([]),
-  version: integer("version").notNull().default(1),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  workspaceSequenceIdx: index("workspace_sequence_idx").on(
-    table.workspaceId,
-    table.sequenceNumber
-  ),
-}));
+      }>()
+      .default({}),
+    subtasks: jsonb("subtasks")
+      .$type<
+        Array<{
+          id: string;
+          title: string;
+          completed: boolean;
+          [key: string]: any;
+        }>
+      >()
+      .default([]),
+    version: integer("version").notNull().default(1),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    workspaceSequenceIdx: index("workspace_sequence_idx").on(
+      table.workspaceId,
+      table.sequenceNumber,
+    ),
+  }),
+);
 
 // Task Comments Table
 export const taskComments = pgTable("task_comments", {

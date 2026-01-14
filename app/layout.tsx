@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/src/components/layout";
+import { AppSidebar, WorkspaceLoader } from "@/src/components/layout";
 import { SidebarProvider, SidebarInset } from "@/src/components/ui/sidebar";
 import ReactQueryProvider from "@/src/providers/react-query-provider";
 import { WorkspaceProvider } from "@/src/providers/workspace-provider";
@@ -33,14 +33,16 @@ export default function RootLayout({
       >
         <ReactQueryProvider>
           <WorkspaceProvider>
-            <SidebarProvider defaultOpen={true}>
-              <AppSidebar />
-              <SidebarInset>
-                <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
-                  {children}
-                </main>
-              </SidebarInset>
-            </SidebarProvider>
+            <WorkspaceLoader>
+              <SidebarProvider defaultOpen={true}>
+                <AppSidebar />
+                <SidebarInset>
+                  <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
+                    {children}
+                  </main>
+                </SidebarInset>
+              </SidebarProvider>
+            </WorkspaceLoader>
           </WorkspaceProvider>
         </ReactQueryProvider>
       </body>

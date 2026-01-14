@@ -37,8 +37,8 @@ export function WorkspaceToggler() {
     // window.location.href = `/${workspace.slug}`;
   };
 
-  const getPlanDisplay = (plan: string) => {
-    return plan.charAt(0).toUpperCase() + plan.slice(1) + " Plan";
+  const getWorkspaceInfo = (workspace: typeof workspaces[0]) => {
+    return workspace.slug;
   };
 
   const isCollapsed = state === "collapsed";
@@ -82,7 +82,7 @@ export function WorkspaceToggler() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{workspace.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {getPlanDisplay(workspace.plan)}
+                    {getWorkspaceInfo(workspace)}
                   </p>
                 </div>
                 {currentWorkspace.id === workspace.id && (
@@ -122,7 +122,7 @@ export function WorkspaceToggler() {
                 {currentWorkspace.name}
               </p>
               <p className="text-xs text-muted-foreground">
-                {getPlanDisplay(currentWorkspace.plan)}
+                {getWorkspaceInfo(currentWorkspace)}
               </p>
             </div>
           </div>
@@ -152,7 +152,7 @@ export function WorkspaceToggler() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{workspace.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {getPlanDisplay(workspace.plan)}
+                  {getWorkspaceInfo(workspace)}
                 </p>
               </div>
               {currentWorkspace.id === workspace.id && (
