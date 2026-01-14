@@ -101,7 +101,7 @@ export function EditableTextCell({
   return (
     <div
       className={cn(
-        "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px] flex items-center",
+        "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-8 flex items-center hover:shadow-sm",
         className,
       )}
       data-editable="true"

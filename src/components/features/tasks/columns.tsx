@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
 import { Badge } from "@/src/components/ui/badge";
+import { format } from "date-fns";
 
 export const createColumns = (
   uniqueOwners: string[],
@@ -71,7 +72,18 @@ export const createColumns = (
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Status
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const handleStatusChange = (newStatus: Status) => {
         console.log("Update status", row.original.id, newStatus);
@@ -88,7 +100,18 @@ export const createColumns = (
   },
   {
     accessorKey: "priority",
-    header: "Priority",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Priority
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const handlePriorityChange = (newPriority: Priority) => {
         console.log("Update priority", row.original.id, newPriority);
@@ -102,10 +125,24 @@ export const createColumns = (
         />
       );
     },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
   },
   {
     accessorKey: "owner",
-    header: "Owner",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Owner
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const handleOwnerChange = (newOwner: string) => {
         console.log("Update owner", row.original.id, newOwner);
@@ -121,10 +158,24 @@ export const createColumns = (
         />
       );
     },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
   },
   {
     accessorKey: "assetClass",
-    header: "Asset Class",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Asset Class
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const handleAssetClassChange = (newAssetClass: string) => {
         console.log("Update asset class", row.original.id, newAssetClass);
@@ -139,6 +190,9 @@ export const createColumns = (
           onAddOption={() => {}}
         />
       );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
     },
   },
   {
@@ -191,7 +245,18 @@ export const createColumns = (
   },
   {
     accessorKey: "workedHrs",
-    header: "Worked",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Worked
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const handleWorkedChange = (newHours: number) => {
         console.log("Update worked hours", row.original.id, newHours);
@@ -206,6 +271,30 @@ export const createColumns = (
         />
       );
     },
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Created
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const date = row.original.createdAt;
+      return (
+        <div className="text-sm text-muted-foreground">
+          {format(new Date(date), "MMM d, yyyy")}
+        </div>
+      );
+    },
+    sortingFn: "datetime",
   },
   {
     id: "actions",

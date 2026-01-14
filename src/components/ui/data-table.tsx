@@ -14,14 +14,9 @@ import {
 } from "@tanstack/react-table";
 import { useState, ReactNode } from "react";
 import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 import {
   ChevronLeft,
   ChevronRight,
-  Search,
-  SlidersHorizontal,
-  Plus,
-  Trash2,
   GripVertical,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
@@ -29,38 +24,24 @@ import { cn } from "@/src/lib/utils";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  searchPlaceholder?: string;
   onRowClick?: (row: TData, event: React.MouseEvent) => void;
-  onAdd?: () => void;
-  onDeleteSelected?: (selectedIds: string[]) => void;
   pageSize?: number;
   enableRowSelection?: boolean;
   enableDragHandle?: boolean;
-  enableSearch?: boolean;
-  enableFilter?: boolean;
-  addButtonLabel?: string;
-  deleteButtonLabel?: string;
   emptyStateMessage?: string;
-  toolbarActions?: ReactNode;
+  toolbar?: (table: ReturnType<typeof useReactTable<TData>>) => ReactNode;
   className?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  searchPlaceholder = "Search...",
   onRowClick,
-  onAdd,
-  onDeleteSelected,
   pageSize = 20,
   enableRowSelection = true,
   enableDragHandle = true,
-  enableSearch = true,
-  enableFilter = true,
-  addButtonLabel = "Add",
-  deleteButtonLabel = "Delete",
   emptyStateMessage = "No results found.",
-  toolbarActions,
+  toolbar,
   className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -106,65 +87,10 @@ export function DataTable<TData, TValue>({
     onRowClick?.(row, e);
   };
 
-  const handleDeleteSelected = () => {
-    const selectedIds = Object.keys(rowSelection);
-    onDeleteSelected?.(selectedIds);
-    setRowSelection({});
-  };
-
   return (
     <div className={cn("space-y-4", className)}>
       {/* Toolbar */}
-      {(enableSearch || enableFilter || onAdd || toolbarActions) && (
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 flex-1 max-w-md">
-            {enableSearch && (
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors" />
-                <Input
-                  placeholder={searchPlaceholder}
-                  value={globalFilter ?? ""}
-                  onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="pl-9 bg-card border-border transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-            )}
-            {enableFilter && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="shrink-0 bg-transparent transition-all duration-200 hover:scale-105 hover:bg-muted/50"
-              >
-                <SlidersHorizontal className="h-4 w-4 transition-transform duration-200 hover:rotate-90" />
-              </Button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {toolbarActions}
-            {enableRowSelection && selectedRowCount > 0 && onDeleteSelected && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDeleteSelected}
-                className="text-destructive hover:text-destructive bg-transparent transition-all duration-200 hover:scale-105"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {deleteButtonLabel} ({selectedRowCount})
-              </Button>
-            )}
-            {onAdd && (
-              <Button
-                onClick={onAdd}
-                size="sm"
-                className="bg-primary hover:bg-primary/90 transition-all duration-200 hover:scale-105"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {addButtonLabel}
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
+      {toolbar && toolbar(table)}
 
       {/* Table */}
       <div className="rounded-lg border border-border bg-card overflow-hidden transition-all duration-200 hover:border-border/80">

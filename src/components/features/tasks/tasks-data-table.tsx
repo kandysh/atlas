@@ -1,10 +1,11 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Task } from "@/src/lib/types";
 import { DataTable } from "@/src/components/ui/data-table";
 import { TaskDetailDrawer } from "./task-detail-drawer";
+import { TasksToolbar } from "./tasks-toolbar";
 
 interface TasksDataTableProps {
   columns: ColumnDef<Task, unknown>[];
@@ -14,6 +15,21 @@ interface TasksDataTableProps {
 export function TasksDataTable({ columns, data }: TasksDataTableProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Extract unique values for filters
+  const { uniqueOwners, uniqueAssetClasses } = useMemo(() => {
+    const owners = Array.from(new Set(data.map((task) => task.owner))).filter(
+      Boolean
+    );
+    const assetClasses = Array.from(
+      new Set(data.map((task) => task.assetClass))
+    ).filter(Boolean);
+
+    return {
+      uniqueOwners: owners.sort(),
+      uniqueAssetClasses: assetClasses.sort(),
+    };
+  }, [data]);
 
   const handleRowClick = (task: Task) => {
     setSelectedTask(task);
@@ -44,12 +60,17 @@ export function TasksDataTable({ columns, data }: TasksDataTableProps) {
       <DataTable
         columns={columns}
         data={data}
-        searchPlaceholder="Search tasks..."
         onRowClick={handleRowClick}
-        onAdd={handleAddTask}
-        onDeleteSelected={handleDeleteSelected}
-        addButtonLabel="Add Task"
         emptyStateMessage="No tasks found."
+        toolbar={(table) => (
+          <TasksToolbar
+            table={table}
+            uniqueOwners={uniqueOwners}
+            uniqueAssetClasses={uniqueAssetClasses}
+            onAddTask={handleAddTask}
+            onDeleteSelected={handleDeleteSelected}
+          />
+        )}
       />
 
       <TaskDetailDrawer

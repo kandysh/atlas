@@ -163,6 +163,28 @@
         @apply bg-background text-foreground;
     }
 
+    /* Status and Priority Indicator Dots */
+    .status-dot,
+    .priority-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .status-todo { background-color: var(--status-todo); }
+    .status-in-progress { background-color: var(--status-in-progress); }
+    .status-testing { background-color: var(--status-testing); }
+    .status-done { background-color: var(--status-done); }
+    .status-completed { background-color: var(--status-completed); }
+    .status-blocked { background-color: var(--status-blocked); }
+
+    .priority-low { background-color: var(--priority-low); }
+    .priority-medium { background-color: var(--priority-medium); }
+    .priority-high { background-color: var(--priority-high); }
+    .priority-urgent { background-color: var(--priority-urgent); }
+
     /* Updated checkbox styles - border only when unchecked, filled when checked */
     input[type="checkbox"] {
         appearance: none;
