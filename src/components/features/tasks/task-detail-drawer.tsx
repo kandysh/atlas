@@ -7,7 +7,7 @@ import { PriorityCell } from "./priority-cell";
 import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/lib/utils";
 import { Task, Status, Priority } from "@/src/lib/types";
-import { EditableTextCell, EditableNumberCell } from "./editable-cells";
+import { EditableTextCell, EditableNumberCell, EditableDateCell } from "./editable-cells";
 
 type TaskDetailDrawerProps = {
   task: Task | null;
@@ -217,9 +217,12 @@ export function TaskDetailDrawer({
                     <Calendar className="h-4 w-4" />
                     Completion Date
                   </div>
-                  <span className="text-sm">
-                    {formatDateTime(task.completionDate)}
-                  </span>
+                  <EditableDateCell
+                    value={task.completionDate}
+                    onChange={(value) =>
+                      onUpdate(task.id, "completionDate", value)
+                    }
+                  />
                 </div>
               </div>
             </div>
@@ -259,7 +262,12 @@ export function TaskDetailDrawer({
                 </div>
                 <div className="bg-muted/30 rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-success">
-                    {task.savedHrs}h
+                    <EditableNumberCell
+                      value={task.savedHrs}
+                      onChange={(value) =>
+                        onUpdate(task.id, "savedHrs", value)
+                      }
+                    />
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
                     Saved
@@ -277,6 +285,21 @@ export function TaskDetailDrawer({
                 <EditableTextCell
                   value={task.benefits}
                   onChange={(value) => onUpdate(task.id, "benefits", value)}
+                  multiline
+                  className="text-sm text-foreground/80 leading-relaxed"
+                />
+              </div>
+            )}
+
+            {/* Other Use Cases */}
+            {task.otherUseCases && (
+              <div className="space-y-2 pt-4 border-t border-border">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Other Use Cases
+                </label>
+                <EditableTextCell
+                  value={task.otherUseCases}
+                  onChange={(value) => onUpdate(task.id, "otherUseCases", value)}
                   multiline
                   className="text-sm text-foreground/80 leading-relaxed"
                 />

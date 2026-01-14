@@ -252,3 +252,69 @@ export function EditableOwnerCell({ value, onChange }: EditableOwnerCellProps) {
     </div>
   );
 }
+
+interface EditableDateCellProps {
+  value: Date | null;
+  onChange: (value: Date | null) => void;
+  className?: string;
+}
+
+export function EditableDateCell({
+  value,
+  onChange,
+  className,
+}: EditableDateCellProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return "Not set";
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  return (
+    <div
+      className={cn(
+        "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px] flex items-center",
+        className
+      )}
+      data-editable="true"
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsOpen(true);
+      }}
+    >
+      <span className="text-sm">{formatDate(value)}</span>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="relative bg-card border border-border rounded-lg shadow-lg p-4">
+            <input
+              type="date"
+              value={value ? value.toISOString().split("T")[0] : ""}
+              onChange={(e) => {
+                const newDate = e.target.value ? new Date(e.target.value) : null;
+                onChange(newDate);
+                setIsOpen(false);
+              }}
+              className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              autoFocus
+            />
+            <button
+              onClick={() => setIsOpen(false)}
+              className="mt-2 w-full px-3 py-1 text-sm border border-border rounded-md hover:bg-muted"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
