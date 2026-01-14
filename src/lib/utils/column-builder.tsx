@@ -1,3 +1,5 @@
+"use client";
+
 import { ColumnDef } from "@tanstack/react-table";
 import { Task, Status, Priority } from "@/src/lib/types";
 import { FieldConfig } from "@/src/lib/db/schema";
