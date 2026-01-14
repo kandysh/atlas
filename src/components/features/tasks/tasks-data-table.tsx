@@ -10,6 +10,7 @@ import { TaskDetailDrawer } from "./task-detail-drawer";
 import { useCreateTask, useUpdateTask } from "@/src/lib/query/hooks";
 import { useWorkspace } from "@/src/providers";
 import { createColumns } from "./columns";
+import { TasksToolbar } from "./tasks-toolbar";
 
 interface TasksDataTableProps {
   columns?: ColumnDef<Task, unknown>[];
@@ -27,6 +28,21 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
   
   const createTaskMutation = useCreateTask(activeWorkspaceId);
   const updateTaskMutation = useUpdateTask(activeWorkspaceId, 0);
+
+  // Extract unique values for filters
+  const { uniqueOwners, uniqueAssetClasses } = useMemo(() => {
+    const owners = Array.from(new Set(data.map((task) => task.owner))).filter(
+      Boolean
+    );
+    const assetClasses = Array.from(
+      new Set(data.map((task) => task.assetClass))
+    ).filter(Boolean);
+
+    return {
+      uniqueOwners: owners.sort(),
+      uniqueAssetClasses: assetClasses.sort(),
+    };
+  }, [data]);
 
   const handleRowClick = (task: Task) => {
     setSelectedTask(task);
@@ -60,10 +76,9 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
   };
   
   // Create columns with update handler if not provided
-  const uniqueOwners = Array.from(new Set(data.map(t => t.owner))).sort();
   const columns = useMemo(
-    () => externalColumns || createColumns(uniqueOwners, handleTaskUpdate),
-    [externalColumns, uniqueOwners, handleTaskUpdate]
+    () => externalColumns || createColumns(uniqueOwners, uniqueAssetClasses, handleTaskUpdate),
+    [externalColumns, uniqueOwners, uniqueAssetClasses, handleTaskUpdate]
   );
 
   return (
@@ -72,24 +87,16 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
         columns={columns}
         data={data}
         onRowClick={handleRowClick}
+        emptyStateMessage="No tasks found."
         toolbar={(table) => (
-          <DataTableToolbar
+          <TasksToolbar
             table={table}
-            onAdd={handleAddTask}
+            uniqueOwners={uniqueOwners}
+            uniqueAssetClasses={uniqueAssetClasses}
+            onAddTask={handleAddTask}
             onDeleteSelected={handleDeleteSelected}
-            addButtonLabel="Add Task"
-            deleteButtonLabel="Delete"
-            searchPlaceholder="Search tasks..."
           />
         )}
-        emptyState={
-          <DataTableEmptyState
-            title="No tasks"
-            description="Get started by creating your first task."
-            actionLabel="Add Task"
-            onAction={handleAddTask}
-          />
-        }
       />
 
       <TaskDetailDrawer

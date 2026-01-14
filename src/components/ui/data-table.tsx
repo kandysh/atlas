@@ -16,7 +16,11 @@ import {
 } from "@tanstack/react-table";
 import { useState, ReactNode } from "react";
 import { Button } from "@/src/components/ui/button";
-import { ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
+} from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { DataTableEmptyState } from "./data-table-empty-state";
 
@@ -27,8 +31,8 @@ interface DataTableProps<TData, TValue> {
   pageSize?: number;
   enableRowSelection?: boolean;
   enableDragHandle?: boolean;
-  toolbar?: ReactNode | ((table: any) => ReactNode);
-  emptyState?: ReactNode;
+  emptyStateMessage?: string;
+  toolbar?: (table: ReturnType<typeof useReactTable<TData>>) => ReactNode;
   className?: string;
 }
 
@@ -39,8 +43,8 @@ export function DataTable<TData, TValue>({
   pageSize = 20,
   enableRowSelection = true,
   enableDragHandle = true,
+  emptyStateMessage = "No results found.",
   toolbar,
-  emptyState,
   className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -93,8 +97,8 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Toolbar - pass table instance if toolbar is a function */}
-      {typeof toolbar === "function" ? toolbar(table) : toolbar}
+      {/* Toolbar */}
+      {toolbar && toolbar(table)}
 
       {/* Table */}
       <div className="rounded-lg border border-border bg-card overflow-hidden transition-all duration-200 hover:border-border/80">
@@ -180,9 +184,9 @@ export function DataTable<TData, TValue>({
                       (enableRowSelection ? 1 : 0) +
                       (enableDragHandle ? 1 : 0)
                     }
-                    className="h-0 p-0"
+                    className="h-24 text-center"
                   >
-                    {emptyState}
+                    {emptyStateMessage}
                   </td>
                 </tr>
               )}
