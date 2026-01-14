@@ -3,6 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
+import { Calendar } from "@/src/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/ui/popover";
+import { Button } from "@/src/components/ui/button";
+import { Badge } from "@/src/components/ui/badge";
+import { Calendar as CalendarIcon, X } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 interface EditableTextCellProps {
@@ -276,45 +281,135 @@ export function EditableDateCell({
   };
 
   return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "justify-start text-left font-normal hover:bg-accent/50",
+            !value && "text-muted-foreground",
+            className
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {formatDate(value)}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={value || undefined}
+          onSelect={(date) => {
+            onChange(date || null);
+            setIsOpen(false);
+          }}
+          initialFocus
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+interface EditableTagsCellProps {
+  value: string[];
+  onChange: (value: string[]) => void;
+  className?: string;
+  placeholder?: string;
+}
+
+export function EditableTagsCell({
+  value,
+  onChange,
+  className,
+  placeholder = "Type and press Enter...",
+}: EditableTagsCellProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+    }
+  }, [isEditing]);
+
+  const handleAddTag = () => {
+    const trimmed = inputValue.trim();
+    if (trimmed && !value.includes(trimmed)) {
+      onChange([...value, trimmed]);
+      setInputValue("");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddTag();
+    } else if (e.key === "Escape") {
+      setInputValue("");
+      setIsEditing(false);
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    onChange(value.filter((tag) => tag !== tagToRemove));
+  };
+
+  return (
     <div
       className={cn(
-        "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px] flex items-center",
+        "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px]",
         className
       )}
       data-editable="true"
       onClick={(e) => {
         e.stopPropagation();
-        setIsOpen(true);
+        setIsEditing(true);
       }}
     >
-      <span className="text-sm">{formatDate(value)}</span>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="relative bg-card border border-border rounded-lg shadow-lg p-4">
-            <input
-              type="date"
-              value={value ? value.toISOString().split("T")[0] : ""}
-              onChange={(e) => {
-                const newDate = e.target.value ? new Date(e.target.value) : null;
-                onChange(newDate);
-                setIsOpen(false);
-              }}
-              className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
-              autoFocus
-            />
+      <div className="flex items-center gap-1 flex-wrap">
+        {value.map((tag) => (
+          <Badge
+            key={tag}
+            variant="secondary"
+            className="gap-1 pr-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span>{tag}</span>
             <button
-              onClick={() => setIsOpen(false)}
-              className="mt-2 w-full px-3 py-1 text-sm border border-border rounded-md hover:bg-muted"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveTag(tag);
+              }}
+              className="hover:bg-muted rounded-full p-0.5"
             >
-              Cancel
+              <X className="h-3 w-3" />
             </button>
-          </div>
-        </div>
-      )}
+          </Badge>
+        ))}
+        {isEditing && (
+          <Input
+            ref={inputRef}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={() => {
+              handleAddTag();
+              setIsEditing(false);
+            }}
+            placeholder={placeholder}
+            className="h-7 w-32 text-sm inline-block"
+            onClick={(e) => e.stopPropagation()}
+          />
+        )}
+        {!isEditing && value.length === 0 && (
+          <span className="text-muted-foreground italic text-sm">
+            Click to add tags
+          </span>
+        )}
+      </div>
     </div>
   );
 }

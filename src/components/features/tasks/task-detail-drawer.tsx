@@ -7,7 +7,7 @@ import { PriorityCell } from "./priority-cell";
 import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/lib/utils";
 import { Task, Status, Priority } from "@/src/lib/types";
-import { EditableTextCell, EditableNumberCell, EditableDateCell } from "./editable-cells";
+import { EditableTextCell, EditableNumberCell, EditableDateCell, EditableTagsCell } from "./editable-cells";
 
 type TaskDetailDrawerProps = {
   task: Task | null;
@@ -202,13 +202,12 @@ export function TaskDetailDrawer({
                     <Users className="h-4 w-4" />
                     Teams
                   </div>
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {task.teamsInvolved.map((team) => (
-                      <Badge key={team} variant="secondary">
-                        {team}
-                      </Badge>
-                    ))}
-                  </div>
+                  <EditableTagsCell
+                    value={task.teamsInvolved || []}
+                    onChange={(value) => onUpdate(task.id, "teamsInvolved", value)}
+                    placeholder="Add team..."
+                    className="flex-1 max-w-[300px]"
+                  />
                 </div>
 
                 {/* Completion Date */}
@@ -307,46 +306,30 @@ export function TaskDetailDrawer({
             )}
 
             {/* Tools */}
-            {task.tools && task.tools.length > 0 && (
-              <div className="space-y-2 pt-4 border-t border-border">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  <FileText className="h-3.5 w-3.5" />
-                  Tools & Technologies
-                </div>
-                <div className="flex items-center gap-1 flex-wrap">
-                  {task.tools.map((tool) => (
-                    <Badge
-                      key={tool}
-                      variant="outline"
-                      className="bg-primary/5 border-primary/20"
-                    >
-                      {tool}
-                    </Badge>
-                  ))}
-                </div>
+            <div className="space-y-2 pt-4 border-t border-border">
+              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <FileText className="h-3.5 w-3.5" />
+                Tools & Technologies
               </div>
-            )}
+              <EditableTagsCell
+                value={task.tools || []}
+                onChange={(value) => onUpdate(task.id, "tools", value)}
+                placeholder="Add tool..."
+              />
+            </div>
 
             {/* Tags */}
-            {task.tags && task.tags.length > 0 && (
-              <div className="space-y-2 pt-4 border-t border-border">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  <Tag className="h-3.5 w-3.5" />
-                  Tags
-                </div>
-                <div className="flex items-center gap-1 flex-wrap">
-                  {task.tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="bg-accent/20"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
+            <div className="space-y-2 pt-4 border-t border-border">
+              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <Tag className="h-3.5 w-3.5" />
+                Tags
               </div>
-            )}
+              <EditableTagsCell
+                value={task.tags || []}
+                onChange={(value) => onUpdate(task.id, "tags", value)}
+                placeholder="Add tag..."
+              />
+            </div>
 
             {/* Timeline */}
             <div className="space-y-4 pt-4 border-t border-border">
