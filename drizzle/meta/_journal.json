@@ -8,6 +8,13 @@
       "when": 1768381457158,
       "tag": "0000_next_dragon_lord",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768394625165,
+      "tag": "0001_yummy_deathstrike",
+      "breakpoints": true
     }
   ]
 }

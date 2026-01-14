@@ -6,6 +6,8 @@ import {
   jsonb,
   integer,
   pgEnum,
+  index,
+  serial,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -23,6 +25,7 @@ export const fieldTypeEnum = pgEnum("field_type", [
 // Workspaces Table
 export const workspaces = pgTable("workspaces", {
   id: uuid("id").primaryKey().defaultRandom(),
+  numericId: serial("numeric_id").notNull().unique(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   ownerUserId: uuid("owner_user_id")
@@ -82,6 +85,8 @@ export const tasks = pgTable("tasks", {
   workspaceId: uuid("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
+  displayId: text("display_id").notNull().unique(),
+  sequenceNumber: integer("sequence_number").notNull(),
   data: jsonb("data")
     .notNull()
     .$type<{
@@ -101,7 +106,12 @@ export const tasks = pgTable("tasks", {
   version: integer("version").notNull().default(1),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => ({
+  workspaceSequenceIdx: index("workspace_sequence_idx").on(
+    table.workspaceId,
+    table.sequenceNumber
+  ),
+}));
 
 // Task Comments Table
 export const taskComments = pgTable("task_comments", {
