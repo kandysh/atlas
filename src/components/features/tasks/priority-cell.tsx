@@ -62,6 +62,7 @@ export function PriorityCell({ value, onChange }: PriorityCellProps) {
         <Button
           variant="ghost"
           size="sm"
+          onClick={(e) => e.stopPropagation()}
           className={cn(
             "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 hover:scale-105 hover:shadow-sm",
             config.bgColor,
