@@ -5,7 +5,7 @@
 
 -- Title field
 UPDATE field_configs 
-SET cell_type = 'editable-text-with-problem'
+SET cell_type = 'editable-text'
 WHERE key = 'title' AND cell_type IS NULL;
 
 -- Owner field

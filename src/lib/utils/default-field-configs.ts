@@ -14,7 +14,7 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       options: { required: true },
       order: 0,
       visible: "true",
-      cellType: "editable-text-with-problem",
+      cellType: "editable-text",
     },
     {
       workspaceId,

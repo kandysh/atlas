@@ -36,8 +36,7 @@ Each field configuration has the following properties:
 The `cellType` field maps to specific UI components:
 
 ### Standard Cell Types
-- `editable-text`: Single-line text input
-- `editable-text-with-problem`: Title field with optional problem statement (special case)
+- `editable-text`: Text input (single-line for title, multiline for other fields)
 - `editable-number`: Number input with optional suffix
 - `editable-date`: Date picker
 - `editable-tags`: Tag input for multiselect fields

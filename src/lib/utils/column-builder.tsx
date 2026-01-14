@@ -172,35 +172,6 @@ function renderCell(
     onUpdate?.(task.id, key, newValue);
   };
 
-  // Special handling for title with problem statement
-  if (cellType === "editable-text-with-problem") {
-    const handleTitleChange = (newTitle: string) => {
-      onUpdate?.(task.id, "title", newTitle);
-    };
-
-    const handleProblemChange = (newProblem: string) => {
-      onUpdate?.(task.id, "problemStatement", newProblem);
-    };
-
-    return (
-      <div className="flex flex-col gap-2 py-2 min-w-[300px]">
-        <EditableTextCell
-          value={task.title}
-          onChange={handleTitleChange}
-          className="font-medium"
-        />
-        {task.problemStatement && (
-          <EditableTextCell
-            value={task.problemStatement}
-            onChange={handleProblemChange}
-            multiline
-            className="text-xs text-muted-foreground"
-          />
-        )}
-      </div>
-    );
-  }
-
   // Map cellType to specific cell components
   switch (cellType) {
     case "status":
@@ -258,11 +229,14 @@ function renderCell(
       );
 
     case "editable-text":
+      // Title field should be single-line, others can be multiline
+      const isTitle = key === "title";
       return (
         <EditableTextCell
           value={value || ""}
           onChange={handleChange}
-          multiline
+          multiline={!isTitle}
+          className={isTitle ? "font-medium" : undefined}
         />
       );
 
