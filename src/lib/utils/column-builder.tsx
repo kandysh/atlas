@@ -164,8 +164,9 @@ function renderCell(
   uniqueOwners: string[] = [],
   uniqueAssetClasses: string[] = []
 ) {
-  const { key, cellType, type } = fieldConfig;
-  const value = (task as any)[key];
+  const { key, cellType, type, options } = fieldConfig;
+  // Type-safe property access using Record type
+  const value = (task as Record<string, any>)[key];
 
   const handleChange = (newValue: any) => {
     onUpdate?.(task.id, key, newValue);
@@ -224,18 +225,35 @@ function renderCell(
           value={value || ""}
           onChange={handleChange}
           options={uniqueOwners}
-          onAddOption={() => {}}
+          onAddOption={(newOption) => {
+            // When a new owner is added, update the field value
+            handleChange(newOption);
+          }}
         />
       );
 
     case "editable-combobox":
-      const options = key === "assetClass" ? uniqueAssetClasses : [];
+      // Determine options based on field key or use options from field config
+      let comboboxOptions: string[] = [];
+      if (key === "assetClass") {
+        comboboxOptions = uniqueAssetClasses;
+      } else if (key === "theme") {
+        // For theme or other fields, extract from field config options if available
+        comboboxOptions = (options?.choices as string[]) || [];
+      } else {
+        // Fallback to field config choices
+        comboboxOptions = (options?.choices as string[]) || [];
+      }
+      
       return (
         <EditableComboboxCell
           value={value || ""}
           onChange={handleChange}
-          options={options}
-          onAddOption={() => {}}
+          options={comboboxOptions}
+          onAddOption={(newOption) => {
+            // When a new option is added, update the field value
+            handleChange(newOption);
+          }}
         />
       );
 
@@ -249,11 +267,13 @@ function renderCell(
       );
 
     case "editable-number":
+      // Use suffix from field config options if available, default to empty string
+      const suffix = (options?.suffix as string) || "";
       return (
         <EditableNumberCell
           value={value || 0}
           onChange={handleChange}
-          suffix="h"
+          suffix={suffix}
         />
       );
 

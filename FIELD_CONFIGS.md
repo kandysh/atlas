@@ -22,6 +22,7 @@ Each field configuration has the following properties:
   - `choices`: Array of options for select/multiselect fields
   - `defaultValue`: Default value for the field
   - `required`: Whether the field is required
+  - `suffix`: Optional suffix for number fields (e.g., "h", "min", "days")
 - `order`: Display order (lower numbers appear first)
 - `visible`: Controls visibility in table view
   - `"true"`: Field is visible in the table
@@ -83,13 +84,17 @@ Default field configurations are defined in `src/lib/utils/default-field-configs
 ```typescript
 {
   workspaceId,
-  key: "title",
-  name: "Title",
-  type: "text",
-  options: { required: true },
-  order: 0,
+  key: "currentHrs",
+  name: "Estimated Hours",
+  type: "number",
+  options: { 
+    defaultValue: 0, 
+    required: false,
+    suffix: "h" // Displays as "5h" in the table
+  },
+  order: 10,
   visible: "true",
-  cellType: "editable-text-with-problem",
+  cellType: "editable-number",
 }
 ```
 
