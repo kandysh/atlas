@@ -81,6 +81,7 @@ export function PriorityCell({ value, onChange }: PriorityCellProps) {
       <PopoverContent
         className="w-[200px] p-0 bg-card border-border shadow-lg"
         align="start"
+        onClick={(e) => e.stopPropagation()}
       >
         <Command className="bg-card">
           <CommandInput
@@ -103,10 +104,11 @@ export function PriorityCell({ value, onChange }: PriorityCellProps) {
                   <CommandItem
                     key={key}
                     value={cfg.label}
-                    onSelect={() => {
+                    onSelect={(e) => {
                       onChange(key);
                       setOpen(false);
                     }}
+                    onClick={(e) => e.stopPropagation()}
                     className="gap-2 transition-all duration-200 hover:bg-muted/50 cursor-pointer rounded-sm"
                   >
                     <ItemIcon

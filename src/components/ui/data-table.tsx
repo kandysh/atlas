@@ -87,7 +87,7 @@ export function DataTable<TData, TValue>({
     // Don't trigger row click if clicking on interactive elements
     if (
       (e.target as HTMLElement).closest(
-        'button, input, textarea, [role="combobox"], [data-radix-collection-item], [data-editable="true"]'
+        'button, input, textarea, [role="combobox"], [data-radix-collection-item], [data-editable="true"], [cmdk-item], [role="option"]'
       )
     ) {
       return;

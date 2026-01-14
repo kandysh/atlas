@@ -73,6 +73,14 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
       displayId,
       patch: { [field]: value },
     });
+    
+    // Update the selected task in the drawer if it's the same task
+    if (selectedTask && selectedTask.id === displayId) {
+      setSelectedTask({
+        ...selectedTask,
+        [field]: value,
+      });
+    }
   };
   
   // Create columns with update handler if not provided
