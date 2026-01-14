@@ -13,6 +13,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: true },
       order: 0,
+      visible: "true",
+      cellType: "editable-text-with-problem",
     },
     {
       workspaceId,
@@ -21,6 +23,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "select",
       options: { choices: [], required: true },
       order: 1,
+      visible: "true",
+      cellType: "editable-owner",
     },
     {
       workspaceId,
@@ -33,6 +37,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
         required: true,
       },
       order: 2,
+      visible: "true",
+      cellType: "status",
     },
     {
       workspaceId,
@@ -45,6 +51,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
         required: true,
       },
       order: 3,
+      visible: "true",
+      cellType: "priority",
     },
     {
       workspaceId,
@@ -53,6 +61,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "select",
       options: { choices: [], required: false },
       order: 4,
+      visible: "true",
+      cellType: "editable-combobox",
     },
     {
       workspaceId,
@@ -61,6 +71,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "select",
       options: { choices: [], required: false },
       order: 5,
+      visible: "false",
+      cellType: "editable-combobox",
     },
     {
       workspaceId,
@@ -69,6 +81,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "multiselect",
       options: { choices: [], required: false },
       order: 6,
+      visible: "true",
+      cellType: "badge-list",
     },
     {
       workspaceId,
@@ -77,6 +91,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: false },
       order: 7,
+      visible: "detail-only",
+      cellType: "editable-text",
     },
     {
       workspaceId,
@@ -85,6 +101,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: false },
       order: 8,
+      visible: "detail-only",
+      cellType: "editable-text",
     },
     {
       workspaceId,
@@ -93,6 +111,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: false },
       order: 9,
+      visible: "detail-only",
+      cellType: "editable-text",
     },
     {
       workspaceId,
@@ -101,6 +121,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "number",
       options: { defaultValue: 0, required: false },
       order: 10,
+      visible: "true",
+      cellType: "editable-number",
     },
     {
       workspaceId,
@@ -109,6 +131,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "number",
       options: { defaultValue: 0, required: false },
       order: 11,
+      visible: "true",
+      cellType: "editable-number",
     },
     {
       workspaceId,
@@ -117,6 +141,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "number",
       options: { defaultValue: 0, required: false },
       order: 12,
+      visible: "false",
+      cellType: "editable-number",
     },
     {
       workspaceId,
@@ -125,6 +151,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "multiselect",
       options: { choices: [], required: false },
       order: 13,
+      visible: "detail-only",
+      cellType: "editable-tags",
     },
     {
       workspaceId,
@@ -133,6 +161,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "multiselect",
       options: { choices: [], required: false },
       order: 14,
+      visible: "detail-only",
+      cellType: "editable-tags",
     },
     {
       workspaceId,
@@ -141,6 +171,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "text",
       options: { required: false },
       order: 15,
+      visible: "detail-only",
+      cellType: "editable-text",
     },
     {
       workspaceId,
@@ -149,6 +181,8 @@ export function getDefaultFieldConfigs(workspaceId: string): Omit<NewFieldConfig
       type: "date",
       options: { required: false },
       order: 16,
+      visible: "detail-only",
+      cellType: "editable-date",
     },
   ];
 }

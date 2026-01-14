@@ -7,10 +7,11 @@ import { DataTable } from "@/src/components/ui/data-table";
 import { DataTableToolbar } from "./data-table-toolbar";
 import { DataTableEmptyState } from "@/src/components/ui/data-table-empty-state";
 import { TaskDetailDrawer } from "./task-detail-drawer";
-import { useCreateTask, useUpdateTask } from "@/src/lib/query/hooks";
+import { useCreateTask, useUpdateTask, useWorkspaceFields } from "@/src/lib/query/hooks";
 import { useWorkspace } from "@/src/providers";
 import { createColumns } from "./columns";
 import { TasksToolbar } from "./tasks-toolbar";
+import { buildColumnsFromFieldConfigs } from "@/src/lib/utils/column-builder";
 
 interface TasksDataTableProps {
   columns?: ColumnDef<Task, unknown>[];
@@ -28,6 +29,10 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
   
   const createTaskMutation = useCreateTask(activeWorkspaceId);
   const updateTaskMutation = useUpdateTask(activeWorkspaceId, 0);
+  
+  // Fetch field configurations for the workspace
+  const { data: fieldsData, isLoading: isLoadingFields } = useWorkspaceFields(activeWorkspaceId);
+  const fieldConfigs = fieldsData?.fields || [];
 
   // Extract unique values for filters
   const { uniqueOwners, uniqueAssetClasses } = useMemo(() => {
@@ -84,10 +89,25 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
   };
   
   // Create columns with update handler if not provided
-  const columns = useMemo(
-    () => externalColumns || createColumns(uniqueOwners, uniqueAssetClasses, handleTaskUpdate),
-    [externalColumns, uniqueOwners, uniqueAssetClasses, handleTaskUpdate]
-  );
+  // Use field configs to build columns dynamically if available
+  const columns = useMemo(() => {
+    if (externalColumns) {
+      return externalColumns;
+    }
+    
+    // If field configs are loaded and available, use them to build columns
+    if (!isLoadingFields && fieldConfigs.length > 0) {
+      return buildColumnsFromFieldConfigs(
+        fieldConfigs,
+        handleTaskUpdate,
+        uniqueOwners,
+        uniqueAssetClasses
+      );
+    }
+    
+    // Fallback to static columns if field configs are not available
+    return createColumns(uniqueOwners, uniqueAssetClasses, handleTaskUpdate);
+  }, [externalColumns, fieldConfigs, isLoadingFields, uniqueOwners, uniqueAssetClasses, handleTaskUpdate]);
 
   return (
     <>
