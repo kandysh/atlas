@@ -1,10 +1,10 @@
 "use client";
 
-import { TasksDataTable } from "@/components/tasks-table/tasks-data-table";
-import { columns } from "@/components/tasks-table/columns";
-import { mockTasks } from "@/data/mock-tasks";
-import { Task } from "@/data/project";
-import { useWorkspace } from "@/providers/workspace-provider";
+import { TasksDataTable } from "@/src/components/features/tasks";
+import { columns } from "@/src/components/features/tasks";
+import { mockTasks } from "@/src/data";
+import { Task } from "@/src/lib/types";
+import { useWorkspace } from "@/src/providers";
 
 export default function Page() {
   const { currentWorkspace } = useWorkspace();

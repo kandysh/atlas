@@ -1,11 +1,14 @@
 "use client";
-import AssetClassSelect from "@/components/insights/assest-class-select";
-import { CumulativeFlowChart } from "@/components/insights/cumulative-flow";
-import CycleTimeChart from "@/components/insights/cycle-time";
-import HoursSavedWorkedChart from "@/components/insights/hours-saved-worked";
-import { TasksStatusBreakdownDonut } from "@/components/insights/task-status-breakdown";
-import { ChartLineInteractive } from "@/components/insights/throughput-over-time";
-import { ToolsUsedChart } from "@/components/insights/tools-used";
+
+import {
+  AssetClassSelect,
+  CumulativeFlowChart,
+  CycleTimeChart,
+  HoursSavedWorkedChart,
+  TasksStatusBreakdownDonut,
+  ChartLineInteractive,
+  ToolsUsedChart,
+} from "@/src/components/features/insights";
 import {
   useTaskAssestClasses,
   useTasks,
@@ -15,7 +18,7 @@ import {
   useTasksWithHoursSavedWorked,
   useTasksWithStatusCount,
   useTasksWithThroughputOverTime,
-} from "@/lib/tasks/tasks.query";
+} from "@/src/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -32,6 +35,7 @@ export default function InsightsPage() {
   const { data: toolsUsedData } = useTasksToolUsed(tasks!);
   const { data: assetClassesData } = useTaskAssestClasses();
   const queryClient = useQueryClient();
+
   return (
     <div className="space-y-6">
       <div>

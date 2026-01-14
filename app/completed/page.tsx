@@ -1,19 +1,4 @@
-"use client";
-
-import { TasksDataTable } from "@/components/tasks-table/tasks-data-table";
-import { columns } from "@/components/tasks-table/columns";
-import { mockTasks } from "@/data/mock-tasks";
-import { Task } from "@/data/project";
-import { useWorkspace } from "@/providers/workspace-provider";
-
 export default function CompletedPage() {
-  const { currentWorkspace } = useWorkspace();
-  
-  // Filter only completed tasks
-  const completedTasks: Task[] = mockTasks.filter(
-    (task) => task.status === "completed"
-  );
-
   return (
     <div className="space-y-6">
       <div>
@@ -21,11 +6,14 @@ export default function CompletedPage() {
           Completed Tasks
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {currentWorkspace?.name} • {completedTasks.length} completed tasks
+          View all completed tasks
         </p>
       </div>
-
-      <TasksDataTable columns={columns} data={completedTasks} />
+      <div className="rounded-lg border border-border p-6">
+        <p className="text-sm text-muted-foreground">
+          Completed tasks will be displayed here
+        </p>
+      </div>
     </div>
   );
 }

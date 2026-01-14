@@ -1,7 +1,7 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import ReactQueryProvider from "@/providers/react-query-provider";
-import { WorkspaceProvider } from "@/providers/workspace-provider";
+import { AppSidebar } from "@/src/components/layout";
+import { SidebarProvider } from "@/src/components/ui/sidebar";
+import ReactQueryProvider from "@/src/providers/react-query-provider";
+import { WorkspaceProvider } from "@/src/providers/workspace-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
