@@ -445,13 +445,22 @@ export function EditableComboboxCell({
     setSearchValue("");
   };
 
-  const handleAddNew = () => {
-    const trimmed = searchValue.trim();
-    if (trimmed && !options.includes(trimmed)) {
-      onAddOption?.(trimmed);
-      onChange(trimmed);
-      setIsOpen(false);
-      setSearchValue("");
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const trimmed = searchValue.trim();
+      
+      // If there's a filtered option, select the first one
+      if (filteredOptions.length > 0) {
+        handleSelect(filteredOptions[0]);
+      } 
+      // Otherwise, add the new value
+      else if (trimmed && !options.includes(trimmed)) {
+        onAddOption?.(trimmed);
+        onChange(trimmed);
+        setIsOpen(false);
+        setSearchValue("");
+      }
     }
   };
 
@@ -474,30 +483,21 @@ export function EditableComboboxCell({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[250px] p-0" align="start">
-        <Command>
+      <PopoverContent 
+        className="p-0" 
+        align="start"
+        style={{ width: "var(--radix-popover-trigger-width)" }}
+      >
+        <Command shouldFilter={false}>
           <CommandInput
             placeholder={placeholder}
             value={searchValue}
             onValueChange={setSearchValue}
+            onKeyDown={handleKeyDown}
           />
-          <CommandList>
-            <CommandEmpty>
-              <div className="py-2 px-3">
-                <p className="text-sm text-muted-foreground mb-2">
-                  No option found.
-                </p>
-                {searchValue.trim() && onAddOption && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleAddNew}
-                  >
-                    Add "{searchValue.trim()}"
-                  </Button>
-                )}
-              </div>
+          <CommandList className="max-h-[200px]">
+            <CommandEmpty className="py-2 px-3 text-sm text-muted-foreground">
+              Type and press Enter to add
             </CommandEmpty>
             <CommandGroup>
               {filteredOptions.map((option) => (
