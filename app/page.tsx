@@ -1,28 +1,31 @@
 "use client";
 
+import { TasksDataTable } from "@/components/tasks-table/tasks-data-table";
+import { columns } from "@/components/tasks-table/columns";
+import { mockTasks } from "@/data/mock-tasks";
+import { Task } from "@/data/project";
+import { useWorkspace } from "@/providers/workspace-provider";
+
 export default function Page() {
-  // TODO: Filter tasks where status !== "completed"
-  // const activeTasks = tasks.filter(t => t.status !== "completed");
+  const { currentWorkspace } = useWorkspace();
   
+  // Filter out completed tasks for active board
+  const activeTasks: Task[] = mockTasks.filter(
+    (task) => task.status !== "completed"
+  );
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">
+        <h1 className="text-3xl font-semibold tracking-tight">
           Active Tasks
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your active tasks and projects (excludes completed)
+          {currentWorkspace?.name} • {activeTasks.length} active tasks
         </p>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-12 text-center">
-        <p className="text-muted-foreground">
-          Your active tasks will appear here
-        </p>
-        <p className="text-xs text-muted-foreground mt-2">
-          Tasks with status: To Do, In Progress, Testing, Done, or Blocked
-        </p>
-      </div>
+      <TasksDataTable columns={columns} data={activeTasks} />
     </div>
   );
 }

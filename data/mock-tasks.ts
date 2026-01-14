@@ -13,6 +13,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Built a weighted similarity engine using profile attributes and preferences with FastAPI and PostgreSQL.",
     status: "completed",
+    priority: "high",
     benefits:
       "Reduced manual ops effort and improved match relevance across global cohorts.",
     currentHrs: 120,
@@ -38,6 +39,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Designed a role-based dashboard with cohort metrics, status tracking, and exports.",
     status: "completed",
+    priority: "medium",
     benefits:
       "Improved operational visibility and reduced follow-ups by HR teams.",
     currentHrs: 80,
@@ -62,6 +64,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Implemented CSV ingestion with validation, preview, and async processing.",
     status: "in-progress",
+    priority: "high",
     benefits: "Expected to drastically reduce onboarding turnaround time.",
     currentHrs: 60,
     workedHrs: 40,
@@ -85,6 +88,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Introduced RBAC with fine-grained permissions and policy enforcement.",
     status: "completed",
+    priority: "urgent",
     benefits: "Improved security posture and enabled enterprise adoption.",
     currentHrs: 100,
     workedHrs: 130,
@@ -107,7 +111,8 @@ export const mockTasks: Task[] = [
       "Creating cohorts required engineering intervention for every request.",
     solutionDesign:
       "Built a self-serve flow with validations, previews, and rollback support.",
-    status: "pending",
+    status: "todo",
+    priority: "medium",
     benefits: "Expected to reduce engineering dependency for HR operations.",
     currentHrs: 70,
     workedHrs: 0,
@@ -131,6 +136,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Integrated an LLM pipeline with prompt templates and scoring heuristics.",
     status: "completed",
+    priority: "high",
     benefits: "Reduced resume screening time and improved consistency.",
     currentHrs: 90,
     workedHrs: 110,
@@ -154,6 +160,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Added OpenTelemetry tracing, metrics, and dashboards with alerts.",
     status: "completed",
+    priority: "high",
     benefits:
       "Reduced incident resolution time and improved system reliability.",
     currentHrs: 60,
@@ -178,6 +185,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Implemented sentiment analysis and topic extraction on feedback text.",
     status: "in-progress",
+    priority: "medium",
     benefits: "Will help identify systemic issues and program strengths.",
     currentHrs: 70,
     workedHrs: 55,
@@ -201,6 +209,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Wrote migration scripts with validation and rollback support.",
     status: "completed",
+    priority: "low",
     benefits: "Enabled reporting on historical cohorts.",
     currentHrs: 50,
     workedHrs: 90,
@@ -224,6 +233,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Integrated Slack webhooks with configurable notification rules.",
     status: "completed",
+    priority: "medium",
     benefits: "Improved engagement and reduced missed actions.",
     currentHrs: 40,
     workedHrs: 35,
@@ -243,10 +253,11 @@ export const mockTasks: Task[] = [
     teamsInvolved: ["Engineering", "Product"],
     theme: ["customization", "scale"],
     problemStatement:
-      "Hardcoded task statuses did not fit all teams’ workflows.",
+      "Hardcoded task statuses did not fit all teams' workflows.",
     solutionDesign:
       "Built a configurable state machine with UI and validations.",
     status: "in-progress",
+    priority: "high",
     benefits: "Enables team-specific workflows without code changes.",
     currentHrs: 100,
     workedHrs: 65,
@@ -258,8 +269,6 @@ export const mockTasks: Task[] = [
     createdAt: new Date("2024-05-02T00:00:00.000Z"),
     updatedAt: new Date("2024-05-10T00:00:00.000Z"),
   },
-
-  // Additional mock tasks spanning the calendar year (late 2023 -> late 2024)
   {
     id: "TSK-012",
     owner: "Maya",
@@ -272,6 +281,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Scheduled digest emails with cohort highlights, sent weekly via a mailer service.",
     status: "completed",
+    priority: "medium",
     benefits: "Increased engagement and reduced ad-hoc status requests.",
     currentHrs: 30,
     workedHrs: 25,
@@ -295,6 +305,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Responsive redesign with prioritized actions and simplified charts.",
     status: "completed",
+    priority: "medium",
     benefits: "Improved mobile engagement and retention.",
     currentHrs: 60,
     workedHrs: 55,
@@ -318,6 +329,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Created central KPIs, ETL pipelines and a reporting view for leadership.",
     status: "completed",
+    priority: "high",
     benefits: "Enabled data-driven decisions and funding prioritization.",
     currentHrs: 110,
     workedHrs: 120,
@@ -341,6 +353,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Built a two-way sync with Google Calendar and ICS import support.",
     status: "completed",
+    priority: "low",
     benefits: "Reduced scheduling friction and no-shows.",
     currentHrs: 45,
     workedHrs: 50,
@@ -364,6 +377,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Automated onboarding flow with checklist, resource links and verification steps.",
     status: "in-progress",
+    priority: "medium",
     benefits: "Reduces time-to-first-mentor-activity and improves consistency.",
     currentHrs: 40,
     workedHrs: 20,
@@ -387,6 +401,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Added consent capture, retention enforcement and anonymization pipelines.",
     status: "completed",
+    priority: "urgent",
     benefits: "Reduced compliance risk and enabled safe analytics.",
     currentHrs: 95,
     workedHrs: 100,
@@ -409,7 +424,8 @@ export const mockTasks: Task[] = [
       "Current matching lacked contextual signals from interactions and outcomes.",
     solutionDesign:
       "Prototype ML model that learns from outcomes and recommends mentor adjustments.",
-    status: "pending",
+    status: "todo",
+    priority: "low",
     benefits: "Potential to increase match success rates.",
     currentHrs: 60,
     workedHrs: 0,
@@ -433,6 +449,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Added compensating transactions and idempotency to cohort-creation flow.",
     status: "completed",
+    priority: "high",
     benefits: "Reduced inconsistent state and manual rollbacks.",
     currentHrs: 75,
     workedHrs: 80,
@@ -456,6 +473,7 @@ export const mockTasks: Task[] = [
     solutionDesign:
       "Performed audit, remediated keyboard navigation, color contrast, aria attributes.",
     status: "completed",
+    priority: "medium",
     benefits: "Improved inclusivity and reduced legal risk.",
     currentHrs: 40,
     workedHrs: 45,
