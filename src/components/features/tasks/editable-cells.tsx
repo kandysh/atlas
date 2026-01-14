@@ -82,7 +82,9 @@ export function EditableTextCell({
         "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px] flex items-center",
         className
       )}
-      onClick={() => {
+      data-editable="true"
+      onClick={(e) => {
+        e.stopPropagation();
         setIsEditing(true);
         setEditValue(value);
       }}
@@ -159,7 +161,9 @@ export function EditableNumberCell({
         "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px] flex items-center",
         className
       )}
-      onClick={() => {
+      data-editable="true"
+      onClick={(e) => {
+        e.stopPropagation();
         setIsEditing(true);
         setEditValue(value.toString());
       }}
@@ -232,7 +236,9 @@ export function EditableOwnerCell({ value, onChange }: EditableOwnerCellProps) {
   return (
     <div
       className="flex items-center gap-2 cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px]"
-      onClick={() => {
+      data-editable="true"
+      onClick={(e) => {
+        e.stopPropagation();
         setIsEditing(true);
         setEditValue(value);
       }}

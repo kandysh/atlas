@@ -71,10 +71,10 @@ export function TasksDataTable<TData extends Task, TValue>({
   const selectedRowCount = Object.keys(rowSelection).length;
 
   const handleRowClick = (task: Task, e: React.MouseEvent) => {
-    // Don't open drawer if clicking on interactive elements
+    // Don't open drawer if clicking on interactive elements or editable cells
     if (
       (e.target as HTMLElement).closest(
-        'button, input, [role="combobox"], [data-radix-collection-item]'
+        'button, input, textarea, [role="combobox"], [data-radix-collection-item], [data-editable="true"]'
       )
     ) {
       return;
