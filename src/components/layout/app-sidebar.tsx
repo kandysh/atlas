@@ -10,13 +10,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
+  useSidebar,
 } from "@/src/components/ui/sidebar";
 import {
   CheckCircle2,
   LayoutDashboard,
   BarChart3,
-  Sparkles,
-  TrendingUp,
 } from "lucide-react";
 import { WorkspaceToggler } from "./workspace-toggler";
 import NavUser from "./nav-user";
@@ -42,11 +42,15 @@ const navigation = [
 
 export function AppSidebar() {
   const currentPath = usePathname();
+  const { state } = useSidebar();
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" variant="sidebar">
       {/* Workspace Header */}
-      <SidebarHeader className="p-4 border-b border-border">
+      <SidebarHeader className={cn(
+        "border-b border-border transition-all",
+        state === "collapsed" ? "p-2" : "p-4"
+      )}>
         <WorkspaceToggler />
       </SidebarHeader>
 
@@ -81,6 +85,8 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 border-t border-border">
         <NavUser />
       </SidebarFooter>
+      
+      <SidebarRail />
     </Sidebar>
   );
 }
