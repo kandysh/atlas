@@ -41,20 +41,6 @@ export default function Page() {
     );
   }
 
-  // Filter out completed tasks for active board
-  const activeTasks: Task[] = mockTasks.filter(
-    (task) => task.status !== "completed",
-  );
-
-  // Get unique owners for dropdown
-  const uniqueOwners = Array.from(
-    new Set(mockTasks.map((t) => t.owner)),
-  ).sort();
-  const uniqueAssetClasses = Array.from(
-    new Set(mockTasks.map((t) => t.assetClass)),
-  ).sort();
-  const columns = createColumns(uniqueOwners, uniqueAssetClasses);
-
   return (
     <div className="space-y-6">
       <div>
