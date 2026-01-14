@@ -59,6 +59,21 @@ export function TasksDataTable({ columns: externalColumns, data, workspaceId }: 
     };
   }, [data]);
 
+  // Extract unique values for filters
+  const { uniqueOwners, uniqueAssetClasses } = useMemo(() => {
+    const owners = Array.from(new Set(data.map((task) => task.owner))).filter(
+      Boolean
+    );
+    const assetClasses = Array.from(
+      new Set(data.map((task) => task.assetClass))
+    ).filter(Boolean);
+
+    return {
+      uniqueOwners: owners.sort(),
+      uniqueAssetClasses: assetClasses.sort(),
+    };
+  }, [data]);
+
   const handleRowClick = (task: Task) => {
     setSelectedTask(task);
     setIsDrawerOpen(true);
