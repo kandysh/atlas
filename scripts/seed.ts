@@ -12,7 +12,7 @@ async function seed() {
   console.log("🌱 Starting database seed...");
 
   try {
-    // 1. Create a test user
+    // 1. Create or get test user using upsert
     console.log("Creating test user...");
     const [user] = await db
       .insert(users)
@@ -20,44 +20,35 @@ async function seed() {
         email: "test@example.com",
         name: "Test User",
       })
-      .onConflictDoNothing()
+      .onConflictDoUpdate({
+        target: users.email,
+        set: { name: "Test User" },
+      })
       .returning();
-
-    const userId = user?.id || (await db.select().from(users).where(eq(users.email, "test@example.com")).limit(1))[0]?.id;
     
-    if (!userId) {
-      throw new Error("Failed to create or fetch user");
-    }
-    
-    console.log("✅ User ready:", userId);
+    console.log("✅ User ready:", user.id);
 
-    // 2. Create a test workspace
+    // 2. Create or get test workspace using upsert
     console.log("Creating test workspace...");
     const [workspace] = await db
       .insert(workspaces)
       .values({
         name: "Personal Projects",
         slug: "personal",
-        ownerUserId: userId,
+        ownerUserId: user.id,
       })
-      .onConflictDoNothing()
+      .onConflictDoUpdate({
+        target: workspaces.slug,
+        set: { name: "Personal Projects" },
+      })
       .returning();
-
-    const workspaceId = workspace?.id || (await db.select().from(workspaces).where(eq(workspaces.slug, "personal")).limit(1))[0]?.id;
-    const workspaceNumericId = workspace?.numericId || (await db.select().from(workspaces).where(eq(workspaces.slug, "personal")).limit(1))[0]?.numericId;
-    
-    if (!workspaceId) {
-      throw new Error("Failed to create or fetch workspace");
-    }
-    
-    console.log("✅ Workspace ready:", workspaceId);
 
     // 3. Create sample tasks
     console.log("Creating sample tasks...");
     const sampleTasks = [
       {
-        workspaceId,
-        displayId: `TSK-${String(workspaceNumericId).padStart(3, "0")}-0001`,
+        workspaceId: workspace.id,
+        displayId: `TSK-${String(workspace.numericId).padStart(3, "0")}-0001`,
         sequenceNumber: 1,
         data: {
           title: "Setup CI/CD Pipeline",
@@ -68,8 +59,8 @@ async function seed() {
         },
       },
       {
-        workspaceId,
-        displayId: `TSK-${String(workspaceNumericId).padStart(3, "0")}-0002`,
+        workspaceId: workspace.id,
+        displayId: `TSK-${String(workspace.numericId).padStart(3, "0")}-0002`,
         sequenceNumber: 2,
         data: {
           title: "Implement User Authentication",
@@ -86,7 +77,7 @@ async function seed() {
 
     console.log("✅ Created sample tasks");
     console.log("\n🎉 Database seeding completed!");
-    console.log(`Workspace ID: ${workspaceId}`);
+    console.log(`Workspace ID: ${workspace.id}`);
 
   } catch (error) {
     console.error("❌ Error:", error);

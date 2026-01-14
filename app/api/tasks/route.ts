@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, tasks } from "@/src/lib/db";
+import { db, tasks, workspaces } from "@/src/lib/db";
 import { eq, and, desc } from "drizzle-orm";
 import { generateTaskDisplayId } from "@/src/lib/utils/task-id-generator";
 
@@ -72,10 +72,21 @@ export async function POST(request: NextRequest) {
 
     const sequenceNumber = latestTask.length > 0 ? latestTask[0].sequenceNumber + 1 : 1;
 
-    // Get workspace numeric ID for display ID generation
-    // For now, using a simple conversion. In production, fetch from workspaces table
-    const workspaceNumericId = parseInt(workspaceId.toString().substring(0, 3).padStart(3, "0"), 10) || 1;
-    const displayId = generateTaskDisplayId(workspaceNumericId, sequenceNumber);
+    // Get workspace numeric ID from workspaces table
+    const [workspace] = await db
+      .select({ numericId: workspaces.numericId })
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1);
+    
+    if (!workspace) {
+      return NextResponse.json(
+        { error: "Workspace not found" },
+        { status: 404 }
+      );
+    }
+
+    const displayId = generateTaskDisplayId(workspace.numericId, sequenceNumber);
 
     // Insert the new task
     const [newTask] = await db

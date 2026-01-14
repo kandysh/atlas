@@ -79,17 +79,27 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ displayId, patch }: { displayId: string; patch: Record<string, any> }) => {
+    mutationFn: async ({ displayId, patch }: { displayId: string; patch: Partial<UiTask> }) => {
       // Get cached data to find the DB task ID
       const queryKey = queryKeys.tasks(workspaceId, page);
       const cachedData = queryClient.getQueryData(queryKey) as any;
       
-      if (!cachedData?.dbTasks) {
-        throw new Error("Cannot update task: no cached data");
+      // If no cache, we need to refetch to get the mapping
+      if (!cachedData?.dbTasks || cachedData.dbTasks.length === 0) {
+        // Fetch fresh data to get the DB task
+        await queryClient.refetchQueries({ queryKey });
+        const freshData = queryClient.getQueryData(queryKey) as any;
+        
+        if (!freshData?.dbTasks) {
+          throw new Error("Cannot update task: unable to fetch task data");
+        }
       }
 
+      // Get updated cache after potential refetch
+      const currentData = queryClient.getQueryData(queryKey) as any;
+      
       // Find the DB task by displayId
-      const dbTask = cachedData.dbTasks.find((t: DbTask) => t.displayId === displayId);
+      const dbTask = currentData.dbTasks.find((t: DbTask) => t.displayId === displayId);
       if (!dbTask) {
         throw new Error(`Cannot find task with displayId: ${displayId}`);
       }
