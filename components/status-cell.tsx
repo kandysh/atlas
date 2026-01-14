@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Circle, Loader2, XCircle, FlaskConical, CheckCheck } from "lucide-react";
+import { Circle, CircleDot, PlayCircle, Ban, FlaskConical, CircleCheck } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -28,12 +28,12 @@ const statusConfig = {
   todo: {
     label: "To Do",
     icon: Circle,
-    color: "text-muted-foreground",
-    bgColor: "bg-muted",
+    color: "text-slate-500",
+    bgColor: "bg-slate-500/10",
   },
   "in-progress": {
     label: "In Progress",
-    icon: Loader2,
+    icon: PlayCircle,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
   },
@@ -45,19 +45,19 @@ const statusConfig = {
   },
   done: {
     label: "Done",
-    icon: Check,
+    icon: CircleDot,
     color: "text-green-500",
     bgColor: "bg-green-500/10",
   },
   completed: {
     label: "Completed",
-    icon: CheckCheck,
-    color: "text-emerald-500",
+    icon: CircleCheck,
+    color: "text-emerald-600",
     bgColor: "bg-emerald-500/10",
   },
   blocked: {
     label: "Blocked",
-    icon: XCircle,
+    icon: Ban,
     color: "text-red-500",
     bgColor: "bg-red-500/10",
   },

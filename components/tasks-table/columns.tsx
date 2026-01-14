@@ -4,6 +4,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Task, Status, Priority } from "@/data/project";
 import { StatusCell } from "@/components/status-cell";
 import { PriorityCell } from "@/components/priority-cell";
+import {
+  EditableTextCell,
+  EditableNumberCell,
+  EditableOwnerCell,
+} from "./editable-cells";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,13 +36,30 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
     cell: ({ row }) => {
+      const handleTitleChange = (newTitle: string) => {
+        console.log("Update title", row.original.id, newTitle);
+        // TODO: Call API to update
+      };
+
+      const handleProblemChange = (newProblem: string) => {
+        console.log("Update problem", row.original.id, newProblem);
+        // TODO: Call API to update
+      };
+
       return (
-        <div className="flex flex-col gap-1">
-          <span className="font-medium">{row.original.title}</span>
+        <div className="flex flex-col gap-2 py-2 min-w-[300px]">
+          <EditableTextCell
+            value={row.original.title}
+            onChange={handleTitleChange}
+            className="font-medium"
+          />
           {row.original.problemStatement && (
-            <span className="text-xs text-muted-foreground line-clamp-1">
-              {row.original.problemStatement}
-            </span>
+            <EditableTextCell
+              value={row.original.problemStatement}
+              onChange={handleProblemChange}
+              multiline
+              className="text-xs text-muted-foreground"
+            />
           )}
         </div>
       );
@@ -48,8 +70,8 @@ export const columns: ColumnDef<Task>[] = [
     header: "Status",
     cell: ({ row }) => {
       const handleStatusChange = (newStatus: Status) => {
-        // TODO: Update task status
         console.log("Update status", row.original.id, newStatus);
+        // TODO: Call API to update
       };
 
       return (
@@ -68,8 +90,8 @@ export const columns: ColumnDef<Task>[] = [
     header: "Priority",
     cell: ({ row }) => {
       const handlePriorityChange = (newPriority: Priority) => {
-        // TODO: Update task priority
         console.log("Update priority", row.original.id, newPriority);
+        // TODO: Call API to update
       };
 
       return (
@@ -84,19 +106,16 @@ export const columns: ColumnDef<Task>[] = [
     accessorKey: "owner",
     header: "Owner",
     cell: ({ row }) => {
+      const handleOwnerChange = (newOwner: string) => {
+        console.log("Update owner", row.original.id, newOwner);
+        // TODO: Call API to update
+      };
+
       return (
-        <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-xs font-medium text-primary">
-              {row.original.owner
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()}
-            </span>
-          </div>
-          <span className="text-sm">{row.original.owner}</span>
-        </div>
+        <EditableOwnerCell
+          value={row.original.owner}
+          onChange={handleOwnerChange}
+        />
       );
     },
   },
@@ -104,10 +123,16 @@ export const columns: ColumnDef<Task>[] = [
     accessorKey: "assetClass",
     header: "Asset Class",
     cell: ({ row }) => {
+      const handleAssetClassChange = (newAssetClass: string) => {
+        console.log("Update asset class", row.original.id, newAssetClass);
+        // TODO: Call API to update
+      };
+
       return (
-        <Badge variant="outline" className="font-normal">
-          {row.original.assetClass}
-        </Badge>
+        <EditableTextCell
+          value={row.original.assetClass}
+          onChange={handleAssetClassChange}
+        />
       );
     },
   },
@@ -116,7 +141,8 @@ export const columns: ColumnDef<Task>[] = [
     header: "Teams",
     cell: ({ row }) => {
       const teams = row.original.teamsInvolved;
-      if (teams.length === 0) return <span className="text-muted-foreground">-</span>;
+      if (teams.length === 0)
+        return <span className="text-muted-foreground">-</span>;
       if (teams.length === 1) return <Badge variant="secondary">{teams[0]}</Badge>;
       return (
         <div className="flex items-center gap-1">
@@ -143,14 +169,36 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
     cell: ({ row }) => {
-      return <span className="text-sm">{row.original.currentHrs}h</span>;
+      const handleHoursChange = (newHours: number) => {
+        console.log("Update estimated hours", row.original.id, newHours);
+        // TODO: Call API to update
+      };
+
+      return (
+        <EditableNumberCell
+          value={row.original.currentHrs}
+          onChange={handleHoursChange}
+          suffix="h"
+        />
+      );
     },
   },
   {
     accessorKey: "workedHrs",
     header: "Worked",
     cell: ({ row }) => {
-      return <span className="text-sm">{row.original.workedHrs}h</span>;
+      const handleWorkedChange = (newHours: number) => {
+        console.log("Update worked hours", row.original.id, newHours);
+        // TODO: Call API to update
+      };
+
+      return (
+        <EditableNumberCell
+          value={row.original.workedHrs}
+          onChange={handleWorkedChange}
+          suffix="h"
+        />
+      );
     },
   },
   {

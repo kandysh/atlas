@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, ArrowDown, ArrowUp, Signal } from "lucide-react";
+import { ChevronDown, Minus, ChevronUp, AlertCircle } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -27,19 +27,19 @@ type PriorityCellProps = {
 const priorityConfig = {
   low: {
     label: "Low",
-    icon: ArrowDown,
-    color: "text-blue-500",
-    bgColor: "bg-blue-500/10",
+    icon: ChevronDown,
+    color: "text-slate-500",
+    bgColor: "bg-slate-500/10",
   },
   medium: {
     label: "Medium",
-    icon: Signal,
-    color: "text-yellow-500",
-    bgColor: "bg-yellow-500/10",
+    icon: Minus,
+    color: "text-amber-500",
+    bgColor: "bg-amber-500/10",
   },
   high: {
     label: "High",
-    icon: ArrowUp,
+    icon: ChevronUp,
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
   },

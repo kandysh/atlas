@@ -15,6 +15,8 @@ import {
   CheckCircle2,
   LayoutDashboard,
   BarChart3,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import { WorkspaceToggler } from "./workspace-toggler";
 import NavUser from "./nav-user";
@@ -66,7 +68,7 @@ export function AppSidebar() {
                       "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-200",
                       isActive
                         ? "bg-primary/10 text-primary font-medium"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground",
                     )}
                   >
                     <item.icon className="h-4 w-4" />
