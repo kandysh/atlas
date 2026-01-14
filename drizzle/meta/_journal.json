@@ -15,6 +15,13 @@
       "when": 1768394625165,
       "tag": "0001_yummy_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768406497728,
+      "tag": "0002_seed-data",
+      "breakpoints": true
     }
   ]
 }

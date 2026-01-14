@@ -19,7 +19,7 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
 
     // Create EventSource connection
     const eventSource = new EventSource(
-      `/api/tasks/${workspaceId}/events`
+      `/api/events/${workspaceId}`
     );
     eventSourceRef.current = eventSource;
 
