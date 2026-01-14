@@ -482,13 +482,13 @@ export function EditableComboboxCell({
           aria-expanded={isOpen}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200",
+            "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 w-auto",
             !value && "text-muted-foreground",
             className
           )}
         >
-          <span className="text-sm truncate">{value || placeholder}</span>
-          <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+          <span className="text-sm">{value || placeholder}</span>
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent 
