@@ -2,19 +2,22 @@ import { AppSidebar, WorkspaceLoader } from "@/src/components/layout";
 import { SidebarProvider, SidebarInset } from "@/src/components/ui/sidebar";
 import ReactQueryProvider from "@/src/providers/react-query-provider";
 import { WorkspaceProvider } from "@/src/providers/workspace-provider";
+import { ThemeProvider } from "@/src/providers/theme-provider";
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,31 +31,38 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <ReactQueryProvider>
-          <WorkspaceProvider>
-            <WorkspaceLoader>
-              <SidebarProvider defaultOpen={true}>
-                <AppSidebar />
-                <SidebarInset>
-                  <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
-                    {children}
-                  </main>
-                </SidebarInset>
-              </SidebarProvider>
-            </WorkspaceLoader>
-          </WorkspaceProvider>
-          <Toaster
-            richColors
-            position="bottom-left"
-            toastOptions={{
-              duration: 3000,
-            }}
-          />
-        </ReactQueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ReactQueryProvider>
+            <WorkspaceProvider>
+              <WorkspaceLoader>
+                <SidebarProvider defaultOpen={true}>
+                  <AppSidebar />
+                  <SidebarInset>
+                    <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">
+                      {children}
+                    </main>
+                  </SidebarInset>
+                </SidebarProvider>
+              </WorkspaceLoader>
+            </WorkspaceProvider>
+            <Toaster
+              richColors
+              position="bottom-left"
+              toastOptions={{
+                duration: 3000,
+              }}
+            />
+          </ReactQueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

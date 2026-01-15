@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,20 +68,6 @@ export default function NavUser() {
 
           <DropdownMenuSeparator />
 
-          {/* TODO: Implement profile and settings pages
-          <DropdownMenuItem className="cursor-pointer">
-            <User className="h-4 w-4 mr-2" />
-            <span>Profile</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem className="cursor-pointer">
-            <Settings className="h-4 w-4 mr-2" />
-            <span>Settings</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-          */}
-
           <DropdownMenuItem className="cursor-pointer text-destructive" disabled>
             <LogOut className="h-4 w-4 mr-2" />
             <span>Log out</span>
@@ -125,20 +111,6 @@ export default function NavUser() {
         </div>
 
         <DropdownMenuSeparator />
-
-        {/* TODO: Implement profile and settings pages
-        <DropdownMenuItem className="cursor-pointer">
-          <User className="h-4 w-4 mr-2" />
-          <span>Profile</span>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem className="cursor-pointer">
-          <Settings className="h-4 w-4 mr-2" />
-          <span>Settings</span>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-        */}
 
         <DropdownMenuItem className="cursor-pointer text-destructive" disabled>
           <LogOut className="h-4 w-4 mr-2" />

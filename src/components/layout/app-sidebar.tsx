@@ -17,10 +17,14 @@ import {
   CheckCircle2,
   LayoutDashboard,
   BarChart3,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { WorkspaceToggler } from "./workspace-toggler";
 import NavUser from "./nav-user";
 import { cn } from "@/src/lib/utils";
+import { Button } from "@/src/components/ui/button";
+import { useTheme } from "next-themes";
 
 const navigation = [
   {
@@ -43,6 +47,7 @@ const navigation = [
 export function AppSidebar() {
   const currentPath = usePathname();
   const { state } = useSidebar();
+  const { theme, setTheme } = useTheme();
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -51,7 +56,23 @@ export function AppSidebar() {
         "border-b border-border transition-all",
         state === "collapsed" ? "p-2" : "p-4"
       )}>
-        <WorkspaceToggler />
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <WorkspaceToggler />
+          </div>
+          {state !== "collapsed" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="h-8 w-8 shrink-0"
+            >
+              <Sun className="h-[1.1rem] w-[1.1rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-[1.1rem] w-[1.1rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          )}
+        </div>
       </SidebarHeader>
 
       {/* Navigation Content */}
@@ -79,6 +100,22 @@ export function AppSidebar() {
             );
           })}
         </SidebarMenu>
+        
+        {/* Theme toggle for collapsed state */}
+        {state === "collapsed" && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-full h-10"
+            >
+              <Sun className="h-[1.1rem] w-[1.1rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-[1.1rem] w-[1.1rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </div>
+        )}
       </SidebarContent>
 
       {/* User Footer */}

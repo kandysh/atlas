@@ -21,7 +21,7 @@ export async function initUser(): Promise<
     let [user] = await db
       .select()
       .from(users)
-      .where(eq(users.email, userInfo.email))
+      .where(eq(users.id, userInfo.id))
       .limit(1);
 
     // Create user if doesn't exist
@@ -29,8 +29,9 @@ export async function initUser(): Promise<
       [user] = await db
         .insert(users)
         .values({
-          email: userInfo.email,
-          name: userInfo.name,
+          id: userInfo.id,
+          email: userInfo.details.email,
+          name: userInfo.details.name,
           avatar: null,
         })
         .returning();
