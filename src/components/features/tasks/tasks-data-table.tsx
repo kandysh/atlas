@@ -12,7 +12,7 @@ import {
   useWorkspaceFields 
 } from "@/src/lib/query/hooks";
 import { useWorkspace } from "@/src/providers";
-import { buildColumnsFromFieldConfigs } from "@/src/lib/utils/column-builder";
+import { buildColumnsFromFieldConfigs } from "@/src/lib/utils";
 import { createColumns } from "./columns";
 
 interface TasksDataTableProps {

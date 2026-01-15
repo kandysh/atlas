@@ -1,4 +1,4 @@
-import { generateTaskDisplayId, parseTaskDisplayId, isValidTaskDisplayId } from "../task-id-generator";
+import { generateTaskDisplayId, parseTaskDisplayId, isValidTaskDisplayId } from "./task-id-generator";
 
 describe("Task ID Generator", () => {
   describe("generateTaskDisplayId", () => {

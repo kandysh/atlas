@@ -7,16 +7,16 @@ import {
 } from "@/src/components/ui/select";
 
 export default function AssetClassSelect({
-  assestClasses,
+  assetClasses,
   currentAssetClass,
-  setAssestClass,
+  setAssetClass,
 }: {
-  assestClasses: string[];
+  assetClasses: string[];
   currentAssetClass: string;
-  setAssestClass: (value: string) => void;
+  setAssetClass: (value: string) => void;
 }) {
   return (
-    <Select value={currentAssetClass} onValueChange={setAssestClass}>
+    <Select value={currentAssetClass} onValueChange={setAssetClass}>
       <SelectTrigger
         className="hidden w-40 rounded-lg sm:ml-auto sm:flex"
         aria-label="Select an asset class"
@@ -24,7 +24,7 @@ export default function AssetClassSelect({
         <SelectValue placeholder="All" />
       </SelectTrigger>
       <SelectContent className="rounded-xl">
-        {assestClasses.map((assetClass) => (
+        {assetClasses.map((assetClass) => (
           <SelectItem
             key={assetClass}
             value={assetClass}

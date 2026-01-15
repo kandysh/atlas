@@ -4,7 +4,7 @@ import { TasksDataTable } from "@/src/components/features/tasks";
 import { Task } from "@/src/lib/types";
 import { useWorkspace } from "@/src/providers";
 import { useWorkspaceTasks } from "@/src/lib/query/hooks";
-import { useTaskEvents } from "@/src/hooks/useTaskEvents";
+import { useTaskEvents } from "@/src/hooks";
 
 export default function Page() {
   const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();

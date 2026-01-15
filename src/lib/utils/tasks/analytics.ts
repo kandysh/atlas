@@ -1,5 +1,5 @@
-import { DonutChartData, ThroughPutOverTimeData, ToolsUsed } from "../types";
-import { Task, Status } from "../types";
+import { DonutChartData, ThroughPutOverTimeData, ToolsUsed } from "@/src/lib/types/analytics";
+import { Task, Status } from "@/src/lib/types";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 const DEFAULT_STATUS: Status = "todo";

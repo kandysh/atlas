@@ -7,7 +7,7 @@ import {
   computeHoursSavedWorked,
   computeRemainingWorkTrend,
   computeToolsUsed,
-} from "@/src/lib/utils/analytics";
+} from "@/src/lib/utils/tasks/analytics";
 import { Task } from "@/src/lib/types";
 
 /**
