@@ -48,8 +48,13 @@ export function PriorityAgingChart({
     return order.indexOf(a) - order.indexOf(b);
   });
 
-  const transformedData = ageBuckets.map((bucket) => {
-    const row: any = { ageBucket: bucket };
+  interface TransformedRow {
+    ageBucket: string;
+    [priority: string]: string | number;
+  }
+
+  const transformedData: TransformedRow[] = ageBuckets.map((bucket) => {
+    const row: TransformedRow = { ageBucket: bucket };
     chartData
       .filter((d) => d.ageBucket === bucket)
       .forEach((d) => {

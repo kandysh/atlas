@@ -474,7 +474,7 @@ async function getOwnerProductivity(
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'status' = 'completed'
     AND data->>'owner' IS NOT NULL
-    AND data->>'owner' != ''`;
+    AND data->>'owner' != '' AND TRIM(data->>'owner') != ''`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
     : baseCondition;
@@ -668,7 +668,7 @@ async function getHoursEfficiency(
       CASE
         WHEN SUM(COALESCE((data->>'workedHrs')::numeric, 0)) > 0
         THEN (SUM(COALESCE((data->>'currentHrs')::numeric, 0)) / 
-              SUM(COALESCE((data->>'workedHrs')::numeric, 1)))::float
+              SUM(COALESCE((data->>'workedHrs')::numeric, 0)))::float
         ELSE 0
       END as efficiency,
       SUM(COALESCE((data->>'currentHrs')::numeric, 0))::float as current_hrs,

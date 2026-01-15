@@ -93,7 +93,8 @@ export function generateInsights(data: {
       message: `${tasksOver30Days.count} tasks stuck >30 days - review blocking issues`,
       action: {
         label: "Show",
-        onClick: () => console.log("Filter old tasks"),
+        // TODO: Implement filter action to show old tasks
+        onClick: () => {},
       },
     });
   }
@@ -111,7 +112,8 @@ export function generateInsights(data: {
       message: `${topPerformer.owner} completes ${Math.round((topPerformer.completed / avgPerformer.completed) * 100 - 100)}% faster than avg`,
       action: {
         label: "Compare",
-        onClick: () => console.log("Compare owners"),
+        // TODO: Implement owner comparison view
+        onClick: () => {},
       },
     });
   }
@@ -124,7 +126,8 @@ export function generateInsights(data: {
       message: `$${dollarValue.toLocaleString()} saved via automation`,
       action: {
         label: "Details",
-        onClick: () => console.log("Show hours details"),
+        // TODO: Implement hours details modal
+        onClick: () => {},
       },
     });
   }

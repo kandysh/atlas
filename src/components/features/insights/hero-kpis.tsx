@@ -98,11 +98,13 @@ function KPICard({
     return () => clearInterval(timer);
   }, [value, isLoading]);
 
-  const displayValue = isLoading
-    ? "-"
-    : decimals > 0
-      ? animatedValue.toFixed(decimals)
-      : Math.round(animatedValue).toLocaleString();
+  const formatDisplayValue = () => {
+    if (isLoading) return "-";
+    if (decimals > 0) return animatedValue.toFixed(decimals);
+    return Math.round(animatedValue).toLocaleString();
+  };
+
+  const displayValue = formatDisplayValue();
 
   return (
     <Card className="relative overflow-hidden bg-background/80 backdrop-blur transition-all hover:shadow-lg">
