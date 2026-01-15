@@ -1,7 +1,7 @@
 import { db } from "@/src/lib/db";
 import { tasks, workspaces } from "@/src/lib/db/schema";
 import { eq, max, and } from "drizzle-orm";
-import { generateTaskDisplayId } from "@/src/lib/utils/task-id-generator";
+import { generateTaskDisplayId } from "@/src/lib/utils";
 
 /**
  * Gets the next sequence number for a task in a workspace

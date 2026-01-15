@@ -9,7 +9,7 @@ import {
   updateTask as updateTaskAction,
 } from "@/src/lib/actions/tasks";
 import { getFields } from "@/src/lib/actions/fields";
-import { dbTaskToUiTask } from "@/src/lib/utils/task-mapper";
+import { dbTaskToUiTask } from "@/src/lib/utils";
 import { toast } from "sonner";
 import { queryKeys } from "./keys";
 

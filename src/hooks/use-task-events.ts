@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Task as DbTask } from "@/src/lib/db";
 import { Task as UiTask } from "@/src/lib/types";
 import { queryKeys } from "@/src/lib/query/keys";
-import { dbTaskToUiTask } from "@/src/lib/utils/task-mapper";
+import { dbTaskToUiTask } from "@/src/lib/utils";
 
 /**
  * Hook to listen to task updates via SSE

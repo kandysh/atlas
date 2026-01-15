@@ -2,7 +2,7 @@
 
 import { db, workspaces, workspaceMembers, fieldConfigs, Workspace } from "@/src/lib/db";
 import { eq, or } from "drizzle-orm";
-import { getDefaultFieldConfigs } from "@/src/lib/utils/default-field-configs";
+import { getDefaultFieldConfigs } from "@/src/lib/utils";
 
 /**
  * Get all workspaces for a user (where user is owner or member)

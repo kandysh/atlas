@@ -2,7 +2,7 @@
 
 import { db, tasks, workspaces, Task } from "@/src/lib/db";
 import { eq, desc, sql } from "drizzle-orm";
-import { generateTaskDisplayId } from "@/src/lib/utils/task-id-generator";
+import { generateTaskDisplayId } from "@/src/lib/utils";
 import { broadcastTaskUpdate } from "@/src/lib/sse/server";
 
 export type TasksResult = {
