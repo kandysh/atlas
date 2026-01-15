@@ -216,6 +216,7 @@ export function TasksDataTable({
         onClose={() => setIsDrawerOpen(false)}
         onUpdate={handleTaskUpdate}
         dbTaskId={selectedTask ? getDbId(selectedTask.id) : null}
+        workspaceId={activeWorkspaceId}
       />
     </>
   );

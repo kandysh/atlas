@@ -37,6 +37,7 @@ type TaskDetailDrawerProps = {
   onClose: () => void;
   onUpdate: (id: string, field: keyof Task, value: unknown) => void;
   dbTaskId?: string | null;
+  workspaceId: string;
 };
 
 export function TaskDetailDrawer({
@@ -46,6 +47,7 @@ export function TaskDetailDrawer({
   onClose,
   onUpdate,
   dbTaskId,
+  workspaceId,
 }: TaskDetailDrawerProps) {
   // Compute unique values from tasks array (DB tasks as single source of truth)
   const { uniqueOwners, uniqueAssetClasses, uniqueThemes } = useMemo(() => {
@@ -408,7 +410,7 @@ export function TaskDetailDrawer({
             </div>
 
             {/* Recent Activity / History */}
-            <TaskHistory taskId={task.id} dbTaskId={dbTaskId} />
+            <TaskHistory taskId={task.id} dbTaskId={dbTaskId} workspaceId={workspaceId} />
           </div>
         </div>
       </div>
