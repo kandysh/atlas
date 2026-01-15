@@ -1,17 +1,17 @@
 "use client";
 
+import { useMemo } from "react";
 import { X, Calendar, User, Clock, Briefcase, Users, Tag, FileText, CircleDot, Flag, Palette } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { StatusCell } from "./status-cell";
 import { PriorityCell } from "./priority-cell";
-import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/lib/utils";
 import { Task, Status, Priority } from "@/src/lib/types";
 import { EditableTextCell, EditableNumberCell, EditableDateCell, EditableTagsCell, EditableComboboxCell, EditableOwnerCell } from "./editable-cells";
-import { mockTasks } from "@/src/data";
 
 type TaskDetailDrawerProps = {
   task: Task | null;
+  tasks: Task[];
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (id: string, field: keyof Task, value: unknown) => void;
@@ -19,16 +19,20 @@ type TaskDetailDrawerProps = {
 
 export function TaskDetailDrawer({
   task,
+  tasks,
   isOpen,
   onClose,
   onUpdate,
 }: TaskDetailDrawerProps) {
-  if (!task) return null;
+  // Compute unique values from tasks array (DB tasks as single source of truth)
+  const { uniqueOwners, uniqueAssetClasses, uniqueThemes } = useMemo(() => {
+    const owners = Array.from(new Set(tasks.map(t => t.owner).filter(Boolean))).sort();
+    const assetClasses = Array.from(new Set(tasks.map(t => t.assetClass).filter(Boolean))).sort();
+    const themes = Array.from(new Set(tasks.map(t => t.theme).filter(Boolean))).sort();
+    return { uniqueOwners: owners, uniqueAssetClasses: assetClasses, uniqueThemes: themes };
+  }, [tasks]);
 
-  // Get unique values for dropdowns from all tasks
-  const uniqueOwners = Array.from(new Set(mockTasks.map(t => t.owner))).sort();
-  const uniqueAssetClasses = Array.from(new Set(mockTasks.map(t => t.assetClass))).sort();
-  const uniqueThemes = Array.from(new Set(mockTasks.map(t => t.theme))).sort();
+  if (!task) return null;
 
   const formatDateTime = (date: Date | null | undefined) => {
     if (!date) return "Not set";

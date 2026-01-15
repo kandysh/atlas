@@ -23,16 +23,6 @@ export const queryKeys = {
       [...queryKeys.tasks.all, { workspaceId }] as const,
     paginated: (workspaceId: string, page: number) =>
       [...queryKeys.tasks.all, { workspaceId, page }] as const,
-    statusCount: () => [...queryKeys.tasks.all, "statusCount"] as const,
-    throughputOverTime: () =>
-      [...queryKeys.tasks.all, "throughputOverTime"] as const,
-    cycleTime: () => [...queryKeys.tasks.all, "cycleTime"] as const,
-    hoursSavedWorked: () =>
-      [...queryKeys.tasks.all, "hoursSavedWorked"] as const,
-    remainingWorkTrend: () =>
-      [...queryKeys.tasks.all, "remainingWorkTrend"] as const,
-    toolsUsed: () => [...queryKeys.tasks.all, "toolsUsed"] as const,
-    assetClasses: () => [...queryKeys.tasks.all, "assetClasses"] as const,
   },
 
   // Field config keys

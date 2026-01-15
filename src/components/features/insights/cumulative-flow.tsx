@@ -15,7 +15,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/src/components/ui/chart";
-import { RemaingWorkTrend } from "@/src/lib/utils";
+import { RemainingWorkTrend } from "@/src/lib/utils";
 
 export const description = "A line chart with dots";
 
@@ -29,7 +29,7 @@ const chartConfig = {
 export function CumulativeFlowChart({
   chartData,
 }: {
-  chartData: RemaingWorkTrend[];
+  chartData: RemainingWorkTrend[];
 }) {
   return (
     <Card>

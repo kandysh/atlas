@@ -1,7 +1,6 @@
 "use client";
 
 import { TasksDataTable } from "@/src/components/features/tasks";
-import { mockTasks } from "@/src/data";
 import { Task } from "@/src/lib/types";
 import { useWorkspace } from "@/src/providers";
 import { useWorkspaceTasks } from "@/src/lib/query/hooks";
@@ -44,8 +43,8 @@ export default function Page() {
   // Connect to SSE for live updates
   useTaskEvents(workspaceId, 0);
 
-  // Use mock data as fallback during development
-  const tasks = data?.tasks || mockTasks;
+  // Get tasks from DB only - single source of truth
+  const tasks = data?.tasks || [];
 
   // Filter out completed tasks for active board
   const activeTasks: Task[] = tasks.filter(
@@ -60,10 +59,9 @@ export default function Page() {
             Active Tasks
           </h1>
           <p className="text-sm text-destructive mt-1">
-            Error loading tasks. Using mock data.
+            Error loading tasks. Please try again.
           </p>
         </div>
-        <TasksDataTable data={activeTasks} workspaceId={workspaceId} />
       </div>
     );
   }

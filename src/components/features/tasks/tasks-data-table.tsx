@@ -122,6 +122,7 @@ export function TasksDataTable({
 
       <TaskDetailDrawer
         task={selectedTask}
+        tasks={data}
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onUpdate={handleTaskUpdate}
