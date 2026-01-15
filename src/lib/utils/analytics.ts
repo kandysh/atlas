@@ -2,13 +2,20 @@ import { DonutChartData, ThroughPutOverTimeData, ToolsUsed } from "../types";
 import { Task, Status } from "../types";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
+const DEFAULT_STATUS: Status = "todo";
+
+/**
+ * Helper to filter completed tasks with valid completion dates
+ */
+const getCompletedTasksWithDates = (tasks: Task[]): Task[] =>
+  tasks.filter((t) => t.status === "completed" && t.completionDate);
 
 export const computeStatusCount = (tasks: Task[]): DonutChartData[] => {
   if (!tasks || tasks.length === 0) return [];
   
   const statusCounts = tasks.reduce(
     (acc, task) => {
-      const status = task.status || "todo";
+      const status = task.status || DEFAULT_STATUS;
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     },
@@ -54,8 +61,7 @@ export const computeThroughputOverTime = (
 ): ThroughPutOverTimeData[] => {
   if (!tasks || tasks.length === 0) return [];
   
-  const completed = tasks
-    .filter((x) => x.status === "completed" && x.completionDate)
+  const completed = getCompletedTasksWithDates(tasks)
     .sort(
       (a, b) =>
         a.completionDate!.getUTCMonth() - b.completionDate!.getUTCMonth(),
@@ -95,8 +101,7 @@ export interface RollingCycle extends MonthlyCycle {
 }
 
 export const getCompletedCyclePoints = (tasks: Task[]): CyclePoint[] =>
-  tasks
-    .filter((x) => x.status === "completed" && x.completionDate)
+  getCompletedTasksWithDates(tasks)
     .sort((a, b) => a.completionDate!.getTime() - b.completionDate!.getTime())
     .map((t) => ({
       completedAt: t.completionDate!,
@@ -161,21 +166,19 @@ export const computeHoursSavedWorked = (
   
   const monthlyMap = new Map<string, { worked: number; saved: number }>();
 
-  tasks
-    .filter((t) => t.status === "completed" && t.completionDate)
-    .forEach((task) => {
-      const month = task.completionDate!.toISOString().slice(0, 7); // yyyy-MM
+  getCompletedTasksWithDates(tasks).forEach((task) => {
+    const month = task.completionDate!.toISOString().slice(0, 7); // yyyy-MM
 
-      const prev = monthlyMap.get(month) ?? {
-        worked: 0,
-        saved: 0,
-      };
+    const prev = monthlyMap.get(month) ?? {
+      worked: 0,
+      saved: 0,
+    };
 
-      monthlyMap.set(month, {
-        worked: prev.worked + (task.workedHrs || 0),
-        saved: prev.saved + (task.savedHrs || 0),
-      });
+    monthlyMap.set(month, {
+      worked: prev.worked + (task.workedHrs || 0),
+      saved: prev.saved + (task.savedHrs || 0),
     });
+  });
 
   // sort months chronologically
   return Array.from(monthlyMap.entries())
@@ -197,7 +200,7 @@ export const computeRemainingWorkTrend = (tasks: Task[]): RemainingWorkTrend[] =
   if (tasks.length === 0) return [];
 
   const createdDates = tasks.map((t) => t.createdAt);
-  const completedTasks = tasks.filter((t) => t.status === "completed" && t.completionDate);
+  const completedTasks = getCompletedTasksWithDates(tasks);
   
   if (completedTasks.length === 0) return [];
   
