@@ -3,7 +3,7 @@
 import { db, workspaces, workspaceMembers } from "@/src/lib/db";
 import { eq, or } from "drizzle-orm";
 
-export async function getWorkspaces(userId: string) {
+export async function getWorkspaces(userId: number) {
   try {
     // Get all workspaces where user is owner or member
     const userWorkspaces = await db

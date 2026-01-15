@@ -1,9 +1,21 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useState, useMemo, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Workspace as DBWorkspace, User } from "@/src/lib/db/schema";
-import { getWorkspaces } from "@/src/lib/api/workspaces";
+import {
+  getWorkspaces,
+  createWorkspace as createWorkspaceAction,
+} from "@/src/lib/actions/workspaces";
+import { initUser } from "@/src/lib/actions/user";
+import { queryKeys } from "@/src/lib/query/keys";
 
 interface WorkspaceContextType {
   currentWorkspace: DBWorkspace | null;
@@ -21,44 +33,39 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
   undefined
 );
 
-// Query key factory for consistency
-export const workspaceQueryKeys = {
-  all: ["workspaces"] as const,
-  user: (userId: string) => ["workspaces", "user", userId] as const,
-  currentUser: ["user", "current"] as const,
-};
-
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [currentWorkspace, setCurrentWorkspace] = useState<DBWorkspace | null>(null);
+  const [currentWorkspace, setCurrentWorkspace] =
+    useState<DBWorkspace | null>(null);
 
-  // Fetch current user from USERINFO env var
+  // Fetch current user from USERINFO env var using server action
   const {
     data: user,
     isLoading: isLoadingUser,
     error: userError,
   } = useQuery({
-    queryKey: workspaceQueryKeys.currentUser,
+    queryKey: queryKeys.user.current(),
     queryFn: async () => {
-      const response = await fetch("/api/user/init");
-      if (!response.ok) {
-        throw new Error("Failed to initialize user");
+      const result = await initUser();
+      if (!result.success) {
+        throw new Error(result.error);
       }
-      const data = await response.json();
-      return data.user as User;
+      return result.user;
     },
     staleTime: Infinity, // User info doesn't change during session
     retry: 2,
   });
 
-  // Fetch workspaces for the user
+  // Fetch workspaces for the user using server action
   const {
     data: workspacesData,
     isLoading: isLoadingWorkspaces,
     error: workspacesError,
     refetch,
   } = useQuery({
-    queryKey: user ? workspaceQueryKeys.user(user.id) : ["workspaces", "pending"],
+    queryKey: user
+      ? queryKeys.workspaces.byUser(user.id)
+      : ["workspaces", "pending"],
     queryFn: async () => {
       if (!user) return [];
       const result = await getWorkspaces(user.id);
@@ -75,27 +82,22 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: false,
   });
 
-  // Mutation to create a new workspace
+  // Mutation to create a new workspace using server action
   const createWorkspaceMutation = useMutation({
     mutationFn: async (name: string) => {
       if (!user) throw new Error("User not initialized");
-      
-      const response = await fetch("/api/workspaces", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, ownerUserId: user.id }),
-      });
 
-      if (!response.ok) {
-        throw new Error("Failed to create workspace");
+      const result = await createWorkspaceAction(name, user.id);
+      if (!result.success) {
+        throw new Error(result.error);
       }
-
-      const data = await response.json();
-      return data.workspace as DBWorkspace;
+      return result.workspace;
     },
     onSuccess: (newWorkspace) => {
       // Invalidate and refetch workspaces
-      queryClient.invalidateQueries({ queryKey: workspaceQueryKeys.user(user!.id) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.workspaces.byUser(user!.id),
+      });
       // Set the new workspace as current
       setCurrentWorkspace(newWorkspace);
     },

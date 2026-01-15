@@ -9,12 +9,12 @@ import {
   mockDataToDonut,
   mockDataToThroughputOverTime,
 } from "@/src/lib/utils/analytics";
-import { taskKeys } from "@/src/lib/api/tasks.keys";
+import { queryKeys } from "@/src/lib/query/keys";
 import { Task } from "@/src/lib/types";
 
 export const useTasks = (assetClass: string) => {
   return useQuery({
-    queryKey: taskKeys.all,
+    queryKey: queryKeys.tasks.all,
     queryFn: () => {
       if (assetClass === "All") return mockTasks;
       return mockTasks.filter(
@@ -26,7 +26,7 @@ export const useTasks = (assetClass: string) => {
 
 export const useTasksWithStatusCount = (mockData: Task[]) => {
   return useQuery({
-    queryKey: taskKeys.allTaskWithStatusCount(),
+    queryKey: queryKeys.tasks.statusCount(),
     queryFn: () => {
       return mockDataToDonut(mockData);
     },
@@ -35,7 +35,7 @@ export const useTasksWithStatusCount = (mockData: Task[]) => {
 
 export const useTasksWithThroughputOverTime = (mockData: Task[]) => {
   return useQuery({
-    queryKey: taskKeys.allTaskWithThroughputOverTime(),
+    queryKey: queryKeys.tasks.throughputOverTime(),
     queryFn: () => {
       return mockDataToThroughputOverTime(mockData);
     },
@@ -44,7 +44,7 @@ export const useTasksWithThroughputOverTime = (mockData: Task[]) => {
 
 export const useTasksWithCycleTime = (mockData: Task[]) => {
   return useQuery({
-    queryKey: taskKeys.allTasksWithCycleTime(),
+    queryKey: queryKeys.tasks.cycleTime(),
     queryFn: () => {
       return mockDataForCycleTime(mockData);
     },
@@ -53,7 +53,7 @@ export const useTasksWithCycleTime = (mockData: Task[]) => {
 
 export const useTasksWithHoursSavedWorked = (mockData: Task[]) => {
   return useQuery({
-    queryKey: taskKeys.allTasksWithHoursSavedWorked(),
+    queryKey: queryKeys.tasks.hoursSavedWorked(),
     queryFn: () => {
       return mockDataForHoursSavedWorked(mockData);
     },
@@ -62,7 +62,7 @@ export const useTasksWithHoursSavedWorked = (mockData: Task[]) => {
 
 export const useTasksRemainingWorkTrend = (mockData: Task[]) => {
   return useQuery({
-    queryKey: taskKeys.allTasksRemainingWorkTrend(),
+    queryKey: queryKeys.tasks.remainingWorkTrend(),
     queryFn: () => {
       return mockDataForRemainingWorkTrend(mockData);
     },
@@ -70,7 +70,7 @@ export const useTasksRemainingWorkTrend = (mockData: Task[]) => {
 };
 export const useTasksToolUsed = (mockData: Task[]) => {
   return useQuery({
-    queryKey: taskKeys.allTasksToolsUsed(),
+    queryKey: queryKeys.tasks.toolsUsed(),
     queryFn: () => {
       return mockDataForToolsUsed(mockData);
     },
@@ -79,7 +79,7 @@ export const useTasksToolUsed = (mockData: Task[]) => {
 
 export const useTaskAssestClasses = () => {
   return useQuery({
-    queryKey: taskKeys.assestClasses(),
+    queryKey: queryKeys.tasks.assetClasses(),
     queryFn: () => {
       return new Set(mockTasks.map((x) => x.assetClass.toLowerCase()));
     },
