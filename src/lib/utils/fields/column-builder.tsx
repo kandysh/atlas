@@ -83,6 +83,7 @@ export function buildColumnsFromFieldConfigs(
   onUpdate?: (taskId: string, field: string, value: any) => void,
   onViewDetails?: (task: Task) => void,
   onDelete?: (taskId: string) => void,
+  onDuplicate?: (taskId: string) => void,
 ): ColumnDef<Task>[] {
   const uniqueValues = extractUniqueFieldValues(tasks, fieldConfigs);
 
@@ -94,7 +95,7 @@ export function buildColumnsFromFieldConfigs(
     createColumnFromFieldConfig(fieldConfig, onUpdate, uniqueValues),
   );
 
-  columns.push(createActionsColumn(onViewDetails, onDelete));
+  columns.push(createActionsColumn(onViewDetails, onDelete, onDuplicate));
 
   return columns;
 }
@@ -138,6 +139,7 @@ function createColumnFromFieldConfig(
 function createActionsColumn(
   onViewDetails?: (task: Task) => void,
   onDelete?: (taskId: string) => void,
+  onDuplicate?: (taskId: string) => void,
 ): ColumnDef<Task> {
   return {
     id: "actions",
@@ -152,6 +154,9 @@ function createActionsColumn(
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => onViewDetails?.(row.original)}>
             View details
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onDuplicate?.(row.original.id)}>
+            Duplicate
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem 

@@ -5,13 +5,15 @@ import { useState, useMemo, useCallback } from "react";
 import { Task } from "@/src/lib/types";
 import { DataTable } from "@/src/components/ui/data-table";
 import { TaskDetailDrawer } from "./task-detail-drawer";
-import { TasksToolbar } from "./tasks-toolbar";
+import { DynamicToolbar } from "./dynamic-toolbar";
 import { 
   useCreateTask, 
   useUpdateTask,
   useDeleteTask,
   useDeleteTasks,
-  useWorkspaceFields 
+  useDuplicateTask,
+  useWorkspaceFields,
+  useUpdateFieldVisibility,
 } from "@/src/lib/query/hooks";
 import { useWorkspace } from "@/src/providers";
 import { buildColumnsFromFieldConfigs } from "@/src/lib/utils";
@@ -40,6 +42,8 @@ export function TasksDataTable({
   const updateTaskMutation = useUpdateTask(activeWorkspaceId, 0);
   const deleteTaskMutation = useDeleteTask(activeWorkspaceId, 0);
   const deleteTasksMutation = useDeleteTasks(activeWorkspaceId);
+  const duplicateTaskMutation = useDuplicateTask(activeWorkspaceId);
+  const updateFieldVisibilityMutation = useUpdateFieldVisibility(activeWorkspaceId);
   const { data: fieldsData, isLoading: isLoadingFields } = useWorkspaceFields(activeWorkspaceId);
   
   const fieldConfigs = fieldsData?.fields || [];
@@ -121,6 +125,17 @@ export function TasksDataTable({
     }
   }, [deleteTasksMutation, getDbId]);
 
+  const handleDuplicateTask = useCallback((displayId: string) => {
+    const dbId = getDbId(displayId);
+    if (dbId) {
+      duplicateTaskMutation.mutate(dbId);
+    }
+  }, [duplicateTaskMutation, getDbId]);
+
+  const handleToggleFieldVisibility = useCallback((fieldId: string, visible: boolean) => {
+    updateFieldVisibilityMutation.mutate({ fieldId, visible });
+  }, [updateFieldVisibilityMutation]);
+
   const handleTaskUpdate = useCallback((
     displayId: string,
     field: string,
@@ -147,7 +162,8 @@ export function TasksDataTable({
         data, 
         handleTaskUpdate,
         handleRowClick,
-        handleDeleteTask
+        handleDeleteTask,
+        handleDuplicateTask
       );
     }
     
@@ -156,7 +172,8 @@ export function TasksDataTable({
       uniqueAssetClasses, 
       handleTaskUpdate,
       handleRowClick,
-      handleDeleteTask
+      handleDeleteTask,
+      handleDuplicateTask
     );
   }, [
     externalColumns, 
@@ -166,6 +183,7 @@ export function TasksDataTable({
     handleTaskUpdate,
     handleRowClick,
     handleDeleteTask,
+    handleDuplicateTask,
     uniqueOwners, 
     uniqueAssetClasses
   ]);
@@ -180,12 +198,13 @@ export function TasksDataTable({
         // TODO: Implement drag-and-drop reordering - currently disabled
         enableDragHandle={false}
         toolbar={(table) => (
-          <TasksToolbar
+          <DynamicToolbar
             table={table}
-            uniqueOwners={uniqueOwners}
-            uniqueAssetClasses={uniqueAssetClasses}
+            fieldConfigs={fieldConfigs}
+            tasks={data}
             onAddTask={handleAddTask}
             onDeleteSelected={handleDeleteSelected}
+            onToggleFieldVisibility={handleToggleFieldVisibility}
           />
         )}
       />

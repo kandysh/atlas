@@ -1,6 +1,6 @@
 "use server";
 
-import { db, tasks, workspaces, Task } from "@/src/lib/db";
+import { db, tasks, workspaces, taskEvents, Task } from "@/src/lib/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { generateTaskDisplayId } from "@/src/lib/utils";
 import { broadcastTaskUpdate } from "@/src/lib/sse/server";
@@ -101,6 +101,15 @@ export async function createTask(
       })
       .returning();
 
+    // Log creation event
+    await db.insert(taskEvents).values({
+      workspaceId,
+      taskId: newTask.id,
+      eventType: "created",
+      newValue: data,
+      metadata: { version: 1, displayId },
+    });
+
     return { success: true, task: newTask };
   } catch (error) {
     console.error("Error creating task:", error);
@@ -124,6 +133,17 @@ export async function updateTask(
       return { success: false, error: "patch object is required" };
     }
 
+    // Get current task to log changes
+    const [currentTask] = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.id, taskId))
+      .limit(1);
+
+    if (!currentTask) {
+      return { success: false, error: "Task not found" };
+    }
+
     // Update the task using JSONB merge (data || patch)
     const [updatedTask] = await db
       .update(tasks)
@@ -135,9 +155,20 @@ export async function updateTask(
       .where(eq(tasks.id, taskId))
       .returning();
 
-    if (!updatedTask) {
-      return { success: false, error: "Task not found" };
-    }
+    // Log update events for each changed field
+    const eventPromises = Object.entries(patch).map(([field, newValue]) => {
+      const oldValue = (currentTask.data as Record<string, unknown>)?.[field];
+      return db.insert(taskEvents).values({
+        workspaceId: currentTask.workspaceId,
+        taskId: currentTask.id,
+        eventType: "updated",
+        field,
+        oldValue: oldValue !== undefined ? oldValue : null,
+        newValue: newValue !== undefined ? newValue : null,
+        metadata: { version: updatedTask.version, displayId: currentTask.displayId },
+      });
+    });
+    await Promise.all(eventPromises);
 
     // Broadcast the update to SSE clients
     broadcastTaskUpdate(updatedTask);
@@ -200,5 +231,91 @@ export async function deleteTasks(
   } catch (error) {
     console.error("Error deleting tasks:", error);
     return { success: false, error: "Failed to delete tasks" };
+  }
+}
+
+/**
+ * Duplicate a task
+ */
+export async function duplicateTask(
+  taskId: string
+): Promise<{ success: true; task: Task } | { success: false; error: string }> {
+  try {
+    if (!taskId) {
+      return { success: false, error: "taskId is required" };
+    }
+
+    // Get the original task
+    const [originalTask] = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.id, taskId))
+      .limit(1);
+
+    if (!originalTask) {
+      return { success: false, error: "Task not found" };
+    }
+
+    // Get next sequence number
+    const latestTask = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.workspaceId, originalTask.workspaceId))
+      .orderBy(desc(tasks.sequenceNumber))
+      .limit(1);
+
+    const sequenceNumber =
+      latestTask.length > 0 ? latestTask[0].sequenceNumber + 1 : 1;
+
+    // Get workspace numeric ID
+    const [workspace] = await db
+      .select({ numericId: workspaces.numericId })
+      .from(workspaces)
+      .where(eq(workspaces.id, originalTask.workspaceId))
+      .limit(1);
+
+    if (!workspace) {
+      return { success: false, error: "Workspace not found" };
+    }
+
+    const displayId = generateTaskDisplayId(workspace.numericId, sequenceNumber);
+
+    // Duplicate task data with modified title
+    const duplicatedData = {
+      ...(originalTask.data as Record<string, unknown>),
+      title: `${(originalTask.data as Record<string, unknown>)?.title || "Task"} (Copy)`,
+      status: "todo", // Reset status to todo
+    };
+
+    // Insert the duplicated task
+    const [newTask] = await db
+      .insert(tasks)
+      .values({
+        workspaceId: originalTask.workspaceId,
+        displayId,
+        sequenceNumber,
+        data: duplicatedData,
+        version: 1,
+      })
+      .returning();
+
+    // Log duplication event
+    await db.insert(taskEvents).values({
+      workspaceId: originalTask.workspaceId,
+      taskId: newTask.id,
+      eventType: "duplicated",
+      newValue: duplicatedData,
+      metadata: { 
+        version: 1, 
+        displayId, 
+        sourceTaskId: originalTask.id,
+        sourceDisplayId: originalTask.displayId,
+      },
+    });
+
+    return { success: true, task: newTask };
+  } catch (error) {
+    console.error("Error duplicating task:", error);
+    return { success: false, error: "Failed to duplicate task" };
   }
 }

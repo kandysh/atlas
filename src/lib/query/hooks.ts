@@ -9,8 +9,12 @@ import {
   updateTask as updateTaskAction,
   deleteTask as deleteTaskAction,
   deleteTasks as deleteTasksAction,
+  duplicateTask as duplicateTaskAction,
 } from "@/src/lib/actions/tasks";
-import { getFields } from "@/src/lib/actions/fields";
+import { 
+  getFields,
+  updateFieldVisibility as updateFieldVisibilityAction,
+} from "@/src/lib/actions/fields";
 import { dbTaskToUiTask } from "@/src/lib/utils";
 import { toast } from "sonner";
 import { queryKeys } from "./keys";
@@ -277,6 +281,59 @@ export function useDeleteTasks(workspaceId: string) {
     onError: (error) => {
       console.error("Failed to delete tasks:", error);
       toast.error("Failed to delete tasks");
+    },
+  });
+}
+
+/**
+ * Hook to duplicate a task
+ */
+export function useDuplicateTask(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      const result = await duplicateTaskAction(taskId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.task;
+    },
+    onSuccess: (newTask) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.byWorkspace(workspaceId),
+      });
+      toast.success("Task duplicated");
+    },
+    onError: (error) => {
+      console.error("Failed to duplicate task:", error);
+      toast.error("Failed to duplicate task");
+    },
+  });
+}
+
+/**
+ * Hook to update field visibility
+ */
+export function useUpdateFieldVisibility(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ fieldId, visible }: { fieldId: string; visible: boolean }) => {
+      const result = await updateFieldVisibilityAction(fieldId, visible);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.field;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.fields.byWorkspace(workspaceId),
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to update field visibility:", error);
+      toast.error("Failed to update column visibility");
     },
   });
 }

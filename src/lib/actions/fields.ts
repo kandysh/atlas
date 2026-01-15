@@ -26,3 +26,62 @@ export async function getFields(
     return { success: false, error: "Failed to fetch fields" };
   }
 }
+
+/**
+ * Update a field's visibility
+ */
+export async function updateFieldVisibility(
+  fieldId: string,
+  visible: boolean
+): Promise<{ success: true; field: FieldConfig } | { success: false; error: string }> {
+  try {
+    if (!fieldId) {
+      return { success: false, error: "fieldId is required" };
+    }
+
+    const [updatedField] = await db
+      .update(fieldConfigs)
+      .set({
+        visible,
+        updatedAt: new Date(),
+      })
+      .where(eq(fieldConfigs.id, fieldId))
+      .returning();
+
+    if (!updatedField) {
+      return { success: false, error: "Field not found" };
+    }
+
+    return { success: true, field: updatedField };
+  } catch (error) {
+    console.error("Error updating field visibility:", error);
+    return { success: false, error: "Failed to update field visibility" };
+  }
+}
+
+/**
+ * Batch update multiple field visibilities
+ */
+export async function updateFieldsVisibility(
+  updates: { fieldId: string; visible: boolean }[]
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    if (!updates || updates.length === 0) {
+      return { success: false, error: "updates array is required" };
+    }
+
+    await Promise.all(
+      updates.map(({ fieldId, visible }) =>
+        db
+          .update(fieldConfigs)
+          .set({ visible, updatedAt: new Date() })
+          .where(eq(fieldConfigs.id, fieldId))
+      )
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating field visibilities:", error);
+    return { success: false, error: "Failed to update field visibilities" };
+  }
+}

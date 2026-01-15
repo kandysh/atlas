@@ -27,7 +27,8 @@ export const createColumns = (
   uniqueAssetClasses: string[],
   onUpdate?: (taskId: string, field: string, value: any) => void,
   onViewDetails?: (task: Task) => void,
-  onDelete?: (taskId: string) => void
+  onDelete?: (taskId: string) => void,
+  onDuplicate?: (taskId: string) => void
 ): ColumnDef<Task>[] => [
   {
     accessorKey: "title",
@@ -305,6 +306,9 @@ export const createColumns = (
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onViewDetails?.(row.original)}>
               View details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onDuplicate?.(row.original.id)}>
+              Duplicate
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 

@@ -2,6 +2,7 @@
 export { columns, createColumns } from "./columns";
 export { TasksDataTable } from "./tasks-data-table";
 export { TasksToolbar } from "./tasks-toolbar";
+export { DynamicToolbar } from "./dynamic-toolbar";
 export { 
   EditableTextCell, 
   EditableNumberCell, 

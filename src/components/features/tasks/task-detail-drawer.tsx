@@ -1,13 +1,32 @@
 "use client";
 
 import { useMemo } from "react";
-import { X, Calendar, User, Clock, Briefcase, Users, Tag, FileText, CircleDot, Flag, Palette } from "lucide-react";
+import {
+  X,
+  Calendar,
+  User,
+  Clock,
+  Briefcase,
+  Users,
+  Tag,
+  FileText,
+  CircleDot,
+  Flag,
+  Palette,
+} from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { StatusCell } from "./status-cell";
 import { PriorityCell } from "./priority-cell";
 import { cn } from "@/src/lib/utils";
 import { Task, Status, Priority } from "@/src/lib/types";
-import { EditableTextCell, EditableNumberCell, EditableDateCell, EditableTagsCell, EditableComboboxCell, EditableOwnerCell } from "./editable-cells";
+import {
+  EditableTextCell,
+  EditableNumberCell,
+  EditableDateCell,
+  EditableTagsCell,
+  EditableComboboxCell,
+  EditableOwnerCell,
+} from "./editable-cells";
 
 type TaskDetailDrawerProps = {
   task: Task | null;
@@ -26,10 +45,20 @@ export function TaskDetailDrawer({
 }: TaskDetailDrawerProps) {
   // Compute unique values from tasks array (DB tasks as single source of truth)
   const { uniqueOwners, uniqueAssetClasses, uniqueThemes } = useMemo(() => {
-    const owners = Array.from(new Set(tasks.map(t => t.owner).filter(Boolean))).sort();
-    const assetClasses = Array.from(new Set(tasks.map(t => t.assetClass).filter(Boolean))).sort();
-    const themes = Array.from(new Set(tasks.map(t => t.theme).filter(Boolean))).sort();
-    return { uniqueOwners: owners, uniqueAssetClasses: assetClasses, uniqueThemes: themes };
+    const owners = Array.from(
+      new Set(tasks.map((t) => t.owner).filter(Boolean)),
+    ).sort();
+    const assetClasses = Array.from(
+      new Set(tasks.map((t) => t.assetClass).filter(Boolean)),
+    ).sort();
+    const themes = Array.from(
+      new Set(tasks.map((t) => t.theme).filter(Boolean)),
+    ).sort();
+    return {
+      uniqueOwners: owners,
+      uniqueAssetClasses: assetClasses,
+      uniqueThemes: themes,
+    };
   }, [tasks]);
 
   if (!task) return null;
@@ -51,7 +80,7 @@ export function TaskDetailDrawer({
       <div
         className={cn(
           "fixed inset-0 bg-background/80 backdrop-blur-sm z-40 transition-opacity duration-300",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
         onClick={onClose}
       />
@@ -60,7 +89,7 @@ export function TaskDetailDrawer({
       <div
         className={cn(
           "fixed right-0 top-0 h-full w-full md:w-[650px] bg-card border-l border-border shadow-2xl z-50 transition-transform duration-300 ease-out overflow-y-auto",
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
         <div className="flex flex-col h-full">
@@ -99,38 +128,32 @@ export function TaskDetailDrawer({
             </div>
 
             {/* Problem Statement */}
-            {task.problemStatement && (
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Problem Statement
-                </label>
-                <EditableTextCell
-                  value={task.problemStatement}
-                  onChange={(value) =>
-                    onUpdate(task.id, "problemStatement", value)
-                  }
-                  multiline
-                  className="text-sm text-foreground/80 leading-relaxed"
-                />
-              </div>
-            )}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Problem Statement
+              </label>
+              <EditableTextCell
+                value={task.problemStatement}
+                onChange={(value) =>
+                  onUpdate(task.id, "problemStatement", value)
+                }
+                multiline
+                className="text-sm text-foreground/80 leading-relaxed"
+              />
+            </div>
 
             {/* Solution Design */}
-            {task.solutionDesign && (
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Solution Design
-                </label>
-                <EditableTextCell
-                  value={task.solutionDesign}
-                  onChange={(value) =>
-                    onUpdate(task.id, "solutionDesign", value)
-                  }
-                  multiline
-                  className="text-sm text-foreground/80 leading-relaxed"
-                />
-              </div>
-            )}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Solution Design
+              </label>
+              <EditableTextCell
+                value={task.solutionDesign}
+                onChange={(value) => onUpdate(task.id, "solutionDesign", value)}
+                multiline
+                className="text-sm text-foreground/80 leading-relaxed"
+              />
+            </div>
 
             {/* Properties Grid */}
             <div className="space-y-4 pt-4 border-t border-border">
@@ -220,7 +243,9 @@ export function TaskDetailDrawer({
                   </div>
                   <EditableTagsCell
                     value={task.teamsInvolved || []}
-                    onChange={(value) => onUpdate(task.id, "teamsInvolved", value)}
+                    onChange={(value) =>
+                      onUpdate(task.id, "teamsInvolved", value)
+                    }
                     placeholder="Add team..."
                     className="flex-1 max-w-[300px]"
                   />
@@ -279,9 +304,7 @@ export function TaskDetailDrawer({
                   <div className="text-2xl font-bold text-success">
                     <EditableNumberCell
                       value={task.savedHrs}
-                      onChange={(value) =>
-                        onUpdate(task.id, "savedHrs", value)
-                      }
+                      onChange={(value) => onUpdate(task.id, "savedHrs", value)}
                     />
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -292,34 +315,30 @@ export function TaskDetailDrawer({
             </div>
 
             {/* Benefits */}
-            {task.benefits && (
-              <div className="space-y-2 pt-4 border-t border-border">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Benefits
-                </label>
-                <EditableTextCell
-                  value={task.benefits}
-                  onChange={(value) => onUpdate(task.id, "benefits", value)}
-                  multiline
-                  className="text-sm text-foreground/80 leading-relaxed"
-                />
-              </div>
-            )}
+            <div className="space-y-2 pt-4 border-t border-border">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Benefits
+              </label>
+              <EditableTextCell
+                value={task.benefits}
+                onChange={(value) => onUpdate(task.id, "benefits", value)}
+                multiline
+                className="text-sm text-foreground/80 leading-relaxed"
+              />
+            </div>
 
             {/* Other Use Cases */}
-            {task.otherUseCases && (
-              <div className="space-y-2 pt-4 border-t border-border">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Other Use Cases
-                </label>
-                <EditableTextCell
-                  value={task.otherUseCases}
-                  onChange={(value) => onUpdate(task.id, "otherUseCases", value)}
-                  multiline
-                  className="text-sm text-foreground/80 leading-relaxed"
-                />
-              </div>
-            )}
+            <div className="space-y-2 pt-4 border-t border-border">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Other Use Cases
+              </label>
+              <EditableTextCell
+                value={task.otherUseCases}
+                onChange={(value) => onUpdate(task.id, "otherUseCases", value)}
+                multiline
+                className="text-sm text-foreground/80 leading-relaxed"
+              />
+            </div>
 
             {/* Tools */}
             <div className="space-y-2 pt-4 border-t border-border">

@@ -45,8 +45,8 @@ export default function RootLayout({
               </SidebarProvider>
             </WorkspaceLoader>
           </WorkspaceProvider>
-          <Toaster 
-            position="top-right" 
+          <Toaster
+            position="bottom-left"
             toastOptions={{
               duration: 3000,
             }}
