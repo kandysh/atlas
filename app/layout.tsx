@@ -45,7 +45,12 @@ export default function RootLayout({
               </SidebarProvider>
             </WorkspaceLoader>
           </WorkspaceProvider>
-          <Toaster richColors position="bottom-right" />
+          <Toaster 
+            position="top-right" 
+            toastOptions={{
+              duration: 3000,
+            }}
+          />
         </ReactQueryProvider>
       </body>
     </html>

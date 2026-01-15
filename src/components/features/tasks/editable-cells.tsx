@@ -394,17 +394,17 @@ export function EditableDateCell({
     const diffDays = Math.floor((dateValue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
     if (diffDays < 0) {
-      // Past date - overdue (red)
-      return "text-destructive";
+      // Past date - overdue
+      return "text-date-overdue";
     } else if (diffDays === 0) {
-      // Today (green)
-      return "text-green-600 dark:text-green-500";
+      // Today
+      return "text-date-today";
     } else if (diffDays <= 7) {
-      // Within a week (amber/warning)
-      return "text-amber-600 dark:text-amber-500";
+      // Within a week
+      return "text-date-soon";
     } else {
-      // Future (default)
-      return "text-foreground";
+      // Future
+      return "text-date-future";
     }
   };
 
