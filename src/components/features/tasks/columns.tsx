@@ -25,7 +25,9 @@ import { format } from "date-fns";
 export const createColumns = (
   uniqueOwners: string[],
   uniqueAssetClasses: string[],
-  onUpdate?: (taskId: string, field: string, value: any) => void
+  onUpdate?: (taskId: string, field: string, value: any) => void,
+  onViewDetails?: (task: Task) => void,
+  onDelete?: (taskId: string) => void
 ): ColumnDef<Task>[] => [
   {
     accessorKey: "title",
@@ -301,11 +303,14 @@ export const createColumns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>View details</DropdownMenuItem>
-            <DropdownMenuItem>Edit task</DropdownMenuItem>
-            <DropdownMenuItem>Duplicate</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onViewDetails?.(row.original)}>
+              View details
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem 
+              className="text-destructive"
+              onClick={() => onDelete?.(row.original.id)}
+            >
               Delete task
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -2,6 +2,7 @@ import { AppSidebar, WorkspaceLoader } from "@/src/components/layout";
 import { SidebarProvider, SidebarInset } from "@/src/components/ui/sidebar";
 import ReactQueryProvider from "@/src/providers/react-query-provider";
 import { WorkspaceProvider } from "@/src/providers/workspace-provider";
+import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -44,6 +45,7 @@ export default function RootLayout({
               </SidebarProvider>
             </WorkspaceLoader>
           </WorkspaceProvider>
+          <Toaster richColors position="bottom-right" />
         </ReactQueryProvider>
       </body>
     </html>

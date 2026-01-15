@@ -382,6 +382,32 @@ export function EditableDateCell({
     });
   };
 
+  // Color coding based on date relative to today
+  const getDateColorClass = (date: Date | null) => {
+    if (!date) return "text-muted-foreground";
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dateValue = new Date(date);
+    dateValue.setHours(0, 0, 0, 0);
+    
+    const diffDays = Math.floor((dateValue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+      // Past date - overdue (red)
+      return "text-destructive";
+    } else if (diffDays === 0) {
+      // Today (green)
+      return "text-green-600 dark:text-green-500";
+    } else if (diffDays <= 7) {
+      // Within a week (amber/warning)
+      return "text-amber-600 dark:text-amber-500";
+    } else {
+      // Future (default)
+      return "text-foreground";
+    }
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -391,7 +417,7 @@ export function EditableDateCell({
           onClick={(e) => e.stopPropagation()}
           className={cn(
             "justify-start text-left font-normal hover:bg-accent/50",
-            !value && "text-muted-foreground",
+            getDateColorClass(value),
             className,
           )}
         >

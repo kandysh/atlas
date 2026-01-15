@@ -65,6 +65,36 @@ export function TasksDataTable({
       title: "New Task",
       status: "todo",
       priority: "medium",
+    }, {
+      onSuccess: (newTask) => {
+        // Open drawer with the new task for immediate editing
+        if (newTask) {
+          const newUiTask = {
+            id: newTask.displayId,
+            title: (newTask.data as Record<string, unknown>)?.title as string || "New Task",
+            status: ((newTask.data as Record<string, unknown>)?.status as string) || "todo",
+            priority: ((newTask.data as Record<string, unknown>)?.priority as string) || "medium",
+            owner: "",
+            assetClass: "",
+            teamsInvolved: [],
+            theme: "",
+            problemStatement: "",
+            solutionDesign: "",
+            benefits: "",
+            currentHrs: 0,
+            savedHrs: 0,
+            workedHrs: 0,
+            tools: [],
+            otherUseCases: "",
+            tags: [],
+            completionDate: null,
+            createdAt: newTask.createdAt,
+            updatedAt: newTask.updatedAt,
+          } as Task;
+          setSelectedTask(newUiTask);
+          setIsDrawerOpen(true);
+        }
+      }
     });
   }, [createTaskMutation]);
 
@@ -121,7 +151,13 @@ export function TasksDataTable({
       );
     }
     
-    return createColumns(uniqueOwners, uniqueAssetClasses, handleTaskUpdate);
+    return createColumns(
+      uniqueOwners, 
+      uniqueAssetClasses, 
+      handleTaskUpdate,
+      handleRowClick,
+      handleDeleteTask
+    );
   }, [
     externalColumns, 
     fieldConfigs, 

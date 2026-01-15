@@ -10,24 +10,37 @@ import {
 } from "@/src/components/ui/dropdown-menu";
 import { Button } from "@/src/components/ui/button";
 import { useSidebar } from "@/src/components/ui/sidebar";
-
-// Mock user data - replace with real data from auth context
-const user = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  avatar: null, // URL to avatar image
-};
+import { useWorkspace } from "@/src/providers/workspace-provider";
 
 export default function NavUser() {
   const { state } = useSidebar();
+  const { user, isLoading } = useWorkspace();
   const isCollapsed = state === "collapsed";
+
+  // Show loading state
+  if (isLoading || !user) {
+    return (
+      <div className={isCollapsed ? "p-2" : "py-2 px-3"}>
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+          {!isCollapsed && (
+            <div className="flex-1 space-y-1">
+              <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+              <div className="h-3 w-28 bg-muted animate-pulse rounded" />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const getInitials = () => {
     return user.name
       .split(" ")
       .map((n) => n[0])
       .join("")
-      .toUpperCase();
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   // Collapsed state - icon only
@@ -55,6 +68,7 @@ export default function NavUser() {
 
           <DropdownMenuSeparator />
 
+          {/* TODO: Implement profile and settings pages
           <DropdownMenuItem className="cursor-pointer">
             <User className="h-4 w-4 mr-2" />
             <span>Profile</span>
@@ -66,8 +80,9 @@ export default function NavUser() {
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
+          */}
 
-          <DropdownMenuItem className="cursor-pointer text-destructive">
+          <DropdownMenuItem className="cursor-pointer text-destructive" disabled>
             <LogOut className="h-4 w-4 mr-2" />
             <span>Log out</span>
           </DropdownMenuItem>
@@ -111,6 +126,7 @@ export default function NavUser() {
 
         <DropdownMenuSeparator />
 
+        {/* TODO: Implement profile and settings pages
         <DropdownMenuItem className="cursor-pointer">
           <User className="h-4 w-4 mr-2" />
           <span>Profile</span>
@@ -122,8 +138,9 @@ export default function NavUser() {
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
+        */}
 
-        <DropdownMenuItem className="cursor-pointer text-destructive">
+        <DropdownMenuItem className="cursor-pointer text-destructive" disabled>
           <LogOut className="h-4 w-4 mr-2" />
           <span>Log out</span>
         </DropdownMenuItem>
