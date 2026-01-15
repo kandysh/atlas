@@ -59,9 +59,10 @@ export default function Page() {
             Active Tasks
           </h1>
           <p className="text-sm text-destructive mt-1">
-            Error loading tasks. Please try again.
+            Error loading tasks. Showing cached data if available.
           </p>
         </div>
+        <TasksDataTable data={activeTasks} workspaceId={workspaceId} />
       </div>
     );
   }

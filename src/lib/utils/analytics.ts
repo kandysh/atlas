@@ -4,9 +4,12 @@ import { Task, Status } from "../types";
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 
 export const computeStatusCount = (tasks: Task[]): DonutChartData[] => {
+  if (!tasks || tasks.length === 0) return [];
+  
   const statusCounts = tasks.reduce(
     (acc, task) => {
-      acc[task.status] = (acc[task.status] || 0) + 1;
+      const status = task.status || "todo";
+      acc[status] = (acc[status] || 0) + 1;
       return acc;
     },
     {} as Record<Status, number>,
@@ -49,6 +52,8 @@ export const computeStatusCount = (tasks: Task[]): DonutChartData[] => {
 export const computeThroughputOverTime = (
   tasks: Task[],
 ): ThroughPutOverTimeData[] => {
+  if (!tasks || tasks.length === 0) return [];
+  
   const completed = tasks
     .filter((x) => x.status === "completed" && x.completionDate)
     .sort(
@@ -57,7 +62,7 @@ export const computeThroughputOverTime = (
     )
     .map((x) => ({
       date: x.completionDate,
-      hours: x.savedHrs,
+      hours: x.savedHrs || 0,
     }));
   const data = completed.reduce((acc, x) => {
     const existing = acc.find(
@@ -133,6 +138,8 @@ export const getRollingAverage = (
   });
 
 export const computeCycleTime = (tasks: Task[]) => {
+  if (!tasks || tasks.length === 0) return [];
+  
   const cyclePoints = getCompletedCyclePoints(tasks);
   const monthlyAvg = getMonthlyAvgCycleTime(cyclePoints);
   const rollingAvg = getRollingAverage(monthlyAvg);
@@ -150,6 +157,8 @@ export interface MonthlyHoursPoint {
 export const computeHoursSavedWorked = (
   tasks: Task[],
 ): MonthlyHoursPoint[] => {
+  if (!tasks || tasks.length === 0) return [];
+  
   const monthlyMap = new Map<string, { worked: number; saved: number }>();
 
   tasks
@@ -163,8 +172,8 @@ export const computeHoursSavedWorked = (
       };
 
       monthlyMap.set(month, {
-        worked: prev.worked + task.workedHrs,
-        saved: prev.saved + task.savedHrs,
+        worked: prev.worked + (task.workedHrs || 0),
+        saved: prev.saved + (task.savedHrs || 0),
       });
     });
 
@@ -236,16 +245,18 @@ export const computeRemainingWorkTrend = (tasks: Task[]): RemainingWorkTrend[] =
 };
 
 export const computeToolsUsed = (tasks: Task[]): ToolsUsed[] => {
-  if (tasks.length === 0) return [];
+  if (!tasks || tasks.length === 0) return [];
   const toolMap = new Map<string, number>();
 
   tasks.forEach((task) => {
     if (task.tools && task.tools.length > 0) {
       task.tools.forEach((tool) => {
-        toolMap.set(
-          tool.toLowerCase(),
-          (toolMap.get(tool.toLowerCase()) ?? 0) + 1,
-        );
+        if (tool) {
+          toolMap.set(
+            tool.toLowerCase(),
+            (toolMap.get(tool.toLowerCase()) ?? 0) + 1,
+          );
+        }
       });
     }
   });

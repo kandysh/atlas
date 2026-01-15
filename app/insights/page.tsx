@@ -90,8 +90,23 @@ export default function InsightsPage() {
             Insights
           </h1>
           <p className="text-sm text-destructive mt-1">
-            Error loading tasks. Please try again.
+            Error loading tasks. Showing cached data if available.
           </p>
+          <AssetClassSelect
+            assestClasses={[...Array.from(assetClassesData || []), "All"].sort(
+              (a, b) => a.localeCompare(b),
+            )}
+            currentAssetClass={currentAssetClass}
+            setAssestClass={setCurrentAssetClass}
+          />
+        </div>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(480px,1fr))] gap-4">
+          <TasksStatusBreakdownDonut chartData={donutData || []} />
+          <ToolsUsedChart chartData={toolsUsedData || []} />
+          <ChartLineInteractive chartData={throughPutOverTimeData || []} />
+          <CycleTimeChart chartData={cycleTimeData || []} />
+          <HoursSavedWorkedChart chartData={hoursSavedWorkedData || []} />
+          <CumulativeFlowChart chartData={remainingWorkTrendData || []} />
         </div>
       </div>
     );
