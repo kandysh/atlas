@@ -15,7 +15,7 @@ export function getUserInfo(): {
 
     const userInfo = JSON.parse(userInfoEnv);
 
-    if (!userInfo.email || !userInfo.name) {
+    if (!userInfo.details.email || !userInfo.details.name) {
       console.error("USERINFO must contain email and name");
       return null;
     }
