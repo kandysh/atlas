@@ -93,11 +93,11 @@ export default function InsightsPage() {
             Error loading tasks. Showing cached data if available.
           </p>
           <AssetClassSelect
-            assestClasses={[...Array.from(assetClassesData || []), "All"].sort(
+            assetClasses={[...Array.from(assetClassesData || []), "All"].sort(
               (a, b) => a.localeCompare(b),
             )}
             currentAssetClass={currentAssetClass}
-            setAssestClass={setCurrentAssetClass}
+            setAssetClass={setCurrentAssetClass}
           />
         </div>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(480px,1fr))] gap-4">
@@ -123,11 +123,11 @@ export default function InsightsPage() {
           {isLoading && " • Loading..."}
         </p>
         <AssetClassSelect
-          assestClasses={[...Array.from(assetClassesData || []), "All"].sort(
+          assetClasses={[...Array.from(assetClassesData || []), "All"].sort(
             (a, b) => a.localeCompare(b),
           )}
           currentAssetClass={currentAssetClass}
-          setAssestClass={setCurrentAssetClass}
+          setAssetClass={setCurrentAssetClass}
         />
       </div>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(480px,1fr))] gap-4">

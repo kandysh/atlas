@@ -1,5 +1,5 @@
 // Insights feature components
-export { default as AssetClassSelect } from "./assest-class-select";
+export { default as AssetClassSelect } from "./asset-class-select";
 export { CumulativeFlowChart } from "./cumulative-flow";
 export { default as CycleTimeChart } from "./cycle-time";
 export { default as HoursSavedWorkedChart } from "./hours-saved-worked";
