@@ -15,3 +15,7 @@ export { PriorityAgingChart } from "./priority-aging";
 export { HoursEfficiencyChart } from "./hours-efficiency";
 // Hero KPIs
 export { HeroKPIs } from "./hero-kpis";
+// Utility components
+export { ChartSkeleton, KPISkeleton } from "./chart-skeleton";
+export { FilterControls } from "./filter-controls";
+export { InsightsCard, generateInsights } from "./insights-card";

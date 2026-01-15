@@ -534,7 +534,13 @@ async function getTeamsWorkload(
     ORDER BY count DESC
   `);
 
-  return result.rows as TeamsWorkload[];
+  return (result.rows as { team: string; count: number; avg_hours: number }[]).map(
+    (row) => ({
+      team: row.team,
+      count: row.count,
+      avgHours: row.avg_hours,
+    })
+  );
 }
 
 /**
