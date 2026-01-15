@@ -1,110 +1,17 @@
-import { z } from "zod";
-import { Task as DbTask, FieldConfig } from "@/src/lib/db";
-import { Task as UiTask } from "@/src/lib/types";
-import { dbTaskToUiTask } from "@/src/lib/utils/task-mapper";
-
-/**
- * Fetch tasks for a workspace with pagination
- */
-export async function getWorkspaceTasks(
-  workspaceId: string,
-  page: number = 0
-): Promise<{ tasks: UiTask[]; page: number; perPage: number; hasMore: boolean; dbTasks: DbTask[] }> {
-  const response = await fetch(
-    `/api/tasks?workspaceId=${workspaceId}&page=${page}`,
-    {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch tasks");
-  }
-
-  const data = await response.json();
-  const dbTasks = data.tasks as DbTask[];
-  const uiTasks = dbTasks.map(dbTaskToUiTask);
-
-  return {
-    tasks: uiTasks,
-    dbTasks, // Keep for ID mapping
-    page: data.page,
-    perPage: data.perPage,
-    hasMore: data.hasMore,
-  };
-}
-
-/**
- * Fetch field configurations for a workspace
- */
-export async function getWorkspaceFields(
-  workspaceId: string
-): Promise<{ fields: FieldConfig[] }> {
-  const response = await fetch(`/api/fields?workspaceId=${workspaceId}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch fields");
-  }
-
-  return response.json();
-}
-
-/**
- * Create a new task
- */
-export async function createTask(
-  workspaceId: string,
-  data: Record<string, any>
-): Promise<DbTask> {
-  const response = await fetch("/api/tasks", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ workspaceId, data }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to create task");
-  }
-
-  return response.json();
-}
-
-/**
- * Update a task with a partial patch
- */
-export async function updateTask(
-  taskId: string,
-  patch: Record<string, any>
-): Promise<DbTask> {
-  const response = await fetch(`/api/tasks/${taskId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ patch }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to update task");
-  }
-
-  return response.json();
-}
+import { FieldConfig } from "@/src/lib/db";
 
 /**
  * Validate field values based on field type
  */
 export function validateFields(
-  patch: Record<string, any>,
+  patch: Record<string, unknown>,
   fieldConfigs: FieldConfig[]
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   for (const [key, value] of Object.entries(patch)) {
     const fieldConfig = fieldConfigs.find((f) => f.key === key);
-    
+
     if (!fieldConfig) {
       continue; // Skip validation for fields not in config
     }
@@ -138,7 +45,9 @@ export function validateFields(
           break;
 
         case "select":
-          if (options?.choices && !options.choices.includes(value)) {
+          if (typeof value !== "string") {
+            errors.push(`${fieldConfig.name} must be a string`);
+          } else if (options?.choices && !options.choices.includes(value)) {
             errors.push(
               `${fieldConfig.name} must be one of: ${options.choices.join(", ")}`
             );
@@ -162,7 +71,10 @@ export function validateFields(
       }
 
       // Check required fields
-      if (options?.required && (value === null || value === undefined || value === "")) {
+      if (
+        options?.required &&
+        (value === null || value === undefined || value === "")
+      ) {
         errors.push(`${fieldConfig.name} is required`);
       }
     } catch (error) {

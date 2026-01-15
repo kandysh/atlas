@@ -9,6 +9,8 @@ import {
   index,
   serial,
   boolean,
+  bigint,
+  bigserial,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -38,7 +40,7 @@ export const workspaces = pgTable("workspaces", {
   numericId: serial("numeric_id").notNull().unique(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
-  ownerUserId: uuid("owner_user_id")
+  ownerUserId: bigint("owner_user_id", { mode: "number" })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -47,7 +49,7 @@ export const workspaces = pgTable("workspaces", {
 
 // Users Table
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: bigserial("id", { mode: "number" }).primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   avatar: text("avatar"),
@@ -61,7 +63,7 @@ export const workspaceMembers = pgTable("workspace_members", {
   workspaceId: uuid("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
-  userId: uuid("user_id")
+  userId: bigint("user_id", { mode: "number" })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   role: roleEnum("role").notNull().default("member"),
@@ -138,7 +140,7 @@ export const taskComments = pgTable("task_comments", {
   taskId: uuid("task_id")
     .notNull()
     .references(() => tasks.id, { onDelete: "cascade" }),
-  userId: uuid("user_id")
+  userId: bigint("user_id", { mode: "number" })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
