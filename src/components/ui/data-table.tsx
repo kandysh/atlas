@@ -19,7 +19,7 @@ import { Button } from "@/src/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
-  GripVertical,
+  // GripVertical, // TODO: Re-enable when drag-and-drop is implemented
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { DataTableEmptyState } from "./data-table-empty-state";
@@ -42,7 +42,7 @@ export function DataTable<TData, TValue>({
   onRowClick,
   pageSize = 20,
   enableRowSelection = true,
-  enableDragHandle = true,
+  enableDragHandle = false, // Disabled by default - TODO: implement drag-and-drop reordering
   emptyStateMessage = "No results found.",
   toolbar,
   className,
@@ -100,15 +100,17 @@ export function DataTable<TData, TValue>({
       {/* Toolbar */}
       {toolbar && toolbar(table)}
 
-      {/* Table */}
+      {/* Table with responsive horizontal scroll */}
       <div className="rounded-lg border border-border bg-card overflow-hidden transition-all duration-200 hover:border-border/80">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead className="border-b border-border bg-muted/30">
               <tr>
+                {/* TODO: Implement drag-and-drop reordering
                 {enableDragHandle && <th className="w-10 px-2 py-3"></th>}
+                */}
                 {enableRowSelection && (
-                  <th className="w-12 px-4 py-3">
+                  <th className="w-12 px-4 py-3 sticky left-0 bg-muted/30 z-10">
                     <input
                       type="checkbox"
                       checked={table.getIsAllPageRowsSelected()}
@@ -123,7 +125,7 @@ export function DataTable<TData, TValue>({
                   headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-left text-sm font-medium text-muted-foreground"
+                      className="px-4 py-3 text-left text-sm font-medium text-muted-foreground whitespace-nowrap"
                     >
                       {header.isPlaceholder
                         ? null
@@ -149,6 +151,7 @@ export function DataTable<TData, TValue>({
                     )}
                     onClick={(e) => handleRowClick(row.original, e)}
                   >
+                    {/* TODO: Implement drag-and-drop reordering
                     {enableDragHandle && (
                       <td className="px-2 py-3">
                         <div className="flex items-center justify-center cursor-grab active:cursor-grabbing">
@@ -156,8 +159,9 @@ export function DataTable<TData, TValue>({
                         </div>
                       </td>
                     )}
+                    */}
                     {enableRowSelection && (
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 sticky left-0 bg-card z-10">
                         <input
                           type="checkbox"
                           checked={row.getIsSelected()}
@@ -179,11 +183,7 @@ export function DataTable<TData, TValue>({
               ) : (
                 <tr>
                   <td
-                    colSpan={
-                      columns.length +
-                      (enableRowSelection ? 1 : 0) +
-                      (enableDragHandle ? 1 : 0)
-                    }
+                    colSpan={columns.length + (enableRowSelection ? 1 : 0)}
                     className="h-24 text-center"
                   >
                     {emptyStateMessage}
@@ -195,8 +195,8 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+      {/* Footer - responsive layout */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm text-muted-foreground">
         <div>
           {selectedRowCount > 0 ? (
             <span>

@@ -81,6 +81,8 @@ export function buildColumnsFromFieldConfigs(
   fieldConfigs: FieldConfig[],
   tasks: Task[],
   onUpdate?: (taskId: string, field: string, value: any) => void,
+  onViewDetails?: (task: Task) => void,
+  onDelete?: (taskId: string) => void,
 ): ColumnDef<Task>[] {
   const uniqueValues = extractUniqueFieldValues(tasks, fieldConfigs);
 
@@ -92,7 +94,7 @@ export function buildColumnsFromFieldConfigs(
     createColumnFromFieldConfig(fieldConfig, onUpdate, uniqueValues),
   );
 
-  columns.push(createActionsColumn());
+  columns.push(createActionsColumn(onViewDetails, onDelete));
 
   return columns;
 }
@@ -133,10 +135,13 @@ function createColumnFromFieldConfig(
 /**
  * Create the actions dropdown column
  */
-function createActionsColumn(): ColumnDef<Task> {
+function createActionsColumn(
+  onViewDetails?: (task: Task) => void,
+  onDelete?: (taskId: string) => void,
+): ColumnDef<Task> {
   return {
     id: "actions",
-    cell: () => (
+    cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -145,11 +150,14 @@ function createActionsColumn(): ColumnDef<Task> {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>View details</DropdownMenuItem>
-          <DropdownMenuItem>Edit task</DropdownMenuItem>
-          <DropdownMenuItem>Duplicate</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onViewDetails?.(row.original)}>
+            View details
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive">
+          <DropdownMenuItem 
+            className="text-destructive"
+            onClick={() => onDelete?.(row.original.id)}
+          >
             Delete task
           </DropdownMenuItem>
         </DropdownMenuContent>

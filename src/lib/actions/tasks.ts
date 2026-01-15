@@ -148,3 +148,57 @@ export async function updateTask(
     return { success: false, error: "Failed to update task" };
   }
 }
+
+/**
+ * Delete a task by ID
+ */
+export async function deleteTask(
+  taskId: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    if (!taskId) {
+      return { success: false, error: "taskId is required" };
+    }
+
+    const result = await db
+      .delete(tasks)
+      .where(eq(tasks.id, taskId))
+      .returning({ id: tasks.id });
+
+    if (result.length === 0) {
+      return { success: false, error: "Task not found" };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    return { success: false, error: "Failed to delete task" };
+  }
+}
+
+/**
+ * Delete multiple tasks by IDs
+ */
+export async function deleteTasks(
+  taskIds: string[]
+): Promise<{ success: true; deletedCount: number } | { success: false; error: string }> {
+  try {
+    if (!taskIds || taskIds.length === 0) {
+      return { success: false, error: "taskIds array is required" };
+    }
+
+    let deletedCount = 0;
+    for (const taskId of taskIds) {
+      const result = await db
+        .delete(tasks)
+        .where(eq(tasks.id, taskId))
+        .returning({ id: tasks.id });
+      if (result.length > 0) deletedCount++;
+    }
+
+    return { success: true, deletedCount };
+  } catch (error) {
+    console.error("Error deleting tasks:", error);
+    return { success: false, error: "Failed to delete tasks" };
+  }
+}

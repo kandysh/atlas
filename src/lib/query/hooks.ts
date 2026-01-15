@@ -7,6 +7,8 @@ import {
   getTasks,
   createTask as createTaskAction,
   updateTask as updateTaskAction,
+  deleteTask as deleteTaskAction,
+  deleteTasks as deleteTasksAction,
 } from "@/src/lib/actions/tasks";
 import { getFields } from "@/src/lib/actions/fields";
 import { dbTaskToUiTask } from "@/src/lib/utils";
@@ -221,6 +223,60 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
       if (context?.queryKey) {
         queryClient.invalidateQueries({ queryKey: context.queryKey });
       }
+    },
+  });
+}
+
+/**
+ * Hook to delete a single task
+ */
+export function useDeleteTask(workspaceId: string, page: number = 0) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      const result = await deleteTaskAction(taskId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return taskId;
+    },
+    onSuccess: (deletedTaskId) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.byWorkspace(workspaceId),
+      });
+      toast.success("Task deleted");
+    },
+    onError: (error) => {
+      console.error("Failed to delete task:", error);
+      toast.error("Failed to delete task");
+    },
+  });
+}
+
+/**
+ * Hook to delete multiple tasks
+ */
+export function useDeleteTasks(workspaceId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (taskIds: string[]) => {
+      const result = await deleteTasksAction(taskIds);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.deletedCount;
+    },
+    onSuccess: (deletedCount) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.byWorkspace(workspaceId),
+      });
+      toast.success(`${deletedCount} task(s) deleted`);
+    },
+    onError: (error) => {
+      console.error("Failed to delete tasks:", error);
+      toast.error("Failed to delete tasks");
     },
   });
 }

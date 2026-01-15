@@ -8,7 +8,9 @@ import { TaskDetailDrawer } from "./task-detail-drawer";
 import { TasksToolbar } from "./tasks-toolbar";
 import { 
   useCreateTask, 
-  useUpdateTask, 
+  useUpdateTask,
+  useDeleteTask,
+  useDeleteTasks,
   useWorkspaceFields 
 } from "@/src/lib/query/hooks";
 import { useWorkspace } from "@/src/providers";
@@ -18,12 +20,14 @@ import { createColumns } from "./columns";
 interface TasksDataTableProps {
   columns?: ColumnDef<Task, unknown>[];
   data: Task[];
+  dbTasks?: { id: string; displayId: string }[];
   workspaceId?: string;
 }
 
 export function TasksDataTable({ 
   columns: externalColumns, 
-  data, 
+  data,
+  dbTasks = [],
   workspaceId 
 }: TasksDataTableProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -34,6 +38,8 @@ export function TasksDataTable({
   
   const createTaskMutation = useCreateTask(activeWorkspaceId);
   const updateTaskMutation = useUpdateTask(activeWorkspaceId, 0);
+  const deleteTaskMutation = useDeleteTask(activeWorkspaceId, 0);
+  const deleteTasksMutation = useDeleteTasks(activeWorkspaceId);
   const { data: fieldsData, isLoading: isLoadingFields } = useWorkspaceFields(activeWorkspaceId);
   
   const fieldConfigs = fieldsData?.fields || [];
@@ -62,10 +68,28 @@ export function TasksDataTable({
     });
   }, [createTaskMutation]);
 
-  const handleDeleteSelected = useCallback((selectedIds: string[]) => {
-    // TODO: Implement delete functionality
-    console.log("Delete selected tasks", selectedIds);
-  }, []);
+  // Map displayId to DB UUID for delete operations
+  const getDbId = useCallback((displayId: string): string | null => {
+    const task = dbTasks.find((t) => t.displayId === displayId);
+    return task?.id || null;
+  }, [dbTasks]);
+
+  const handleDeleteTask = useCallback((displayId: string) => {
+    const dbId = getDbId(displayId);
+    if (dbId) {
+      deleteTaskMutation.mutate(dbId);
+    }
+  }, [deleteTaskMutation, getDbId]);
+
+  const handleDeleteSelected = useCallback((selectedDisplayIds: string[]) => {
+    const dbIds = selectedDisplayIds
+      .map((displayId) => getDbId(displayId))
+      .filter((id): id is string => id !== null);
+    
+    if (dbIds.length > 0) {
+      deleteTasksMutation.mutate(dbIds);
+    }
+  }, [deleteTasksMutation, getDbId]);
 
   const handleTaskUpdate = useCallback((
     displayId: string,
@@ -88,7 +112,13 @@ export function TasksDataTable({
     if (externalColumns) return externalColumns;
     
     if (!isLoadingFields && fieldConfigs.length > 0) {
-      return buildColumnsFromFieldConfigs(fieldConfigs, data, handleTaskUpdate);
+      return buildColumnsFromFieldConfigs(
+        fieldConfigs, 
+        data, 
+        handleTaskUpdate,
+        handleRowClick,
+        handleDeleteTask
+      );
     }
     
     return createColumns(uniqueOwners, uniqueAssetClasses, handleTaskUpdate);
@@ -97,7 +127,9 @@ export function TasksDataTable({
     fieldConfigs, 
     isLoadingFields, 
     data, 
-    handleTaskUpdate, 
+    handleTaskUpdate,
+    handleRowClick,
+    handleDeleteTask,
     uniqueOwners, 
     uniqueAssetClasses
   ]);
@@ -109,6 +141,8 @@ export function TasksDataTable({
         data={data}
         onRowClick={handleRowClick}
         emptyStateMessage="No tasks found."
+        // TODO: Implement drag-and-drop reordering - currently disabled
+        enableDragHandle={false}
         toolbar={(table) => (
           <TasksToolbar
             table={table}

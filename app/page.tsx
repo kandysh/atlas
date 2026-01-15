@@ -14,8 +14,12 @@ export default function Page() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Active Tasks</h1>
-          <p className="text-sm text-muted-foreground mt-1">Loading workspace...</p>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Active Tasks
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Loading workspace...
+          </p>
         </div>
       </div>
     );
@@ -26,7 +30,9 @@ export default function Page() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Active Tasks</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Active Tasks
+          </h1>
           <p className="text-sm text-destructive mt-1">
             No workspace available. Please create or join a workspace.
           </p>
@@ -41,15 +47,21 @@ export default function Page() {
   const { data, isLoading, error } = useWorkspaceTasks(workspaceId, 0);
 
   // Connect to SSE for live updates
-  useTaskEvents(workspaceId, 0);
+  // useTaskEvents(workspaceId, 0);
 
   // Get tasks from DB only - single source of truth
   const tasks = data?.tasks || [];
+  const dbTasks = data?.dbTasks || [];
 
   // Filter out completed tasks for active board
   const activeTasks: Task[] = tasks.filter(
     (task) => task.status !== "completed",
   );
+
+  // Filter dbTasks to match active tasks for delete ID mapping
+  const activeDbTasks = dbTasks
+    .filter((dbTask) => activeTasks.some((t) => t.id === dbTask.displayId))
+    .map((t) => ({ id: t.id, displayId: t.displayId }));
 
   if (error) {
     return (
@@ -62,7 +74,11 @@ export default function Page() {
             Error loading tasks. Showing cached data if available.
           </p>
         </div>
-        <TasksDataTable data={activeTasks} workspaceId={workspaceId} />
+        <TasksDataTable 
+          data={activeTasks} 
+          dbTasks={activeDbTasks}
+          workspaceId={workspaceId} 
+        />
       </div>
     );
   }
@@ -77,7 +93,11 @@ export default function Page() {
         </p>
       </div>
 
-      <TasksDataTable data={activeTasks} workspaceId={workspaceId} />
+      <TasksDataTable 
+        data={activeTasks} 
+        dbTasks={activeDbTasks}
+        workspaceId={workspaceId} 
+      />
     </div>
   );
 }
