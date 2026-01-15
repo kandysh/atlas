@@ -25,6 +25,8 @@ export const queryKeys = {
       [...queryKeys.tasks.all, { workspaceId }] as const,
     paginated: (workspaceId: string, page: number) =>
       [...queryKeys.tasks.all, { workspaceId, page }] as const,
+    events: (taskId: string) =>
+      [...queryKeys.tasks.all, "events", { taskId }] as const,
   },
 
   // Field config keys

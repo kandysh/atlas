@@ -10,6 +10,8 @@ import {
   deleteTask as deleteTaskAction,
   deleteTasks as deleteTasksAction,
   duplicateTask as duplicateTaskAction,
+  getTaskEvents as getTaskEventsAction,
+  TaskEventWithUser,
 } from "@/src/lib/actions/tasks";
 import { 
   getFields,
@@ -335,5 +337,24 @@ export function useUpdateFieldVisibility(workspaceId: string) {
       console.error("Failed to update field visibility:", error);
       toast.error("Failed to update column visibility");
     },
+  });
+}
+
+/**
+ * Hook to fetch task events (history)
+ */
+export function useTaskEvents(taskId: string | null, limit: number = 10) {
+  return useQuery({
+    queryKey: queryKeys.tasks.events(taskId || ""),
+    queryFn: async (): Promise<TaskEventWithUser[]> => {
+      if (!taskId) return [];
+      const result = await getTaskEventsAction(taskId, limit);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result.events;
+    },
+    enabled: !!taskId,
+    staleTime: 10000, // 10 seconds - events change frequently
   });
 }

@@ -14,3 +14,4 @@ export {
 export { PriorityCell } from "./priority-cell";
 export { StatusCell } from "./status-cell";
 export { TaskDetailDrawer } from "./task-detail-drawer";
+export { TaskHistory } from "./task-history";

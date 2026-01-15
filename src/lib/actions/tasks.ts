@@ -319,3 +319,59 @@ export async function duplicateTask(
     return { success: false, error: "Failed to duplicate task" };
   }
 }
+
+export type TaskEventWithUser = {
+  id: string;
+  eventType: string;
+  field: string | null;
+  oldValue: unknown;
+  newValue: unknown;
+  createdAt: Date;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+};
+
+/**
+ * Get recent events for a task
+ */
+export async function getTaskEvents(
+  taskId: string,
+  limit: number = 10
+): Promise<{ success: true; events: TaskEventWithUser[] } | { success: false; error: string }> {
+  try {
+    if (!taskId) {
+      return { success: false, error: "taskId is required" };
+    }
+
+    const events = await db.query.taskEvents.findMany({
+      where: eq(taskEvents.taskId, taskId),
+      orderBy: desc(taskEvents.createdAt),
+      limit,
+      with: {
+        user: true,
+      },
+    });
+
+    const formattedEvents: TaskEventWithUser[] = events.map((event) => ({
+      id: event.id,
+      eventType: event.eventType,
+      field: event.field,
+      oldValue: event.oldValue,
+      newValue: event.newValue,
+      createdAt: event.createdAt,
+      user: event.user ? {
+        id: event.user.id,
+        name: event.user.name,
+        email: event.user.email,
+      } : null,
+    }));
+
+    return { success: true, events: formattedEvents };
+  } catch (error) {
+    console.error("Error fetching task events:", error);
+    return { success: false, error: "Failed to fetch task events" };
+  }
+}

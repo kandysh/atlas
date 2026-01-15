@@ -28,12 +28,15 @@ import {
   EditableOwnerCell,
 } from "./editable-cells";
 
+import { TaskHistory } from "./task-history";
+
 type TaskDetailDrawerProps = {
   task: Task | null;
   tasks: Task[];
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (id: string, field: keyof Task, value: unknown) => void;
+  dbTaskId?: string | null;
 };
 
 export function TaskDetailDrawer({
@@ -42,6 +45,7 @@ export function TaskDetailDrawer({
   isOpen,
   onClose,
   onUpdate,
+  dbTaskId,
 }: TaskDetailDrawerProps) {
   // Compute unique values from tasks array (DB tasks as single source of truth)
   const { uniqueOwners, uniqueAssetClasses, uniqueThemes } = useMemo(() => {
@@ -402,6 +406,9 @@ export function TaskDetailDrawer({
                 </div>
               </div>
             </div>
+
+            {/* Recent Activity / History */}
+            <TaskHistory taskId={task.id} dbTaskId={dbTaskId} />
           </div>
         </div>
       </div>
