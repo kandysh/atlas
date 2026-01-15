@@ -18,7 +18,7 @@ import {
   useTasksWithHoursSavedWorked,
   useTasksRemainingWorkTrend,
   useTasksToolUsed,
-} from "@/src/lib/api";
+} from "@/src/hooks/analytics";
 import { useWorkspace } from "@/src/providers";
 import { useWorkspaceTasks } from "@/src/lib/query/hooks";
 
