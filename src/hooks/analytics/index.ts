@@ -1,2 +1,2 @@
 // Analytics hooks for computing task metrics
-export * from "./use-analytics";
+export * from "./use-server-analytics";

@@ -16,7 +16,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/src/components/ui/chart";
-import { MonthlyHoursPoint } from "@/src/lib/utils";
+import { MonthlyHoursPoint } from "@/src/lib/actions/analytics";
 
 export const description = "A multiple line chart";
 

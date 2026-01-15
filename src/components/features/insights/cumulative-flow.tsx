@@ -15,7 +15,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/src/components/ui/chart";
-import { RemainingWorkTrend } from "@/src/lib/utils";
+import { RemainingWorkTrend } from "@/src/lib/actions/analytics";
 
 export const description = "A line chart with dots";
 

@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/src/components/ui/chart";
-import { RollingCycle } from "@/src/lib/utils";
+import { RollingCycle } from "@/src/lib/actions/analytics";
 
 export const description = "A multiple line chart";
 

@@ -1,3 +1,5 @@
+import type { AnalyticsFilters } from "@/src/lib/actions/analytics";
+
 /**
  * Centralized query key factory for React Query
  * Follows the pattern: [entity, scope, filters...]
@@ -30,6 +32,13 @@ export const queryKeys = {
     all: ["fields"] as const,
     byWorkspace: (workspaceId: string) =>
       [...queryKeys.fields.all, { workspaceId }] as const,
+  },
+
+  // Analytics keys
+  analytics: {
+    all: ["analytics"] as const,
+    byWorkspace: (workspaceId: string, filters?: AnalyticsFilters) =>
+      [...queryKeys.analytics.all, { workspaceId, ...filters }] as const,
   },
 } as const;
 
