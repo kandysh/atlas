@@ -46,6 +46,7 @@ export default function RootLayout({
             </WorkspaceLoader>
           </WorkspaceProvider>
           <Toaster
+            richColors
             position="bottom-left"
             toastOptions={{
               duration: 3000,
