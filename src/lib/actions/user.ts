@@ -43,3 +43,17 @@ export async function initUser(): Promise<
     return { success: false, error: "Failed to initialize user" };
   }
 }
+
+/**
+ * Get the current user ID from USERINFO environment variable
+ * This is a lightweight function that doesn't hit the database
+ */
+export async function getCurrentUserId(): Promise<number | null> {
+  try {
+    const userInfo = getUserInfo();
+    return userInfo?.id ?? null;
+  } catch (error) {
+    console.error("Error getting current user ID:", error);
+    return null;
+  }
+}

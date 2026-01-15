@@ -4,6 +4,7 @@ import { db, tasks, workspaces, taskEvents, Task } from "@/src/lib/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { generateTaskDisplayId } from "@/src/lib/utils";
 import { broadcastTaskUpdate } from "@/src/lib/sse/server";
+import { getCurrentUserId } from "./user";
 
 export type TasksResult = {
   tasks: Task[];
@@ -102,9 +103,11 @@ export async function createTask(
       .returning();
 
     // Log creation event
+    const userId = await getCurrentUserId();
     await db.insert(taskEvents).values({
       workspaceId,
       taskId: newTask.id,
+      userId,
       eventType: "created",
       newValue: data,
       metadata: { version: 1, displayId },
@@ -156,11 +159,13 @@ export async function updateTask(
       .returning();
 
     // Log update events for each changed field
+    const userId = await getCurrentUserId();
     const eventPromises = Object.entries(patch).map(([field, newValue]) => {
       const oldValue = (currentTask.data as Record<string, unknown>)?.[field];
       return db.insert(taskEvents).values({
         workspaceId: currentTask.workspaceId,
         taskId: currentTask.id,
+        userId,
         eventType: "updated",
         field,
         oldValue: oldValue !== undefined ? oldValue : null,
@@ -300,9 +305,11 @@ export async function duplicateTask(
       .returning();
 
     // Log duplication event
+    const userId = await getCurrentUserId();
     await db.insert(taskEvents).values({
       workspaceId: originalTask.workspaceId,
       taskId: newTask.id,
+      userId,
       eventType: "duplicated",
       newValue: duplicatedData,
       metadata: { 
