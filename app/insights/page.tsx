@@ -16,6 +16,8 @@ import {
   HeroKpis,
   FilterControls,
   InsightsCards,
+  ChartSkeleton,
+  DonutChartSkeleton,
 } from "@/src/components/features/insights";
 import { useServerAnalytics, AnalyticsFilters } from "@/src/hooks/analytics";
 import { useWorkspace } from "@/src/providers";
@@ -39,24 +41,6 @@ export default function InsightsPage() {
   }, []);
 
   // Chart click handlers for cross-filtering
-  const handleStatusClick = useCallback(
-    (status: string) => {
-      const statusMap: Record<string, string> = {
-        "To Do": "todo",
-        "In Progress": "in-progress",
-        Testing: "testing",
-        Done: "done",
-        Completed: "completed",
-        Blocked: "blocked",
-      };
-      setFilters((prev) => ({
-        ...prev,
-        status: statusMap[status] || status.toLowerCase(),
-      }));
-    },
-    []
-  );
-
   const handleOwnerClick = useCallback((owner: string) => {
     setFilters((prev) => ({ ...prev, assignee: owner }));
   }, []);
@@ -87,6 +71,11 @@ export default function InsightsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(11)].map((_, i) => (
+            <ChartSkeleton key={i} />
           ))}
         </div>
       </div>
@@ -158,63 +147,83 @@ export default function InsightsPage() {
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Analytics and performance metrics
-          {isLoading && " • Loading..."}
+          {analyticsLoading && " • Refreshing..."}
         </p>
       </div>
 
       {/* Filter Controls */}
-      <FilterControls
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        statuses={analyticsData.statuses}
-        priorities={analyticsData.priorities}
-        owners={analyticsData.owners}
-        teams={analyticsData.teams}
-        assetClasses={analyticsData.assetClasses}
-      />
+      <nav 
+        className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 -my-2"
+        aria-label="Dashboard filters"
+      >
+        <FilterControls
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          statuses={analyticsData.statuses}
+          priorities={analyticsData.priorities}
+          owners={analyticsData.owners}
+          teams={analyticsData.teams}
+          assetClasses={analyticsData.assetClasses}
+        />
+      </nav>
 
       {/* Hero KPIs */}
-      <HeroKpis data={analyticsData.kpiSummary} isLoading={isLoading} />
+      <HeroKpis data={analyticsData.kpiSummary} isLoading={analyticsLoading} />
 
       {/* Insights Cards */}
-      {!isLoading && data && (
+      {!analyticsLoading && data && (
         <InsightsCards data={analyticsData} onFilterChange={handleFilterChange} />
       )}
 
       {/* Charts Grid - 11 Charts in 3-column responsive layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Row 1: Status, Priority (pending tasks), Owner Productivity */}
-        <TasksStatusBreakdownDonut chartData={analyticsData.statusCounts} />
-        <CumulativeFlowChart chartData={analyticsData.remainingWorkTrend} />
-        <OwnerProductivityChart
-          chartData={analyticsData.ownerProductivity}
-          onOwnerClick={handleOwnerClick}
-        />
+      {analyticsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <DonutChartSkeleton />
+          <ChartSkeleton />
+          <ChartSkeleton />
+          <ChartSkeleton />
+          <ChartSkeleton />
+          <DonutChartSkeleton />
+          <ChartSkeleton />
+          <ChartSkeleton />
+          <ChartSkeleton />
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Row 1: Status, Pending Work Trend, Owner Productivity */}
+          <TasksStatusBreakdownDonut chartData={analyticsData.statusCounts} />
+          <CumulativeFlowChart chartData={analyticsData.remainingWorkTrend} />
+          <OwnerProductivityChart
+            chartData={analyticsData.ownerProductivity}
+            onOwnerClick={handleOwnerClick}
+          />
 
-        {/* Row 2: Tools Heatmap, Teams Workload, Asset Portfolio */}
-        <ToolsUsedChart chartData={analyticsData.toolsUsed} />
-        <TeamsWorkloadChart
-          chartData={analyticsData.teamsWorkload}
-          onTeamClick={handleTeamClick}
-        />
-        <AssetClassPortfolioChart
-          chartData={analyticsData.assetClassDistribution}
-          onAssetClassClick={handleAssetClassClick}
-        />
+          {/* Row 2: Tools Heatmap, Teams Workload, Asset Portfolio */}
+          <ToolsUsedChart chartData={analyticsData.toolsUsed} />
+          <TeamsWorkloadChart
+            chartData={analyticsData.teamsWorkload}
+            onTeamClick={handleTeamClick}
+          />
+          <AssetClassPortfolioChart
+            chartData={analyticsData.assetClassDistribution}
+            onAssetClassClick={handleAssetClassClick}
+          />
 
-        {/* Row 3: Throughput, Cycle Time, Hours Saved */}
-        <ChartLineInteractive chartData={analyticsData.throughputOverTime} />
-        <CycleTimeChart chartData={analyticsData.cycleTime} />
-        <HoursSavedWorkedChart chartData={analyticsData.hoursSavedWorked} />
+          {/* Row 3: Throughput, Cycle Time, Hours Saved */}
+          <ChartLineInteractive chartData={analyticsData.throughputOverTime} />
+          <CycleTimeChart chartData={analyticsData.cycleTime} />
+          <HoursSavedWorkedChart chartData={analyticsData.hoursSavedWorked} />
 
-        {/* Row 4: Priority Aging, Hours Efficiency - spans remaining */}
-        <PriorityAgingChart
-          chartData={analyticsData.priorityAging}
-          onPriorityClick={handlePriorityClick}
-        />
-        <HoursEfficiencyChart chartData={analyticsData.hoursEfficiency} />
-      </div>
+          {/* Row 4: Priority Aging, Hours Efficiency */}
+          <PriorityAgingChart
+            chartData={analyticsData.priorityAging}
+            onPriorityClick={handlePriorityClick}
+          />
+          <HoursEfficiencyChart chartData={analyticsData.hoursEfficiency} />
+        </div>
+      )}
     </div>
   );
 }
-

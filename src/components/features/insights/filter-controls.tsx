@@ -190,6 +190,7 @@ export function FilterControls({
               <button
                 onClick={() => clearFilter("status")}
                 className="ml-1 hover:text-destructive"
+                aria-label="Remove status filter"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -202,6 +203,7 @@ export function FilterControls({
               <button
                 onClick={() => clearFilter("priority")}
                 className="ml-1 hover:text-destructive"
+                aria-label="Remove priority filter"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -214,6 +216,7 @@ export function FilterControls({
               <button
                 onClick={() => clearFilter("assignee")}
                 className="ml-1 hover:text-destructive"
+                aria-label="Remove owner filter"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -226,6 +229,7 @@ export function FilterControls({
               <button
                 onClick={() => clearFilter("team")}
                 className="ml-1 hover:text-destructive"
+                aria-label="Remove team filter"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -238,6 +242,7 @@ export function FilterControls({
               <button
                 onClick={() => clearFilter("assetClass")}
                 className="ml-1 hover:text-destructive"
+                aria-label="Remove asset class filter"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -249,6 +254,7 @@ export function FilterControls({
             size="sm"
             onClick={clearAllFilters}
             className="text-muted-foreground hover:text-foreground"
+            aria-label="Clear all filters"
           >
             Clear all
           </Button>

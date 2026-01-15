@@ -17,3 +17,5 @@ export { HoursEfficiencyChart } from "./hours-efficiency";
 export { HeroKpis } from "./hero-kpis";
 export { FilterControls } from "./filter-controls";
 export { InsightsCards } from "./insights-cards";
+// Skeleton components
+export { ChartSkeleton, DonutChartSkeleton, BarChartSkeleton, LineChartSkeleton } from "./chart-skeleton";

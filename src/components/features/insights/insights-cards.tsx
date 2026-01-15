@@ -9,9 +9,14 @@ import {
   AnalyticsFilters,
 } from "@/src/lib/actions/analytics";
 
+// Default hourly rate for savings calculation
+// TODO: Make this configurable per workspace/organization
+const DEFAULT_HOURLY_RATE = 50;
+
 interface InsightsCardsProps {
   data: AnalyticsData;
   onFilterChange: (filters: AnalyticsFilters) => void;
+  hourlyRate?: number;
 }
 
 interface Insight {
@@ -24,7 +29,11 @@ interface Insight {
   filter?: AnalyticsFilters;
 }
 
-export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
+export function InsightsCards({ 
+  data, 
+  onFilterChange,
+  hourlyRate = DEFAULT_HOURLY_RATE,
+}: InsightsCardsProps) {
   const insights = useMemo<Insight[]>(() => {
     const result: Insight[] = [];
 
@@ -69,8 +78,7 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
       }
     }
 
-    // Calculate savings value (assuming $50/hr)
-    const hourlyRate = 50;
+    // Calculate savings value using configurable hourly rate
     const savedValue = data.kpiSummary.totalHoursSaved * hourlyRate;
     if (savedValue > 0) {
       result.push({
@@ -98,7 +106,7 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
     }
 
     return result;
-  }, [data]);
+  }, [data, hourlyRate]);
 
   if (insights.length === 0) {
     return null;
