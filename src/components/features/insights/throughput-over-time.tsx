@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import {
   Card,
@@ -17,8 +17,6 @@ import {
   type ChartConfig,
 } from "@/src/components/ui/chart";
 import { ThroughPutOverTimeData } from "@/src/lib/types";
-import { mockTasks } from "@/src/data/mock-tasks";
-import { CANCELLED } from "node:dns/promises";
 
 export const description =
   "An interactive line chart showing completed tasks and hours saved over time.";

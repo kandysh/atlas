@@ -1,87 +1,67 @@
 "use client";
-import { mockTasks } from "@/src/data/mock-tasks";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import {
-  mockDataForCycleTime,
-  mockDataForHoursSavedWorked,
-  mockDataForRemainingWorkTrend,
-  mockDataForToolsUsed,
-  mockDataToDonut,
-  mockDataToThroughputOverTime,
+  computeStatusCount,
+  computeThroughputOverTime,
+  computeCycleTime,
+  computeHoursSavedWorked,
+  computeRemainingWorkTrend,
+  computeToolsUsed,
 } from "@/src/lib/utils/analytics";
-import { queryKeys } from "@/src/lib/query/keys";
 import { Task } from "@/src/lib/types";
 
-export const useTasks = (assetClass: string) => {
-  return useQuery({
-    queryKey: queryKeys.tasks.all,
-    queryFn: () => {
-      if (assetClass === "All") return mockTasks;
-      return mockTasks.filter(
-        (x) => x.assetClass.toLowerCase() === assetClass.toLowerCase(),
-      );
-    },
-  });
+/**
+ * Custom hook to compute status count from tasks
+ */
+export const useTasksWithStatusCount = (tasks: Task[]) => {
+  return useMemo(() => computeStatusCount(tasks), [tasks]);
 };
 
-export const useTasksWithStatusCount = (mockData: Task[]) => {
-  return useQuery({
-    queryKey: queryKeys.tasks.statusCount(),
-    queryFn: () => {
-      return mockDataToDonut(mockData);
-    },
-  });
+/**
+ * Custom hook to compute throughput over time from tasks
+ */
+export const useTasksWithThroughputOverTime = (tasks: Task[]) => {
+  return useMemo(() => computeThroughputOverTime(tasks), [tasks]);
 };
 
-export const useTasksWithThroughputOverTime = (mockData: Task[]) => {
-  return useQuery({
-    queryKey: queryKeys.tasks.throughputOverTime(),
-    queryFn: () => {
-      return mockDataToThroughputOverTime(mockData);
-    },
-  });
+/**
+ * Custom hook to compute cycle time from tasks
+ */
+export const useTasksWithCycleTime = (tasks: Task[]) => {
+  return useMemo(() => computeCycleTime(tasks), [tasks]);
 };
 
-export const useTasksWithCycleTime = (mockData: Task[]) => {
-  return useQuery({
-    queryKey: queryKeys.tasks.cycleTime(),
-    queryFn: () => {
-      return mockDataForCycleTime(mockData);
-    },
-  });
+/**
+ * Custom hook to compute hours saved/worked from tasks
+ */
+export const useTasksWithHoursSavedWorked = (tasks: Task[]) => {
+  return useMemo(() => computeHoursSavedWorked(tasks), [tasks]);
 };
 
-export const useTasksWithHoursSavedWorked = (mockData: Task[]) => {
-  return useQuery({
-    queryKey: queryKeys.tasks.hoursSavedWorked(),
-    queryFn: () => {
-      return mockDataForHoursSavedWorked(mockData);
-    },
-  });
+/**
+ * Custom hook to compute remaining work trend from tasks
+ */
+export const useTasksRemainingWorkTrend = (tasks: Task[]) => {
+  return useMemo(() => computeRemainingWorkTrend(tasks), [tasks]);
 };
 
-export const useTasksRemainingWorkTrend = (mockData: Task[]) => {
-  return useQuery({
-    queryKey: queryKeys.tasks.remainingWorkTrend(),
-    queryFn: () => {
-      return mockDataForRemainingWorkTrend(mockData);
-    },
-  });
-};
-export const useTasksToolUsed = (mockData: Task[]) => {
-  return useQuery({
-    queryKey: queryKeys.tasks.toolsUsed(),
-    queryFn: () => {
-      return mockDataForToolsUsed(mockData);
-    },
-  });
+/**
+ * Custom hook to compute tools used from tasks
+ */
+export const useTasksToolUsed = (tasks: Task[]) => {
+  return useMemo(() => computeToolsUsed(tasks), [tasks]);
 };
 
-export const useTaskAssestClasses = () => {
-  return useQuery({
-    queryKey: queryKeys.tasks.assetClasses(),
-    queryFn: () => {
-      return new Set(mockTasks.map((x) => x.assetClass.toLowerCase()));
-    },
-  });
+/**
+ * Custom hook to get unique asset classes from tasks
+ */
+export const useTaskAssetClasses = (tasks: Task[]) => {
+  return useMemo(() => {
+    return new Set(
+      tasks
+        .map((x) => x.assetClass)
+        .filter(Boolean)
+        .map((x) => x.toLowerCase())
+    );
+  }, [tasks]);
 };

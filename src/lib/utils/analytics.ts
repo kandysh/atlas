@@ -2,11 +2,21 @@ import { DonutChartData, ThroughPutOverTimeData, ToolsUsed } from "../types";
 import { Task, Status } from "../types";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
+const DEFAULT_STATUS: Status = "todo";
 
-export const mockDataToDonut = (mockData: Task[]): DonutChartData[] => {
-  const statusCounts = mockData.reduce(
+/**
+ * Helper to filter completed tasks with valid completion dates
+ */
+const getCompletedTasksWithDates = (tasks: Task[]): Task[] =>
+  tasks.filter((t) => t.status === "completed" && t.completionDate);
+
+export const computeStatusCount = (tasks: Task[]): DonutChartData[] => {
+  if (!tasks || tasks.length === 0) return [];
+  
+  const statusCounts = tasks.reduce(
     (acc, task) => {
-      acc[task.status] = (acc[task.status] || 0) + 1;
+      const status = task.status || DEFAULT_STATUS;
+      acc[status] = (acc[status] || 0) + 1;
       return acc;
     },
     {} as Record<Status, number>,
@@ -46,18 +56,19 @@ export const mockDataToDonut = (mockData: Task[]): DonutChartData[] => {
   ].filter(item => item.count > 0);
 };
 
-export const mockDataToThroughputOverTime = (
-  mockData: Task[],
+export const computeThroughputOverTime = (
+  tasks: Task[],
 ): ThroughPutOverTimeData[] => {
-  const completed = mockData
-    .filter((x) => x.status === "completed")
+  if (!tasks || tasks.length === 0) return [];
+  
+  const completed = getCompletedTasksWithDates(tasks)
     .sort(
       (a, b) =>
         a.completionDate!.getUTCMonth() - b.completionDate!.getUTCMonth(),
     )
     .map((x) => ({
       date: x.completionDate,
-      hours: x.savedHrs,
+      hours: x.savedHrs || 0,
     }));
   const data = completed.reduce((acc, x) => {
     const existing = acc.find(
@@ -74,6 +85,7 @@ export const mockDataToThroughputOverTime = (
 
   return data;
 };
+
 interface CyclePoint {
   completedAt: Date;
   cycleDays: number;
@@ -87,9 +99,9 @@ interface MonthlyCycle {
 export interface RollingCycle extends MonthlyCycle {
   rollingAvg: number;
 }
+
 export const getCompletedCyclePoints = (tasks: Task[]): CyclePoint[] =>
-  tasks
-    .filter((x) => x.status === "completed")
+  getCompletedTasksWithDates(tasks)
     .sort((a, b) => a.completionDate!.getTime() - b.completionDate!.getTime())
     .map((t) => ({
       completedAt: t.completionDate!,
@@ -130,7 +142,9 @@ export const getRollingAverage = (
     };
   });
 
-export const mockDataForCycleTime = (tasks: Task[]) => {
+export const computeCycleTime = (tasks: Task[]) => {
+  if (!tasks || tasks.length === 0) return [];
+  
   const cyclePoints = getCompletedCyclePoints(tasks);
   const monthlyAvg = getMonthlyAvgCycleTime(cyclePoints);
   const rollingAvg = getRollingAverage(monthlyAvg);
@@ -145,26 +159,26 @@ export interface MonthlyHoursPoint {
   net: number;
 }
 
-export const mockDataForHoursSavedWorked = (
+export const computeHoursSavedWorked = (
   tasks: Task[],
 ): MonthlyHoursPoint[] => {
+  if (!tasks || tasks.length === 0) return [];
+  
   const monthlyMap = new Map<string, { worked: number; saved: number }>();
 
-  tasks
-    .filter((t) => t.status === "completed")
-    .forEach((task) => {
-      const month = task.completionDate!.toISOString().slice(0, 7); // yyyy-MM
+  getCompletedTasksWithDates(tasks).forEach((task) => {
+    const month = task.completionDate!.toISOString().slice(0, 7); // yyyy-MM
 
-      const prev = monthlyMap.get(month) ?? {
-        worked: 0,
-        saved: 0,
-      };
+    const prev = monthlyMap.get(month) ?? {
+      worked: 0,
+      saved: 0,
+    };
 
-      monthlyMap.set(month, {
-        worked: prev.worked + task.workedHrs,
-        saved: prev.saved + task.savedHrs,
-      });
+    monthlyMap.set(month, {
+      worked: prev.worked + (task.workedHrs || 0),
+      saved: prev.saved + (task.savedHrs || 0),
     });
+  });
 
   // sort months chronologically
   return Array.from(monthlyMap.entries())
@@ -177,22 +191,22 @@ export const mockDataForHoursSavedWorked = (
     }));
 };
 
-export interface RemaingWorkTrend {
+export interface RemainingWorkTrend {
   month: string;
   remaining: number;
 }
 
-export const mockDataForRemainingWorkTrend = (tasks: Task[]) => {
+export const computeRemainingWorkTrend = (tasks: Task[]): RemainingWorkTrend[] => {
   if (tasks.length === 0) return [];
 
   const createdDates = tasks.map((t) => t.createdAt);
+  const completedTasks = getCompletedTasksWithDates(tasks);
+  
+  if (completedTasks.length === 0) return [];
+  
   const start = new Date(Math.min(...createdDates.map((d) => d.getTime())));
   const end = new Date(
-    Math.max(
-      ...tasks
-        .filter((t) => t.status === "completed" && t.completionDate)
-        .map((t) => t.completionDate!.getTime()),
-    ),
+    Math.max(...completedTasks.map((t) => t.completionDate!.getTime())),
   );
 
   const createdPerMonth = new Map<string, number>();
@@ -214,7 +228,7 @@ export const mockDataForRemainingWorkTrend = (tasks: Task[]) => {
     }
   });
 
-  const points: RemaingWorkTrend[] = [];
+  const points: RemainingWorkTrend[] = [];
   let totalCreated = 0;
   let totalCompleted = 0;
 
@@ -233,17 +247,19 @@ export const mockDataForRemainingWorkTrend = (tasks: Task[]) => {
   return points;
 };
 
-export const mockDataForToolsUsed = (tasks: Task[]): ToolsUsed[] => {
-  if (tasks.length === 0) return [];
+export const computeToolsUsed = (tasks: Task[]): ToolsUsed[] => {
+  if (!tasks || tasks.length === 0) return [];
   const toolMap = new Map<string, number>();
 
   tasks.forEach((task) => {
-    if (task.tools.length > 0) {
+    if (task.tools && task.tools.length > 0) {
       task.tools.forEach((tool) => {
-        toolMap.set(
-          tool.toLowerCase(),
-          (toolMap.get(tool.toLowerCase()) ?? 0) + 1,
-        );
+        if (tool) {
+          toolMap.set(
+            tool.toLowerCase(),
+            (toolMap.get(tool.toLowerCase()) ?? 0) + 1,
+          );
+        }
       });
     }
   });
