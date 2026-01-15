@@ -17,7 +17,7 @@ CREATE TABLE "task_comments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"workspace_id" uuid NOT NULL,
 	"task_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
+	"user_id" bigint NOT NULL,
 	"content" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -37,7 +37,7 @@ CREATE TABLE "tasks" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" bigserial PRIMARY KEY NOT NULL,
 	"email" text NOT NULL,
 	"name" text NOT NULL,
 	"avatar" text,
@@ -49,7 +49,7 @@ CREATE TABLE "users" (
 CREATE TABLE "workspace_members" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"workspace_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
+	"user_id" bigint NOT NULL,
 	"role" "role" DEFAULT 'member' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -60,7 +60,7 @@ CREATE TABLE "workspaces" (
 	"numeric_id" serial NOT NULL,
 	"name" text NOT NULL,
 	"slug" text NOT NULL,
-	"owner_user_id" uuid NOT NULL,
+	"owner_user_id" bigint NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "workspaces_numeric_id_unique" UNIQUE("numeric_id"),
