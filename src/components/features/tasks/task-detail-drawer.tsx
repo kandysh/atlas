@@ -34,15 +34,6 @@ export function TaskDetailDrawer({
 
   if (!task) return null;
 
-  const formatDateTime = (date: Date | null | undefined) => {
-    if (!date) return "Not set";
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   const formatFullDateTime = (date: Date | null | undefined) => {
     if (!date) return "Not set";
     return date.toLocaleDateString("en-US", {
