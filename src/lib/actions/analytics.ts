@@ -27,11 +27,54 @@ export interface RemainingWorkTrend {
   remaining: number;
 }
 
+// New types for the 5 additional charts
+export interface OwnerProductivity {
+  owner: string;
+  completedTasks: number;
+  avgCycleDays: number;
+  totalHoursSaved: number;
+}
+
+export interface TeamsWorkload {
+  team: string;
+  count: number;
+}
+
+export interface AssetClassDistribution {
+  assetClass: string;
+  count: number;
+  fill: string;
+}
+
+export interface PriorityAging {
+  priority: string;
+  bucket0to3: number;
+  bucket3to7: number;
+  bucket7to14: number;
+  bucket14plus: number;
+}
+
+export interface HoursEfficiency {
+  month: string;
+  currentHrs: number;
+  workedHrs: number;
+  efficiency: number;
+}
+
+// KPI summary data
+export interface KpiSummary {
+  totalTasks: number;
+  openTasks: number;
+  avgCycleDays: number;
+  totalHoursSaved: number;
+}
+
 export type AnalyticsFilters = {
   assetClass?: string;
   status?: string;
   priority?: string;
   assignee?: string;
+  team?: string;
   dateFrom?: string;
   dateTo?: string;
 };
@@ -44,6 +87,19 @@ export type AnalyticsData = {
   remainingWorkTrend: RemainingWorkTrend[];
   toolsUsed: ToolsUsed[];
   assetClasses: string[];
+  // New data for 5 additional charts
+  ownerProductivity: OwnerProductivity[];
+  teamsWorkload: TeamsWorkload[];
+  assetClassDistribution: AssetClassDistribution[];
+  priorityAging: PriorityAging[];
+  hoursEfficiency: HoursEfficiency[];
+  // KPI summary
+  kpiSummary: KpiSummary;
+  // Filter options
+  owners: string[];
+  teams: string[];
+  priorities: string[];
+  statuses: string[];
 };
 
 type AnalyticsResult =
@@ -74,6 +130,18 @@ export async function getAnalytics(
       remainingWorkResult,
       toolsUsedResult,
       assetClassesResult,
+      // New queries
+      ownerProductivityResult,
+      teamsWorkloadResult,
+      assetClassDistributionResult,
+      priorityAgingResult,
+      hoursEfficiencyResult,
+      kpiSummaryResult,
+      // Filter options
+      ownersResult,
+      teamsResult,
+      prioritiesResult,
+      statusesResult,
     ] = await Promise.all([
       getStatusCounts(workspaceId, filterCondition),
       getThroughputOverTime(workspaceId, filterCondition),
@@ -82,6 +150,18 @@ export async function getAnalytics(
       getRemainingWorkTrend(workspaceId, filterCondition),
       getToolsUsed(workspaceId, filterCondition),
       getAssetClasses(workspaceId),
+      // New queries
+      getOwnerProductivity(workspaceId, filterCondition),
+      getTeamsWorkload(workspaceId, filterCondition),
+      getAssetClassDistribution(workspaceId, filterCondition),
+      getPriorityAging(workspaceId, filterCondition),
+      getHoursEfficiency(workspaceId, filterCondition),
+      getKpiSummary(workspaceId, filterCondition),
+      // Filter options
+      getOwners(workspaceId),
+      getTeams(workspaceId),
+      getPriorities(workspaceId),
+      getStatuses(workspaceId),
     ]);
 
     return {
@@ -94,6 +174,18 @@ export async function getAnalytics(
         remainingWorkTrend: remainingWorkResult,
         toolsUsed: toolsUsedResult,
         assetClasses: assetClassesResult,
+        // New data
+        ownerProductivity: ownerProductivityResult,
+        teamsWorkload: teamsWorkloadResult,
+        assetClassDistribution: assetClassDistributionResult,
+        priorityAging: priorityAgingResult,
+        hoursEfficiency: hoursEfficiencyResult,
+        kpiSummary: kpiSummaryResult,
+        // Filter options
+        owners: ownersResult,
+        teams: teamsResult,
+        priorities: prioritiesResult,
+        statuses: statusesResult,
       },
     };
   } catch (error) {
@@ -118,6 +210,9 @@ function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
   }
   if (filters.assignee) {
     conditions.push(sql`data->>'owner' = ${filters.assignee}`);
+  }
+  if (filters.team) {
+    conditions.push(sql`data->'teamsInvolved' ? ${filters.team}`);
   }
   if (filters.dateFrom) {
     conditions.push(sql`created_at >= ${filters.dateFrom}::timestamp`);
@@ -391,4 +486,299 @@ async function getAssetClasses(workspaceId: string): Promise<string[]> {
   return (result.rows as { asset_class: string }[]).map(
     (row) => row.asset_class
   );
+}
+
+// New analytics query functions for 5 additional charts
+
+async function getOwnerProductivity(
+  workspaceId: string,
+  filterCondition: SQL | null
+): Promise<OwnerProductivity[]> {
+  const baseCondition = sql`workspace_id = ${workspaceId}
+    AND data->>'status' = 'completed'
+    AND data->>'owner' IS NOT NULL
+    AND data->>'owner' != ''`;
+  const whereClause = filterCondition
+    ? sql`${baseCondition} AND ${filterCondition}`
+    : baseCondition;
+
+  const result = await db.execute(sql`
+    SELECT 
+      data->>'owner' as owner,
+      COUNT(*)::int as completed_tasks,
+      AVG(
+        EXTRACT(EPOCH FROM (
+          COALESCE((data->>'completionDate')::timestamp, updated_at) - created_at
+        )) / 86400
+      )::float as avg_cycle_days,
+      SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as total_hours_saved
+    FROM tasks
+    WHERE ${whereClause}
+    GROUP BY data->>'owner'
+    ORDER BY completed_tasks DESC
+    LIMIT 5
+  `);
+
+  return (result.rows as {
+    owner: string;
+    completed_tasks: number;
+    avg_cycle_days: number;
+    total_hours_saved: number;
+  }[]).map((row) => ({
+    owner: row.owner,
+    completedTasks: row.completed_tasks,
+    avgCycleDays: row.avg_cycle_days || 0,
+    totalHoursSaved: row.total_hours_saved || 0,
+  }));
+}
+
+async function getTeamsWorkload(
+  workspaceId: string,
+  filterCondition: SQL | null
+): Promise<TeamsWorkload[]> {
+  const whereClause = filterCondition
+    ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
+    : sql`workspace_id = ${workspaceId}`;
+
+  const result = await db.execute(sql`
+    SELECT 
+      LOWER(team) as team,
+      COUNT(*)::int as count
+    FROM tasks,
+      jsonb_array_elements_text(COALESCE(data->'teamsInvolved', '[]'::jsonb)) as team
+    WHERE ${whereClause}
+      AND team IS NOT NULL
+      AND team != ''
+    GROUP BY LOWER(team)
+    ORDER BY count DESC
+    LIMIT 10
+  `);
+
+  return (result.rows as { team: string; count: number }[]).map((row) => ({
+    team: row.team,
+    count: row.count,
+  }));
+}
+
+async function getAssetClassDistribution(
+  workspaceId: string,
+  filterCondition: SQL | null
+): Promise<AssetClassDistribution[]> {
+  const whereClause = filterCondition
+    ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
+    : sql`workspace_id = ${workspaceId}`;
+
+  const result = await db.execute(sql`
+    SELECT 
+      COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned') as asset_class,
+      COUNT(*)::int as count
+    FROM tasks
+    WHERE ${whereClause}
+    GROUP BY COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned')
+    ORDER BY count DESC
+  `);
+
+  const colors = [
+    "var(--chart-1)",
+    "var(--chart-2)",
+    "var(--chart-3)",
+    "var(--chart-4)",
+    "var(--chart-5)",
+  ];
+
+  return (result.rows as { asset_class: string; count: number }[]).map(
+    (row, index) => ({
+      assetClass: row.asset_class,
+      count: row.count,
+      fill: colors[index % colors.length],
+    })
+  );
+}
+
+async function getPriorityAging(
+  workspaceId: string,
+  filterCondition: SQL | null
+): Promise<PriorityAging[]> {
+  // Only count open tasks (not completed/done)
+  const baseCondition = sql`workspace_id = ${workspaceId}
+    AND data->>'status' NOT IN ('completed', 'done')`;
+  const whereClause = filterCondition
+    ? sql`${baseCondition} AND ${filterCondition}`
+    : baseCondition;
+
+  const result = await db.execute(sql`
+    SELECT 
+      COALESCE(data->>'priority', 'medium') as priority,
+      COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 3)::int as bucket_0_3,
+      COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 3 
+        AND EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 7)::int as bucket_3_7,
+      COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 7 
+        AND EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 14)::int as bucket_7_14,
+      COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 14)::int as bucket_14_plus
+    FROM tasks
+    WHERE ${whereClause}
+    GROUP BY COALESCE(data->>'priority', 'medium')
+    ORDER BY 
+      CASE COALESCE(data->>'priority', 'medium')
+        WHEN 'urgent' THEN 1
+        WHEN 'high' THEN 2
+        WHEN 'medium' THEN 3
+        WHEN 'low' THEN 4
+        ELSE 5
+      END
+  `);
+
+  return (result.rows as {
+    priority: string;
+    bucket_0_3: number;
+    bucket_3_7: number;
+    bucket_7_14: number;
+    bucket_14_plus: number;
+  }[]).map((row) => ({
+    priority: row.priority.charAt(0).toUpperCase() + row.priority.slice(1),
+    bucket0to3: row.bucket_0_3,
+    bucket3to7: row.bucket_3_7,
+    bucket7to14: row.bucket_7_14,
+    bucket14plus: row.bucket_14_plus,
+  }));
+}
+
+async function getHoursEfficiency(
+  workspaceId: string,
+  filterCondition: SQL | null
+): Promise<HoursEfficiency[]> {
+  const baseCondition = sql`workspace_id = ${workspaceId}
+    AND data->>'completionDate' IS NOT NULL`;
+  const whereClause = filterCondition
+    ? sql`${baseCondition} AND ${filterCondition}`
+    : baseCondition;
+
+  const result = await db.execute(sql`
+    SELECT 
+      TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM') as month,
+      SUM(COALESCE((data->>'currentHrs')::numeric, 0))::float as current_hrs,
+      SUM(COALESCE((data->>'workedHrs')::numeric, 0))::float as worked_hrs,
+      CASE 
+        WHEN SUM(COALESCE((data->>'currentHrs')::numeric, 0)) > 0 
+        THEN (SUM(COALESCE((data->>'workedHrs')::numeric, 0)) / 
+              SUM(COALESCE((data->>'currentHrs')::numeric, 0)) * 100)::float
+        ELSE 0
+      END as efficiency
+    FROM tasks
+    WHERE ${whereClause}
+    GROUP BY TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM')
+    ORDER BY month ASC
+  `);
+
+  return (result.rows as {
+    month: string;
+    current_hrs: number;
+    worked_hrs: number;
+    efficiency: number;
+  }[]).map((row) => ({
+    month: row.month,
+    currentHrs: row.current_hrs || 0,
+    workedHrs: row.worked_hrs || 0,
+    efficiency: row.efficiency || 0,
+  }));
+}
+
+async function getKpiSummary(
+  workspaceId: string,
+  filterCondition: SQL | null
+): Promise<KpiSummary> {
+  const whereClause = filterCondition
+    ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
+    : sql`workspace_id = ${workspaceId}`;
+
+  const result = await db.execute(sql`
+    SELECT 
+      COUNT(*)::int as total_tasks,
+      COUNT(*) FILTER (WHERE data->>'status' NOT IN ('completed', 'done'))::int as open_tasks,
+      AVG(
+        CASE WHEN data->>'status' IN ('completed', 'done') 
+          AND data->>'completionDate' IS NOT NULL
+        THEN EXTRACT(EPOCH FROM (
+          (data->>'completionDate')::timestamp - created_at
+        )) / 86400
+        ELSE NULL END
+      )::float as avg_cycle_days,
+      SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as total_hours_saved
+    FROM tasks
+    WHERE ${whereClause}
+  `);
+
+  const row = result.rows[0] as {
+    total_tasks: number;
+    open_tasks: number;
+    avg_cycle_days: number | null;
+    total_hours_saved: number;
+  };
+
+  return {
+    totalTasks: row.total_tasks || 0,
+    openTasks: row.open_tasks || 0,
+    avgCycleDays: row.avg_cycle_days || 0,
+    totalHoursSaved: row.total_hours_saved || 0,
+  };
+}
+
+// Filter option helpers
+
+async function getOwners(workspaceId: string): Promise<string[]> {
+  const result = await db.execute(sql`
+    SELECT DISTINCT data->>'owner' as owner
+    FROM tasks
+    WHERE workspace_id = ${workspaceId}
+      AND data->>'owner' IS NOT NULL
+      AND data->>'owner' != ''
+    ORDER BY owner ASC
+  `);
+
+  return (result.rows as { owner: string }[]).map((row) => row.owner);
+}
+
+async function getTeams(workspaceId: string): Promise<string[]> {
+  const result = await db.execute(sql`
+    SELECT DISTINCT LOWER(team) as team
+    FROM tasks,
+      jsonb_array_elements_text(COALESCE(data->'teamsInvolved', '[]'::jsonb)) as team
+    WHERE workspace_id = ${workspaceId}
+      AND team IS NOT NULL
+      AND team != ''
+    ORDER BY team ASC
+  `);
+
+  return (result.rows as { team: string }[]).map((row) => row.team);
+}
+
+async function getPriorities(workspaceId: string): Promise<string[]> {
+  const result = await db.execute(sql`
+    SELECT DISTINCT data->>'priority' as priority
+    FROM tasks
+    WHERE workspace_id = ${workspaceId}
+      AND data->>'priority' IS NOT NULL
+    ORDER BY 
+      CASE data->>'priority'
+        WHEN 'urgent' THEN 1
+        WHEN 'high' THEN 2
+        WHEN 'medium' THEN 3
+        WHEN 'low' THEN 4
+        ELSE 5
+      END
+  `);
+
+  return (result.rows as { priority: string }[]).map((row) => row.priority);
+}
+
+async function getStatuses(workspaceId: string): Promise<string[]> {
+  const result = await db.execute(sql`
+    SELECT DISTINCT data->>'status' as status
+    FROM tasks
+    WHERE workspace_id = ${workspaceId}
+      AND data->>'status' IS NOT NULL
+    ORDER BY status ASC
+  `);
+
+  return (result.rows as { status: string }[]).map((row) => row.status);
 }
