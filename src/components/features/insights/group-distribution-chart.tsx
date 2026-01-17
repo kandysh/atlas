@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/src/components/ui/card";
@@ -17,27 +16,40 @@ import {
 } from "@/src/components/ui/chart";
 import { GroupDistribution } from "@/src/lib/actions/analytics";
 
-// Re-export for backward compatibility
-export type AssetClassDistribution = GroupDistribution & { assetClass?: string };
-
-const chartConfig = {
-  count: {
-    label: "Count",
-  },
-} satisfies ChartConfig;
-
-export function AssetClassPortfolioChart({
-  chartData,
-}: {
+interface GroupDistributionChartProps {
+  fieldKey: string;
+  fieldName: string;
   chartData: GroupDistribution[];
-}) {
-  const totalAssets = chartData.reduce((acc, curr) => acc + curr.count, 0);
+}
+
+export function GroupDistributionChart({
+  fieldKey,
+  fieldName,
+  chartData,
+}: GroupDistributionChartProps) {
+  const total = chartData.reduce((acc, curr) => acc + curr.count, 0);
+
+  // Build dynamic chart config from data
+  const chartConfig: ChartConfig = {
+    count: {
+      label: "Count",
+    },
+    ...Object.fromEntries(
+      chartData.map((item, index) => [
+        item.group,
+        {
+          label: formatLabel(item.group),
+          color: item.fill,
+        },
+      ])
+    ),
+  };
 
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Asset Class Portfolio</CardTitle>
-        <CardDescription>Distribution by asset class</CardDescription>
+        <CardTitle>{formatLabel(fieldName)} Distribution</CardTitle>
+        <CardDescription>Tasks by {fieldName.toLowerCase()}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -47,28 +59,7 @@ export function AssetClassPortfolioChart({
           <PieChart>
             <ChartTooltip
               cursor={false}
-              content={
-                <ChartTooltipContent
-                  hideLabel
-                  formatter={(value, name, item) => {
-                    const data = item.payload as GroupDistribution;
-                    return (
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: data.fill }}
-                        />
-                        <div className="flex flex-col">
-                          <span className="font-medium">{data.group}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {data.count} tasks ({data.percentage}%)
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  }}
-                />
-              }
+              content={<ChartTooltipContent hideLabel />}
             />
             <Pie
               data={chartData}
@@ -92,14 +83,14 @@ export function AssetClassPortfolioChart({
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalAssets.toLocaleString()}
+                          {total.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Total Assets
+                          Total Tasks
                         </tspan>
                       </text>
                     );
@@ -110,11 +101,13 @@ export function AssetClassPortfolioChart({
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="text-muted-foreground leading-none">
-          Portfolio distribution across asset classes
-        </div>
-      </CardFooter>
     </Card>
   );
+}
+
+function formatLabel(str: string): string {
+  return str
+    .split(/[-_]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }

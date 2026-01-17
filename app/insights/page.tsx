@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import {
-  AssetClassSelect,
   CumulativeFlowChart,
   CycleTimeChart,
   HoursSavedWorkedChart,
@@ -11,13 +10,13 @@ import {
   ToolsUsedChart,
   OwnerProductivityChart,
   TeamsWorkloadChart,
-  AssetClassPortfolioChart,
+  GroupDistributionChart,
   PriorityAgingChart,
   HoursEfficiencyChart,
   HeroKPIs,
   ChartSkeleton,
   KPISkeleton,
-  FilterControls,
+  DynamicFilterControls,
   InsightsCard,
   generateInsights,
 } from "@/src/components/features/insights";
@@ -92,12 +91,6 @@ export default function InsightsPage() {
     );
   }
 
-  // Build asset class options from server data
-  const assetClassOptions = [
-    ...Array.from(data?.assetClasses || []),
-    "All",
-  ].sort((a, b) => a.localeCompare(b));
-
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -111,10 +104,13 @@ export default function InsightsPage() {
         </p>
       </div>
 
-      {/* Filter Controls */}
-      <FilterControls
+      {/* Dynamic Filter Controls - driven by field configs */}
+      <DynamicFilterControls
         filters={filters}
         onFiltersChange={setFilters}
+        filterableFields={data?.filterableFields || []}
+        filterOptions={data?.filterOptions || {}}
+        isLoading={isLoading}
       />
 
       {/* Hero KPIs Section */}
@@ -126,7 +122,7 @@ export default function InsightsPage() {
         </div>
       ) : (
         <HeroKPIs
-          kpis={data?.kpis || { totalTasks: 0, openTasks: 0, avgCycleTime: 0, hoursSaved: 0 }}
+          kpis={data?.kpis || { totalTasks: 0, openTasks: 0, avgCycleTime: 0, hoursSaved: 0, customMetrics: {} }}
           isLoading={isLoading}
         />
       )}
@@ -136,7 +132,7 @@ export default function InsightsPage() {
         <InsightsCard insights={insights} />
       )}
 
-      {/* Charts Grid - 11 Total Charts */}
+      {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
           <>
@@ -154,7 +150,16 @@ export default function InsightsPage() {
             {/* Row 2 */}
             <ToolsUsedChart chartData={data?.toolsUsed || []} />
             <TeamsWorkloadChart chartData={data?.teamsWorkload || []} />
-            <AssetClassPortfolioChart chartData={data?.assetClassDistribution || []} />
+            
+            {/* Dynamic group distributions from combobox fields */}
+            {Object.entries(data?.groupDistributions || {}).map(([fieldKey, chartData]) => (
+              <GroupDistributionChart 
+                key={fieldKey}
+                fieldKey={fieldKey}
+                chartData={chartData}
+                fieldName={data?.filterableFields?.find(f => f.key === fieldKey)?.name || fieldKey}
+              />
+            ))}
 
             {/* Row 3 - Full width charts */}
             <div className="md:col-span-2 lg:col-span-3">

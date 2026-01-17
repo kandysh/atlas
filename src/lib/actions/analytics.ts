@@ -1,7 +1,7 @@
 "use server";
 
-import { db } from "@/src/lib/db";
-import { sql, SQL } from "drizzle-orm";
+import { db, fieldConfigs, FieldConfig } from "@/src/lib/db";
+import { sql, SQL, eq, asc } from "drizzle-orm";
 import {
   DonutChartData,
   ThroughPutOverTimeData,
@@ -27,7 +27,6 @@ export interface RemainingWorkTrend {
   remaining: number;
 }
 
-// New types for 5 additional charts
 export interface OwnerProductivity {
   owner: string;
   completed: number;
@@ -41,8 +40,8 @@ export interface TeamsWorkload {
   avgHours: number;
 }
 
-export interface AssetClassDistribution {
-  assetClass: string;
+export interface GroupDistribution {
+  group: string;
   count: number;
   percentage: number;
   fill: string;
@@ -61,48 +60,118 @@ export interface HoursEfficiency {
   workedHrs: number;
 }
 
-// KPI Metrics
+// KPI Metrics - dynamic based on available fields
 export interface KPIMetrics {
   totalTasks: number;
   openTasks: number;
   avgCycleTime: number;
   hoursSaved: number;
+  // Dynamic KPIs based on number fields
+  customMetrics: Record<string, number>;
+}
+
+// Field metadata for dynamic filtering
+export interface FieldMeta {
+  key: string;
+  name: string;
+  type: string;
+  choices: string[];
 }
 
 export type AnalyticsFilters = {
-  assetClass?: string;
-  status?: string;
-  priority?: string;
-  assignee?: string;
-  dateFrom?: string;
-  dateTo?: string;
+  [key: string]: string | undefined;
 };
 
 export type AnalyticsData = {
-  // Existing 6 charts
+  // Core charts
   statusCounts: DonutChartData[];
   throughputOverTime: ThroughPutOverTimeData[];
   cycleTime: RollingCycle[];
   hoursSavedWorked: MonthlyHoursPoint[];
   remainingWorkTrend: RemainingWorkTrend[];
   toolsUsed: ToolsUsed[];
-  // New 5 charts
   ownerProductivity: OwnerProductivity[];
   teamsWorkload: TeamsWorkload[];
-  assetClassDistribution: AssetClassDistribution[];
   priorityAging: PriorityAging[];
   hoursEfficiency: HoursEfficiency[];
+  // Dynamic group distributions (for combobox/select fields)
+  groupDistributions: Record<string, GroupDistribution[]>;
   // KPIs and metadata
   kpis: KPIMetrics;
-  assetClasses: string[];
+  // Dynamic field metadata for filters
+  filterableFields: FieldMeta[];
+  // Distinct values for each filterable field
+  filterOptions: Record<string, string[]>;
 };
 
 type AnalyticsResult =
   | { success: true; data: AnalyticsData }
   | { success: false; error: string };
 
+// Chart colors for dynamic distributions
+const CHART_COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "hsl(var(--primary))",
+  "hsl(var(--secondary))",
+];
+
+/**
+ * Get field configurations for analytics
+ */
+async function getFieldConfigs(workspaceId: string): Promise<FieldConfig[]> {
+  return db
+    .select()
+    .from(fieldConfigs)
+    .where(eq(fieldConfigs.workspaceId, workspaceId))
+    .orderBy(asc(fieldConfigs.order));
+}
+
+/**
+ * Build filterable fields from field configs
+ */
+function buildFilterableFields(fields: FieldConfig[]): FieldMeta[] {
+  const filterableTypes = ["status", "priority", "editable-combobox", "editable-owner", "select"];
+  return fields
+    .filter((f) => filterableTypes.includes(f.type))
+    .map((f) => ({
+      key: f.key,
+      name: f.name,
+      type: f.type,
+      choices: (f.options?.choices as string[]) || [],
+    }));
+}
+
+/**
+ * Get distinct values for filterable fields from actual data
+ */
+async function getFilterOptions(
+  workspaceId: string,
+  filterableFields: FieldMeta[]
+): Promise<Record<string, string[]>> {
+  const options: Record<string, string[]> = {};
+
+  for (const field of filterableFields) {
+    const result = await db.execute(sql`
+      SELECT DISTINCT data->>${sql.raw(`'${field.key}'`)} as value
+      FROM tasks
+      WHERE workspace_id = ${workspaceId}
+        AND data->>${sql.raw(`'${field.key}'`)} IS NOT NULL
+        AND data->>${sql.raw(`'${field.key}'`)} != ''
+      ORDER BY value
+    `);
+    options[field.key] = (result.rows as { value: string }[]).map((r) => r.value);
+  }
+
+  return options;
+}
+
 /**
  * Get all analytics data for a workspace with server-side aggregation
+ * Dynamically adapts to workspace field configurations
  */
 export async function getAnalytics(
   workspaceId: string,
@@ -113,8 +182,20 @@ export async function getAnalytics(
       return { success: false, error: "workspaceId is required" };
     }
 
-    // Build parameterized filter conditions
-    const filterCondition = buildFilterCondition(filters);
+    // Get field configurations for this workspace
+    const fields = await getFieldConfigs(workspaceId);
+    const filterableFields = buildFilterableFields(fields);
+
+    // Find key field types for dynamic queries
+    const statusField = fields.find((f) => f.type === "status");
+    const priorityField = fields.find((f) => f.type === "priority");
+    const ownerField = fields.find((f) => f.type === "editable-owner");
+    const numberFields = fields.filter((f) => f.type === "editable-number");
+    const comboboxFields = fields.filter((f) => f.type === "editable-combobox");
+    const tagFields = fields.filter((f) => f.type === "editable-tags");
+
+    // Build dynamic filter conditions
+    const filterCondition = buildDynamicFilterCondition(filters, filterableFields);
 
     // Execute all queries in parallel
     const [
@@ -126,25 +207,25 @@ export async function getAnalytics(
       toolsUsedResult,
       ownerProductivityResult,
       teamsWorkloadResult,
-      assetClassDistributionResult,
       priorityAgingResult,
       hoursEfficiencyResult,
       kpisResult,
-      assetClassesResult,
+      filterOptionsResult,
+      groupDistributionsResult,
     ] = await Promise.all([
-      getStatusCounts(workspaceId, filterCondition),
-      getThroughputOverTime(workspaceId, filterCondition),
-      getCycleTimeData(workspaceId, filterCondition),
-      getHoursSavedWorked(workspaceId, filterCondition),
-      getRemainingWorkTrend(workspaceId, filterCondition),
-      getToolsUsed(workspaceId, filterCondition),
-      getOwnerProductivity(workspaceId, filterCondition),
-      getTeamsWorkload(workspaceId, filterCondition),
-      getAssetClassDistribution(workspaceId, filterCondition),
-      getPriorityAging(workspaceId, filterCondition),
-      getHoursEfficiency(workspaceId, filterCondition),
-      getKPIs(workspaceId, filterCondition),
-      getAssetClasses(workspaceId),
+      getStatusCounts(workspaceId, filterCondition, statusField),
+      getThroughputOverTime(workspaceId, filterCondition, statusField, numberFields),
+      getCycleTimeData(workspaceId, filterCondition, statusField),
+      getHoursSavedWorked(workspaceId, filterCondition, statusField, numberFields),
+      getRemainingWorkTrend(workspaceId, filterCondition, statusField),
+      getToolsUsed(workspaceId, filterCondition, tagFields),
+      getOwnerProductivity(workspaceId, filterCondition, statusField, ownerField, numberFields),
+      getTeamsWorkload(workspaceId, filterCondition, tagFields, numberFields),
+      getPriorityAging(workspaceId, filterCondition, statusField, priorityField),
+      getHoursEfficiency(workspaceId, filterCondition, statusField, numberFields),
+      getKPIs(workspaceId, filterCondition, statusField, numberFields),
+      getFilterOptions(workspaceId, filterableFields),
+      getGroupDistributions(workspaceId, filterCondition, comboboxFields),
     ]);
 
     return {
@@ -158,11 +239,12 @@ export async function getAnalytics(
         toolsUsed: toolsUsedResult,
         ownerProductivity: ownerProductivityResult,
         teamsWorkload: teamsWorkloadResult,
-        assetClassDistribution: assetClassDistributionResult,
         priorityAging: priorityAgingResult,
         hoursEfficiency: hoursEfficiencyResult,
+        groupDistributions: groupDistributionsResult,
         kpis: kpisResult,
-        assetClasses: assetClassesResult,
+        filterableFields,
+        filterOptions: filterOptionsResult,
       },
     };
   } catch (error) {
@@ -171,77 +253,156 @@ export async function getAnalytics(
   }
 }
 
-function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
+/**
+ * Build dynamic filter conditions based on field configs
+ */
+function buildDynamicFilterCondition(
+  filters: AnalyticsFilters,
+  filterableFields: FieldMeta[]
+): SQL | null {
   const conditions: SQL[] = [];
 
-  if (filters.assetClass && filters.assetClass !== "All") {
-    conditions.push(
-      sql`LOWER(data->>'assetClass') = LOWER(${filters.assetClass})`
-    );
-  }
-  if (filters.status) {
-    conditions.push(sql`data->>'status' = ${filters.status}`);
-  }
-  if (filters.priority) {
-    conditions.push(sql`data->>'priority' = ${filters.priority}`);
-  }
-  if (filters.assignee) {
-    conditions.push(sql`data->>'owner' = ${filters.assignee}`);
-  }
-  if (filters.dateFrom) {
-    conditions.push(sql`created_at >= ${filters.dateFrom}::timestamp`);
-  }
-  if (filters.dateTo) {
-    conditions.push(sql`created_at <= ${filters.dateTo}::timestamp`);
+  for (const [key, value] of Object.entries(filters)) {
+    if (!value || value === "All") continue;
+
+    // Handle special date filters
+    if (key === "dateFrom") {
+      conditions.push(sql`created_at >= ${value}::timestamp`);
+    } else if (key === "dateTo") {
+      conditions.push(sql`created_at <= ${value}::timestamp`);
+    } else {
+      // Dynamic field filter
+      const field = filterableFields.find((f) => f.key === key);
+      if (field) {
+        conditions.push(sql`data->>${sql.raw(`'${key}'`)} = ${value}`);
+      }
+    }
   }
 
   if (conditions.length === 0) return null;
   if (conditions.length === 1) return conditions[0];
-  
+
   return sql.join(conditions, sql` AND `);
+}
+
+/**
+ * Helper to create a status array check expression for dynamic status fields
+ */
+function createStatusArrayCheck(statusKey: string, statuses: string[]): SQL {
+  const arrayLiteral = `ARRAY[${statuses.map(s => `'${s.replace(/'/g, "''")}'`).join(',')}]`;
+  return sql.raw(`data->>'${statusKey}' = ANY(${arrayLiteral})`);
+}
+
+/**
+ * Get group distributions for combobox fields
+ */
+async function getGroupDistributions(
+  workspaceId: string,
+  filterCondition: SQL | null,
+  comboboxFields: FieldConfig[]
+): Promise<Record<string, GroupDistribution[]>> {
+  const result: Record<string, GroupDistribution[]> = {};
+
+  for (const field of comboboxFields) {
+    const whereClause = filterCondition
+      ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
+      : sql`workspace_id = ${workspaceId}`;
+
+    const queryResult = await db.execute(sql`
+      WITH group_counts AS (
+        SELECT 
+          COALESCE(LOWER(data->>${sql.raw(`'${field.key}'`)}), 'unspecified') as group_value,
+          COUNT(*)::int as count
+        FROM tasks
+        WHERE ${whereClause}
+        GROUP BY COALESCE(LOWER(data->>${sql.raw(`'${field.key}'`)}), 'unspecified')
+      ),
+      total AS (
+        SELECT SUM(count)::int as total_count FROM group_counts
+      )
+      SELECT 
+        gc.group_value,
+        gc.count,
+        CASE WHEN t.total_count > 0 
+          THEN ROUND((gc.count::numeric / t.total_count * 100), 2)::float 
+          ELSE 0 
+        END as percentage
+      FROM group_counts gc, total t
+      ORDER BY gc.count DESC
+    `);
+
+    result[field.key] = (queryResult.rows as {
+      group_value: string;
+      count: number;
+      percentage: number;
+    }[]).map((row, index) => ({
+      group: row.group_value,
+      count: row.count,
+      percentage: row.percentage,
+      fill: CHART_COLORS[index % CHART_COLORS.length],
+    }));
+  }
+
+  return result;
 }
 
 async function getStatusCounts(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined
 ): Promise<DonutChartData[]> {
+  const statusKey = statusField?.key || "status";
+  const defaultValue = (statusField?.options?.defaultValue as string) || "todo";
+  const choices = (statusField?.options?.choices as string[]) || [];
+
   const whereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
     : sql`workspace_id = ${workspaceId}`;
 
+  // Use sql.raw to build the complete COALESCE expression
+  const statusExpr = sql.raw(`COALESCE(data->>'${statusKey}', '${defaultValue}')`);
+  
   const result = await db.execute(sql`
     SELECT 
-      COALESCE(data->>'status', 'todo') as status,
+      ${statusExpr} as status,
       COUNT(*)::int as count
     FROM tasks
     WHERE ${whereClause}
-    GROUP BY COALESCE(data->>'status', 'todo')
+    GROUP BY ${statusExpr}
   `);
 
-  const statusMap: Record<string, { label: string; fill: string }> = {
-    todo: { label: "To Do", fill: "var(--chart-1)" },
-    "in-progress": { label: "In Progress", fill: "var(--chart-2)" },
-    testing: { label: "Testing", fill: "var(--chart-3)" },
-    done: { label: "Done", fill: "var(--chart-4)" },
-    completed: { label: "Completed", fill: "var(--chart-5)" },
-    blocked: { label: "Blocked", fill: "hsl(var(--destructive))" },
-  };
-
+  // Build color map based on choice index
   return (result.rows as { status: string; count: number }[])
     .filter((row) => row.count > 0)
-    .map((row) => ({
-      status: statusMap[row.status]?.label || row.status,
+    .map((row, index) => ({
+      status: row.status,
       count: row.count,
-      fill: statusMap[row.status]?.fill || "var(--chart-1)",
+      fill: CHART_COLORS[choices.indexOf(row.status) % CHART_COLORS.length] || CHART_COLORS[index % CHART_COLORS.length],
     }));
 }
 
 async function getThroughputOverTime(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined,
+  numberFields: FieldConfig[]
 ): Promise<ThroughPutOverTimeData[]> {
+  const statusKey = statusField?.key || "status";
+  // Find completed statuses (done or completed)
+  const completedStatuses = (statusField?.options?.choices as string[])?.filter(
+    (s) => s.toLowerCase().includes("done") || s.toLowerCase().includes("completed")
+  ) || ["completed", "done"];
+  
+  // Find saved hours field
+  const savedHrsField = numberFields.find((f) => f.key.toLowerCase().includes("saved"));
+  const savedHrsKey = savedHrsField?.key || "savedHrs";
+
+  // Build the status check with proper array literal
+  const statusCheck = createStatusArrayCheck(statusKey, completedStatuses);
+  const savedHrsExpr = sql.raw(`data->>'${savedHrsKey}'`);
+
   const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' = 'completed'
+    AND ${statusCheck}
     AND data->>'completionDate' IS NOT NULL`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
@@ -250,7 +411,7 @@ async function getThroughputOverTime(
   const result = await db.execute(sql`
     SELECT 
       TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM-01') as date,
-      SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as hours,
+      SUM(COALESCE((${savedHrsExpr})::numeric, 0))::float as hours,
       COUNT(*)::int as count
     FROM tasks
     WHERE ${whereClause}
@@ -269,10 +430,16 @@ async function getThroughputOverTime(
 
 async function getCycleTimeData(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined
 ): Promise<RollingCycle[]> {
+  const statusKey = statusField?.key || "status";
+  const completedStatuses = (statusField?.options?.choices as string[])?.filter(
+    (s) => s.toLowerCase().includes("done") || s.toLowerCase().includes("completed")
+  ) || ["completed", "done"];
+
   const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' = 'completed'
+    AND data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})
     AND data->>'completionDate' IS NOT NULL`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
@@ -324,10 +491,22 @@ async function getCycleTimeData(
 
 async function getHoursSavedWorked(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined,
+  numberFields: FieldConfig[]
 ): Promise<MonthlyHoursPoint[]> {
+  const statusKey = statusField?.key || "status";
+  const completedStatuses = (statusField?.options?.choices as string[])?.filter(
+    (s) => s.toLowerCase().includes("done") || s.toLowerCase().includes("completed")
+  ) || ["completed", "done"];
+
+  const workedHrsField = numberFields.find((f) => f.key.toLowerCase().includes("worked"));
+  const savedHrsField = numberFields.find((f) => f.key.toLowerCase().includes("saved"));
+  const workedHrsKey = workedHrsField?.key || "workedHrs";
+  const savedHrsKey = savedHrsField?.key || "savedHrs";
+
   const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' = 'completed'
+    AND data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})
     AND data->>'completionDate' IS NOT NULL`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
@@ -336,10 +515,10 @@ async function getHoursSavedWorked(
   const result = await db.execute(sql`
     SELECT 
       TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM') as month,
-      SUM(COALESCE((data->>'workedHrs')::numeric, 0))::float as worked,
-      SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved,
-      (SUM(COALESCE((data->>'savedHrs')::numeric, 0)) - 
-       SUM(COALESCE((data->>'workedHrs')::numeric, 0)))::float as net
+      SUM(COALESCE((data->>${sql.raw(`'${workedHrsKey}'`)})::numeric, 0))::float as worked,
+      SUM(COALESCE((data->>${sql.raw(`'${savedHrsKey}'`)})::numeric, 0))::float as saved,
+      (SUM(COALESCE((data->>${sql.raw(`'${savedHrsKey}'`)})::numeric, 0)) - 
+       SUM(COALESCE((data->>${sql.raw(`'${workedHrsKey}'`)})::numeric, 0)))::float as net
     FROM tasks
     WHERE ${whereClause}
     GROUP BY TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM')
@@ -358,19 +537,25 @@ async function getHoursSavedWorked(
 
 async function getRemainingWorkTrend(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined
 ): Promise<RemainingWorkTrend[]> {
+  const statusKey = statusField?.key || "status";
+  const completedStatuses = (statusField?.options?.choices as string[])?.filter(
+    (s) => s.toLowerCase().includes("done") || s.toLowerCase().includes("completed")
+  ) || ["completed", "done"];
+
   const baseWhereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
     : sql`workspace_id = ${workspaceId}`;
   
   const completedWhereClause = filterCondition
     ? sql`workspace_id = ${workspaceId}
-        AND data->>'status' = 'completed'
+        AND data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})
         AND data->>'completionDate' IS NOT NULL
         AND ${filterCondition}`
     : sql`workspace_id = ${workspaceId}
-        AND data->>'status' = 'completed'
+        AND data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})
         AND data->>'completionDate' IS NOT NULL`;
 
   const result = await db.execute(sql`
@@ -425,8 +610,13 @@ async function getRemainingWorkTrend(
 
 async function getToolsUsed(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  tagFields: FieldConfig[]
 ): Promise<ToolsUsed[]> {
+  // Find a tools field (tags type with "tools" in key)
+  const toolsField = tagFields.find((f) => f.key.toLowerCase().includes("tool"));
+  const toolsKey = toolsField?.key || "tools";
+
   const whereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
     : sql`workspace_id = ${workspaceId}`;
@@ -436,7 +626,7 @@ async function getToolsUsed(
       LOWER(tool) as tool,
       COUNT(*)::int as count
     FROM tasks,
-      jsonb_array_elements_text(COALESCE(data->'tools', '[]'::jsonb)) as tool
+      jsonb_array_elements_text(COALESCE(data->${sql.raw(`'${toolsKey}'`)}, '[]'::jsonb)) as tool
     WHERE ${whereClause}
       AND tool IS NOT NULL
       AND tool != ''
@@ -447,51 +637,46 @@ async function getToolsUsed(
   return result.rows as ToolsUsed[];
 }
 
-async function getAssetClasses(workspaceId: string): Promise<string[]> {
-  const result = await db.execute(sql`
-    SELECT DISTINCT LOWER(data->>'assetClass') as asset_class
-    FROM tasks
-    WHERE workspace_id = ${workspaceId}
-      AND data->>'assetClass' IS NOT NULL
-      AND data->>'assetClass' != ''
-    ORDER BY asset_class ASC
-  `);
-
-  return (result.rows as { asset_class: string }[]).map(
-    (row) => row.asset_class
-  );
-}
-
-// NEW CHART QUERIES
-
 /**
  * Get owner productivity metrics - top 5 performers
  */
 async function getOwnerProductivity(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined,
+  ownerField: FieldConfig | undefined,
+  numberFields: FieldConfig[]
 ): Promise<OwnerProductivity[]> {
+  const statusKey = statusField?.key || "status";
+  const ownerKey = ownerField?.key || "owner";
+  const savedHrsField = numberFields.find((f) => f.key.toLowerCase().includes("saved"));
+  const savedHrsKey = savedHrsField?.key || "savedHrs";
+
+  const completedStatuses = (statusField?.options?.choices as string[])?.filter(
+    (s) => s.toLowerCase().includes("done") || s.toLowerCase().includes("completed")
+  ) || ["completed", "done"];
+
   const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' = 'completed'
-    AND data->>'owner' IS NOT NULL
-    AND data->>'owner' != '' AND TRIM(data->>'owner') != ''`;
+    AND data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})
+    AND data->>${sql.raw(`'${ownerKey}'`)} IS NOT NULL
+    AND data->>${sql.raw(`'${ownerKey}'`)} != '' AND TRIM(data->>${sql.raw(`'${ownerKey}'`)}) != ''`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
     : baseCondition;
 
   const result = await db.execute(sql`
     SELECT 
-      data->>'owner' as owner,
+      data->>${sql.raw(`'${ownerKey}'`)} as owner,
       COUNT(*)::int as completed,
       AVG(
         EXTRACT(EPOCH FROM (
           COALESCE((data->>'completionDate')::timestamp, updated_at) - created_at
         )) / 86400
       )::float as avg_cycle_days,
-      SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as hours_saved
+      SUM(COALESCE((data->>${sql.raw(`'${savedHrsKey}'`)})::numeric, 0))::float as hours_saved
     FROM tasks
     WHERE ${whereClause}
-    GROUP BY data->>'owner'
+    GROUP BY data->>${sql.raw(`'${ownerKey}'`)}
     ORDER BY completed DESC, hours_saved DESC
     LIMIT 5
   `);
@@ -514,8 +699,20 @@ async function getOwnerProductivity(
  */
 async function getTeamsWorkload(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  tagFields: FieldConfig[],
+  numberFields: FieldConfig[]
 ): Promise<TeamsWorkload[]> {
+  // Find teams field
+  const teamsField = tagFields.find((f) => f.key.toLowerCase().includes("team"));
+  const teamsKey = teamsField?.key || "teamsInvolved";
+  
+  // Find current/estimated hours field
+  const currentHrsField = numberFields.find((f) => 
+    f.key.toLowerCase().includes("current") || f.key.toLowerCase().includes("estimated")
+  );
+  const currentHrsKey = currentHrsField?.key || "currentHrs";
+
   const whereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
     : sql`workspace_id = ${workspaceId}`;
@@ -524,9 +721,9 @@ async function getTeamsWorkload(
     SELECT 
       LOWER(team) as team,
       COUNT(*)::int as count,
-      AVG(COALESCE((data->>'currentHrs')::numeric, 0))::float as avg_hours
+      AVG(COALESCE((data->>${sql.raw(`'${currentHrsKey}'`)})::numeric, 0))::float as avg_hours
     FROM tasks,
-      jsonb_array_elements_text(COALESCE(data->'teamsInvolved', '[]'::jsonb)) as team
+      jsonb_array_elements_text(COALESCE(data->${sql.raw(`'${teamsKey}'`)}, '[]'::jsonb)) as team
     WHERE ${whereClause}
       AND team IS NOT NULL
       AND team != ''
@@ -544,65 +741,26 @@ async function getTeamsWorkload(
 }
 
 /**
- * Get asset class distribution
- */
-async function getAssetClassDistribution(
-  workspaceId: string,
-  filterCondition: SQL | null
-): Promise<AssetClassDistribution[]> {
-  const whereClause = filterCondition
-    ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
-    : sql`workspace_id = ${workspaceId}`;
-
-  const result = await db.execute(sql`
-    WITH asset_counts AS (
-      SELECT 
-        COALESCE(LOWER(data->>'assetClass'), 'unspecified') as asset_class,
-        COUNT(*)::int as count
-      FROM tasks
-      WHERE ${whereClause}
-      GROUP BY COALESCE(LOWER(data->>'assetClass'), 'unspecified')
-    ),
-    total AS (
-      SELECT SUM(count)::int as total_count FROM asset_counts
-    )
-    SELECT 
-      ac.asset_class,
-      ac.count,
-      ROUND((ac.count::numeric / t.total_count * 100), 2)::float as percentage
-    FROM asset_counts ac, total t
-    ORDER BY ac.count DESC
-  `);
-
-  const colors = [
-    "var(--chart-1)",
-    "var(--chart-2)",
-    "var(--chart-3)",
-    "var(--chart-4)",
-    "var(--chart-5)",
-  ];
-
-  return (result.rows as {
-    asset_class: string;
-    count: number;
-    percentage: number;
-  }[]).map((row, index) => ({
-    assetClass: row.asset_class,
-    count: row.count,
-    percentage: row.percentage,
-    fill: colors[index % colors.length],
-  }));
-}
-
-/**
  * Get priority aging distribution
  */
 async function getPriorityAging(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined,
+  priorityField: FieldConfig | undefined
 ): Promise<PriorityAging[]> {
+  const statusKey = statusField?.key || "status";
+  const priorityKey = priorityField?.key || "priority";
+  const defaultPriority = (priorityField?.options?.defaultValue as string) || "medium";
+  const priorityChoices = (priorityField?.options?.choices as string[]) || ["low", "medium", "high", "urgent"];
+
+  // Get non-completed statuses
+  const completedStatuses = (statusField?.options?.choices as string[])?.filter(
+    (s) => s.toLowerCase().includes("done") || s.toLowerCase().includes("completed")
+  ) || ["completed", "done"];
+
   const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' NOT IN ('completed', 'done')`;
+    AND NOT (data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses}))`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
     : baseCondition;
@@ -610,7 +768,7 @@ async function getPriorityAging(
   const result = await db.execute(sql`
     WITH task_ages AS (
       SELECT 
-        COALESCE(data->>'priority', 'medium') as priority,
+        COALESCE(data->>${sql.raw(`'${priorityKey}'`)}, ${defaultPriority}) as priority,
         CASE
           WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 3 THEN '0-3 days'
           WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 7 THEN '4-7 days'
@@ -628,12 +786,7 @@ async function getPriorityAging(
     FROM task_ages
     GROUP BY priority, age_bucket
     ORDER BY 
-      CASE priority
-        WHEN 'urgent' THEN 1
-        WHEN 'high' THEN 2
-        WHEN 'medium' THEN 3
-        WHEN 'low' THEN 4
-      END,
+      array_position(${priorityChoices}::text[], priority),
       CASE age_bucket
         WHEN '0-3 days' THEN 1
         WHEN '4-7 days' THEN 2
@@ -659,10 +812,24 @@ async function getPriorityAging(
  */
 async function getHoursEfficiency(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined,
+  numberFields: FieldConfig[]
 ): Promise<HoursEfficiency[]> {
+  const statusKey = statusField?.key || "status";
+  const completedStatuses = (statusField?.options?.choices as string[])?.filter(
+    (s) => s.toLowerCase().includes("done") || s.toLowerCase().includes("completed")
+  ) || ["completed", "done"];
+
+  const currentHrsField = numberFields.find((f) => 
+    f.key.toLowerCase().includes("current") || f.key.toLowerCase().includes("estimated")
+  );
+  const workedHrsField = numberFields.find((f) => f.key.toLowerCase().includes("worked"));
+  const currentHrsKey = currentHrsField?.key || "currentHrs";
+  const workedHrsKey = workedHrsField?.key || "workedHrs";
+
   const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' = 'completed'
+    AND data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})
     AND data->>'completionDate' IS NOT NULL`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
@@ -672,13 +839,13 @@ async function getHoursEfficiency(
     SELECT 
       TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM') as month,
       CASE
-        WHEN SUM(COALESCE((data->>'workedHrs')::numeric, 0)) > 0
-        THEN (SUM(COALESCE((data->>'currentHrs')::numeric, 0)) / 
-              SUM(COALESCE((data->>'workedHrs')::numeric, 0)))::float
+        WHEN SUM(COALESCE((data->>${sql.raw(`'${workedHrsKey}'`)})::numeric, 0)) > 0
+        THEN (SUM(COALESCE((data->>${sql.raw(`'${currentHrsKey}'`)})::numeric, 0)) / 
+              SUM(COALESCE((data->>${sql.raw(`'${workedHrsKey}'`)})::numeric, 0)))::float
         ELSE 0
       END as efficiency,
-      SUM(COALESCE((data->>'currentHrs')::numeric, 0))::float as current_hrs,
-      SUM(COALESCE((data->>'workedHrs')::numeric, 0))::float as worked_hrs
+      SUM(COALESCE((data->>${sql.raw(`'${currentHrsKey}'`)})::numeric, 0))::float as current_hrs,
+      SUM(COALESCE((data->>${sql.raw(`'${workedHrsKey}'`)})::numeric, 0))::float as worked_hrs
     FROM tasks
     WHERE ${whereClause}
     GROUP BY TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM')
@@ -703,25 +870,35 @@ async function getHoursEfficiency(
  */
 async function getKPIs(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
+  statusField: FieldConfig | undefined,
+  numberFields: FieldConfig[]
 ): Promise<KPIMetrics> {
+  const statusKey = statusField?.key || "status";
+  const completedStatuses = (statusField?.options?.choices as string[])?.filter(
+    (s) => s.toLowerCase().includes("done") || s.toLowerCase().includes("completed")
+  ) || ["completed", "done"];
+
+  const savedHrsField = numberFields.find((f) => f.key.toLowerCase().includes("saved"));
+  const savedHrsKey = savedHrsField?.key || "savedHrs";
+
   const baseWhereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
     : sql`workspace_id = ${workspaceId}`;
 
   const completedWhereClause = filterCondition
     ? sql`workspace_id = ${workspaceId}
-        AND data->>'status' = 'completed'
+        AND data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})
         AND ${filterCondition}`
     : sql`workspace_id = ${workspaceId}
-        AND data->>'status' = 'completed'`;
+        AND data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})`;
 
   const result = await db.execute(sql`
     WITH stats AS (
       SELECT 
         COUNT(*)::int as total_tasks,
-        COUNT(CASE WHEN data->>'status' NOT IN ('completed', 'done') THEN 1 END)::int as open_tasks,
-        SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as hours_saved
+        COUNT(CASE WHEN NOT (data->>${sql.raw(`'${statusKey}'`)} = ANY(${completedStatuses})) THEN 1 END)::int as open_tasks,
+        SUM(COALESCE((data->>${sql.raw(`'${savedHrsKey}'`)})::numeric, 0))::float as hours_saved
       FROM tasks
       WHERE ${baseWhereClause}
     ),
@@ -751,10 +928,22 @@ async function getKPIs(
     hours_saved: number;
   };
 
+  // Calculate custom metrics from number fields
+  const customMetrics: Record<string, number> = {};
+  for (const field of numberFields) {
+    const sumResult = await db.execute(sql`
+      SELECT SUM(COALESCE((data->>${sql.raw(`'${field.key}'`)})::numeric, 0))::float as total
+      FROM tasks
+      WHERE ${baseWhereClause}
+    `);
+    customMetrics[field.key] = (sumResult.rows[0] as { total: number })?.total || 0;
+  }
+
   return {
-    totalTasks: row.total_tasks || 0,
-    openTasks: row.open_tasks || 0,
-    avgCycleTime: row.avg_cycle_time || 0,
-    hoursSaved: row.hours_saved || 0,
+    totalTasks: row?.total_tasks || 0,
+    openTasks: row?.open_tasks || 0,
+    avgCycleTime: row?.avg_cycle_time || 0,
+    hoursSaved: row?.hours_saved || 0,
+    customMetrics,
   };
 }
