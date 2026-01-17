@@ -608,21 +608,27 @@ async function getPriorityAging(
     : baseCondition;
 
   const result = await db.execute(sql`
+    WITH task_ages AS (
+      SELECT 
+        COALESCE(data->>'priority', 'medium') as priority,
+        CASE
+          WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 3 THEN '0-3 days'
+          WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 7 THEN '4-7 days'
+          WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 14 THEN '8-14 days'
+          WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 30 THEN '15-30 days'
+          ELSE '30+ days'
+        END as age_bucket
+      FROM tasks
+      WHERE ${whereClause}
+    )
     SELECT 
-      COALESCE(data->>'priority', 'medium') as priority,
-      CASE
-        WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 3 THEN '0-3 days'
-        WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 7 THEN '4-7 days'
-        WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 14 THEN '8-14 days'
-        WHEN EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 30 THEN '15-30 days'
-        ELSE '30+ days'
-      END as age_bucket,
+      priority,
+      age_bucket,
       COUNT(*)::int as count
-    FROM tasks
-    WHERE ${whereClause}
-    GROUP BY COALESCE(data->>'priority', 'medium'), age_bucket
+    FROM task_ages
+    GROUP BY priority, age_bucket
     ORDER BY 
-      CASE COALESCE(data->>'priority', 'medium')
+      CASE priority
         WHEN 'urgent' THEN 1
         WHEN 'high' THEN 2
         WHEN 'medium' THEN 3
