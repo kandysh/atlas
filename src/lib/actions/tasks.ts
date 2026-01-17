@@ -1,10 +1,11 @@
 "use server";
 
-import { db, tasks, workspaces, taskEvents, Task } from "@/src/lib/db";
-import { eq, desc, sql } from "drizzle-orm";
+import { db, tasks, workspaces, taskEvents, fieldConfigs, Task } from "@/src/lib/db";
+import { eq, desc, sql, asc } from "drizzle-orm";
 import { generateTaskDisplayId } from "@/src/lib/utils";
 import { broadcastTaskUpdate } from "@/src/lib/sse/server";
 import { getCurrentUserId } from "./user";
+import { validatePatch } from "@/src/lib/utils/fields/validate-patch";
 
 export type TasksResult = {
   tasks: Task[];
@@ -122,11 +123,13 @@ export async function createTask(
 
 /**
  * Update a task with a partial patch
+ * Validates patch against field configurations before writing
  */
 export async function updateTask(
   taskId: string,
-  patch: Record<string, unknown>
-): Promise<{ success: true; task: Task } | { success: false; error: string }> {
+  patch: Record<string, unknown>,
+  options?: { skipValidation?: boolean }
+): Promise<{ success: true; task: Task } | { success: false; error: string; validationErrors?: Array<{ field: string; message: string; code: string }> }> {
   try {
     if (!taskId) {
       return { success: false, error: "taskId is required" };
@@ -147,11 +150,31 @@ export async function updateTask(
       return { success: false, error: "Task not found" };
     }
 
+    // Validate patch against field configurations (unless skipped)
+    let validatedPatch = patch;
+    if (!options?.skipValidation) {
+      const fields = await db
+        .select()
+        .from(fieldConfigs)
+        .where(eq(fieldConfigs.workspaceId, currentTask.workspaceId))
+        .orderBy(asc(fieldConfigs.order));
+
+      const validation = validatePatch(fields, patch);
+      if (!validation.valid) {
+        return {
+          success: false,
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join(", ")}`,
+          validationErrors: validation.errors,
+        };
+      }
+      validatedPatch = validation.sanitizedPatch;
+    }
+
     // Update the task using JSONB merge (data || patch)
     const [updatedTask] = await db
       .update(tasks)
       .set({
-        data: sql`${tasks.data} || ${JSON.stringify(patch)}::jsonb`,
+        data: sql`${tasks.data} || ${JSON.stringify(validatedPatch)}::jsonb`,
         version: sql`${tasks.version} + 1`,
         updatedAt: new Date(),
       })
@@ -160,7 +183,7 @@ export async function updateTask(
 
     // Log update events for each changed field
     const userId = await getCurrentUserId();
-    const eventPromises = Object.entries(patch).map(([field, newValue]) => {
+    const eventPromises = Object.entries(validatedPatch).map(([field, newValue]) => {
       const oldValue = (currentTask.data as Record<string, unknown>)?.[field];
       return db.insert(taskEvents).values({
         workspaceId: currentTask.workspaceId,

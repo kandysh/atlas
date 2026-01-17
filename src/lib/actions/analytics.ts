@@ -947,3 +947,228 @@ async function getKPIs(
     customMetrics,
   };
 }
+
+/**
+ * Dynamic chart data type following the contract:
+ * charts[{ fieldKey, chartType, data, meta }]
+ */
+export interface DynamicChartData {
+  fieldKey: string;
+  fieldName: string;
+  chartType: "donut" | "bar" | "heatmap" | "line" | "area";
+  data: Array<{
+    label: string;
+    value: number;
+    percentage?: number;
+    fill?: string;
+  }>;
+  meta: {
+    total: number;
+    topN?: number;
+    suffix?: string;
+  };
+}
+
+export type DynamicChartsResult =
+  | { success: true; charts: DynamicChartData[] }
+  | { success: false; error: string };
+
+/**
+ * Generate dynamic charts based on field configurations
+ * Uses the aggregator registry pattern to map field types to chart strategies
+ */
+export async function getDynamicCharts(
+  workspaceId: string,
+  filters: AnalyticsFilters = {}
+): Promise<DynamicChartsResult> {
+  try {
+    if (!workspaceId) {
+      return { success: false, error: "workspaceId is required" };
+    }
+
+    const fields = await getFieldConfigs(workspaceId);
+    const filterableFields = buildFilterableFields(fields);
+    const filterCondition = buildDynamicFilterCondition(filters, filterableFields);
+
+    // Get fields that should have charts (based on analytics config)
+    const chartableFields = fields.filter((field) => {
+      const options = field.options as { analytics?: { enabled?: boolean } } | undefined;
+      const analyticsConfig = options?.analytics;
+      // Include if analytics.enabled is not explicitly false
+      if (analyticsConfig?.enabled === false) return false;
+      // Skip text fields (not useful for charts)
+      if (field.type === "editable-text" || field.type === "text") return false;
+      if (field.type === "checkbox") return false;
+      return true;
+    });
+
+    // Generate chart data for each chartable field
+    const chartPromises = chartableFields.map((field) =>
+      generateChartForField(workspaceId, field, filterCondition)
+    );
+
+    const charts = await Promise.all(chartPromises);
+
+    // Filter out null results (fields with no data)
+    const validCharts = charts.filter((c): c is DynamicChartData => c !== null);
+
+    return { success: true, charts: validCharts };
+  } catch (error) {
+    console.error("Error generating dynamic charts:", error);
+    return { success: false, error: "Failed to generate charts" };
+  }
+}
+
+/**
+ * Generate chart data for a specific field
+ */
+async function generateChartForField(
+  workspaceId: string,
+  field: FieldConfig,
+  filterCondition: SQL | null
+): Promise<DynamicChartData | null> {
+  const { key, name, type, options } = field;
+  const analyticsOptions = (options as { analytics?: { chart?: string; topN?: number } })?.analytics;
+  const topN = analyticsOptions?.topN || 10;
+
+  const whereClause = filterCondition
+    ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
+    : sql`workspace_id = ${workspaceId}`;
+
+  let chartType: DynamicChartData["chartType"] = "bar";
+  let data: DynamicChartData["data"] = [];
+
+  // Map field types to aggregation strategies
+  switch (type) {
+    case "status":
+    case "priority":
+    case "editable-combobox":
+    case "select":
+    case "editable-owner":
+      // Distribution: count per choice
+      chartType = type === "status" ? "donut" : "bar";
+      const distResult = await db.execute(sql`
+        SELECT 
+          COALESCE(LOWER(data->>${sql.raw(`'${key}'`)}), 'unspecified') as label,
+          COUNT(*)::int as value
+        FROM tasks
+        WHERE ${whereClause}
+        GROUP BY COALESCE(LOWER(data->>${sql.raw(`'${key}'`)}), 'unspecified')
+        ORDER BY value DESC
+        LIMIT ${topN}
+      `);
+      data = (distResult.rows as { label: string; value: number }[]).map(
+        (row, idx) => ({
+          label: row.label,
+          value: row.value,
+          fill: CHART_COLORS[idx % CHART_COLORS.length],
+        })
+      );
+      break;
+
+    case "editable-tags":
+    case "multiselect":
+    case "badge-list":
+      // Frequency: explode array and count
+      chartType = "bar";
+      const tagsResult = await db.execute(sql`
+        SELECT 
+          LOWER(elem) as label,
+          COUNT(*)::int as value
+        FROM tasks,
+          jsonb_array_elements_text(COALESCE(data->${sql.raw(`'${key}'`)}, '[]'::jsonb)) as elem
+        WHERE ${whereClause}
+          AND elem IS NOT NULL
+          AND elem != ''
+        GROUP BY LOWER(elem)
+        ORDER BY value DESC
+        LIMIT ${topN}
+      `);
+      data = (tagsResult.rows as { label: string; value: number }[]).map(
+        (row, idx) => ({
+          label: row.label,
+          value: row.value,
+          fill: CHART_COLORS[idx % CHART_COLORS.length],
+        })
+      );
+      break;
+
+    case "editable-number":
+    case "number":
+      // Sum/avg by month (for trend line)
+      chartType = "line";
+      const suffix = (options as { suffix?: string })?.suffix || "";
+      const numResult = await db.execute(sql`
+        SELECT 
+          TO_CHAR(created_at, 'YYYY-MM') as label,
+          SUM(COALESCE((data->>${sql.raw(`'${key}'`)})::numeric, 0))::float as value
+        FROM tasks
+        WHERE ${whereClause}
+        GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+        ORDER BY label ASC
+      `);
+      data = (numResult.rows as { label: string; value: number }[]).map(
+        (row) => ({
+          label: row.label,
+          value: row.value,
+        })
+      );
+      return {
+        fieldKey: key,
+        fieldName: name,
+        chartType,
+        data,
+        meta: {
+          total: data.reduce((sum, d) => sum + d.value, 0),
+          suffix,
+        },
+      };
+
+    case "editable-date":
+    case "date":
+      // Time series: count by week/month
+      chartType = "line";
+      const dateResult = await db.execute(sql`
+        SELECT 
+          TO_CHAR(DATE_TRUNC('week', (data->>${sql.raw(`'${key}'`)})::timestamp), 'YYYY-MM-DD') as label,
+          COUNT(*)::int as value
+        FROM tasks
+        WHERE ${whereClause}
+          AND data->>${sql.raw(`'${key}'`)} IS NOT NULL
+        GROUP BY DATE_TRUNC('week', (data->>${sql.raw(`'${key}'`)})::timestamp)
+        ORDER BY label ASC
+      `);
+      data = (dateResult.rows as { label: string; value: number }[]).map(
+        (row) => ({
+          label: row.label,
+          value: row.value,
+        })
+      );
+      break;
+
+    default:
+      return null;
+  }
+
+  if (data.length === 0) return null;
+
+  // Calculate percentages for distribution charts
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (chartType === "donut" || chartType === "bar") {
+    data = data.map((d) => ({
+      ...d,
+      percentage: total > 0 ? Math.round((d.value / total) * 1000) / 10 : 0,
+    }));
+  }
+
+  return {
+    fieldKey: key,
+    fieldName: name,
+    chartType,
+    data,
+    meta: {
+      total,
+      topN,
+    },
+  };
+}

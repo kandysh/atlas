@@ -1,8 +1,22 @@
 import { NewFieldConfig } from "@/src/lib/db/schema";
+import { DrawerConfig, AnalyticsConfig } from "./field-options";
+
+/**
+ * Extended options type including drawer and analytics configs
+ */
+interface FieldOptions {
+  choices?: string[];
+  defaultValue?: string | number | boolean;
+  required?: boolean;
+  suffix?: string;
+  maxItems?: number;
+  drawer?: DrawerConfig;
+  analytics?: AnalyticsConfig;
+}
 
 /**
  * Generate default field configurations for a new workspace
- * Based on the Task type in project.ts
+ * Includes drawer and analytics configurations for metadata-driven UI
  */
 export function getDefaultFieldConfigs(
   workspaceId: string,
@@ -13,7 +27,11 @@ export function getDefaultFieldConfigs(
       key: "title",
       name: "Title",
       type: "editable-text",
-      options: { required: true },
+      options: { 
+        required: true,
+        drawer: { section: "Core", width: "full" },
+        analytics: { enabled: false },
+      } satisfies FieldOptions,
       order: 0,
       visible: true,
     },
@@ -22,7 +40,12 @@ export function getDefaultFieldConfigs(
       key: "owner",
       name: "Owner",
       type: "editable-owner",
-      options: { choices: [], required: true },
+      options: { 
+        choices: [], 
+        required: true,
+        drawer: { section: "Core", width: "half" },
+        analytics: { enabled: true, chart: "bar", topN: 10 },
+      } satisfies FieldOptions,
       order: 1,
       visible: true,
     },
@@ -42,7 +65,9 @@ export function getDefaultFieldConfigs(
         ],
         defaultValue: "todo",
         required: true,
-      },
+        drawer: { section: "Core", width: "half" },
+        analytics: { enabled: true, chart: "donut" },
+      } satisfies FieldOptions,
       order: 2,
       visible: true,
     },
@@ -55,7 +80,9 @@ export function getDefaultFieldConfigs(
         choices: ["low", "medium", "high", "urgent"],
         defaultValue: "medium",
         required: true,
-      },
+        drawer: { section: "Core", width: "half" },
+        analytics: { enabled: true, chart: "bar" },
+      } satisfies FieldOptions,
       order: 3,
       visible: true,
     },
@@ -64,7 +91,12 @@ export function getDefaultFieldConfigs(
       key: "assetClass",
       name: "Asset Class",
       type: "editable-combobox",
-      options: { choices: [], required: false },
+      options: { 
+        choices: [], 
+        required: false,
+        drawer: { section: "Core", width: "half" },
+        analytics: { enabled: true, chart: "donut" },
+      } satisfies FieldOptions,
       order: 4,
       visible: true,
     },
@@ -73,7 +105,12 @@ export function getDefaultFieldConfigs(
       key: "theme",
       name: "Theme",
       type: "editable-combobox",
-      options: { choices: [], required: false },
+      options: { 
+        choices: [], 
+        required: false,
+        drawer: { section: "Core", width: "half" },
+        analytics: { enabled: true, chart: "donut" },
+      } satisfies FieldOptions,
       order: 5,
       visible: false,
     },
@@ -82,7 +119,13 @@ export function getDefaultFieldConfigs(
       key: "teamsInvolved",
       name: "Teams Involved",
       type: "editable-tags",
-      options: { choices: [], required: false },
+      options: { 
+        choices: [], 
+        required: false,
+        maxItems: 20,
+        drawer: { section: "Details", width: "full" },
+        analytics: { enabled: true, chart: "bar", topN: 10 },
+      } satisfies FieldOptions,
       order: 6,
       visible: true,
     },
@@ -91,7 +134,11 @@ export function getDefaultFieldConfigs(
       key: "problemStatement",
       name: "Problem Statement",
       type: "editable-text",
-      options: { required: false },
+      options: { 
+        required: false,
+        drawer: { section: "Details", width: "full" },
+        analytics: { enabled: false },
+      } satisfies FieldOptions,
       order: 7,
       visible: false,
     },
@@ -100,7 +147,11 @@ export function getDefaultFieldConfigs(
       key: "solutionDesign",
       name: "Solution Design",
       type: "editable-text",
-      options: { required: false },
+      options: { 
+        required: false,
+        drawer: { section: "Details", width: "full" },
+        analytics: { enabled: false },
+      } satisfies FieldOptions,
       order: 8,
       visible: false,
     },
@@ -109,7 +160,11 @@ export function getDefaultFieldConfigs(
       key: "benefits",
       name: "Benefits",
       type: "editable-text",
-      options: { required: false },
+      options: { 
+        required: false,
+        drawer: { section: "Details", width: "full" },
+        analytics: { enabled: false },
+      } satisfies FieldOptions,
       order: 9,
       visible: false,
     },
@@ -118,7 +173,13 @@ export function getDefaultFieldConfigs(
       key: "currentHrs",
       name: "Estimated Hours",
       type: "editable-number",
-      options: { defaultValue: 0, required: false, suffix: "h" },
+      options: { 
+        defaultValue: 0, 
+        required: false, 
+        suffix: "h",
+        drawer: { section: "Hours", width: "half" },
+        analytics: { enabled: true, chart: "line", aggregation: "sum" },
+      } satisfies FieldOptions,
       order: 10,
       visible: true,
     },
@@ -127,7 +188,13 @@ export function getDefaultFieldConfigs(
       key: "workedHrs",
       name: "Worked Hours",
       type: "editable-number",
-      options: { defaultValue: 0, required: false, suffix: "h" },
+      options: { 
+        defaultValue: 0, 
+        required: false, 
+        suffix: "h",
+        drawer: { section: "Hours", width: "half" },
+        analytics: { enabled: true, chart: "line", aggregation: "sum" },
+      } satisfies FieldOptions,
       order: 11,
       visible: true,
     },
@@ -136,7 +203,13 @@ export function getDefaultFieldConfigs(
       key: "savedHrs",
       name: "Saved Hours",
       type: "editable-number",
-      options: { defaultValue: 0, required: false, suffix: "h" },
+      options: { 
+        defaultValue: 0, 
+        required: false, 
+        suffix: "h",
+        drawer: { section: "Hours", width: "half" },
+        analytics: { enabled: true, chart: "line", aggregation: "sum" },
+      } satisfies FieldOptions,
       order: 12,
       visible: false,
     },
@@ -145,7 +218,13 @@ export function getDefaultFieldConfigs(
       key: "tools",
       name: "Tools",
       type: "editable-tags",
-      options: { choices: [], required: false },
+      options: { 
+        choices: [], 
+        required: false,
+        maxItems: 20,
+        drawer: { section: "Details", width: "full" },
+        analytics: { enabled: true, chart: "bar", topN: 10 },
+      } satisfies FieldOptions,
       order: 13,
       visible: false,
     },
@@ -154,7 +233,13 @@ export function getDefaultFieldConfigs(
       key: "tags",
       name: "Tags",
       type: "editable-tags",
-      options: { choices: [], required: false },
+      options: { 
+        choices: [], 
+        required: false,
+        maxItems: 20,
+        drawer: { section: "Details", width: "full" },
+        analytics: { enabled: true, chart: "heatmap", topN: 10 },
+      } satisfies FieldOptions,
       order: 14,
       visible: false,
     },
@@ -163,7 +248,11 @@ export function getDefaultFieldConfigs(
       key: "otherUseCases",
       name: "Other Use Cases",
       type: "editable-text",
-      options: { required: false },
+      options: { 
+        required: false,
+        drawer: { section: "Details", width: "full" },
+        analytics: { enabled: false },
+      } satisfies FieldOptions,
       order: 15,
       visible: false,
     },
@@ -172,7 +261,11 @@ export function getDefaultFieldConfigs(
       key: "completionDate",
       name: "Completion Date",
       type: "editable-date",
-      options: { required: false },
+      options: { 
+        required: false,
+        drawer: { section: "Timeline", width: "half" },
+        analytics: { enabled: true, chart: "line", groupBy: "week" },
+      } satisfies FieldOptions,
       order: 16,
       visible: true,
     },
