@@ -1,7 +1,7 @@
 "use client";
 
 import { Table } from "@tanstack/react-table";
-import { Task, Status, Priority } from "@/src/lib/types";
+import { Task } from "@/src/lib/db";
 import { FieldConfig } from "@/src/lib/db";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -35,7 +35,7 @@ interface DynamicToolbarProps {
   onToggleFieldVisibility?: (fieldId: string, visible: boolean) => void;
 }
 
-const statusLabels: Record<Status, string> = {
+const statusLabels: Record<string, string> = {
   "todo": "To Do",
   "in-progress": "In Progress",
   "testing": "Testing",
@@ -44,7 +44,7 @@ const statusLabels: Record<Status, string> = {
   "blocked": "Blocked",
 };
 
-const priorityLabels: Record<Priority, string> = {
+const priorityLabels: Record<string, string> = {
   "low": "Low",
   "medium": "Medium",
   "high": "High",
@@ -142,10 +142,10 @@ export function DynamicToolbar({
 
   const getDisplayLabel = (field: FieldConfig, value: string): string => {
     if (field.type === "status") {
-      return statusLabels[value as Status] || value;
+      return statusLabels[value] || value;
     }
     if (field.type === "priority") {
-      return priorityLabels[value as Priority] || value;
+      return priorityLabels[value] || value;
     }
     return value;
   };

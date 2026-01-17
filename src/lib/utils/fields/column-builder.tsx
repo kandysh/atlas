@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { Task, Status, Priority } from "@/src/lib/types";
+import { Task } from "@/src/lib/db/schema";
 import { FieldConfig } from "@/src/lib/db/schema";
 import { StatusCell } from "@/src/components/features/tasks/status-cell";
 import { PriorityCell } from "@/src/components/features/tasks/priority-cell";
@@ -223,16 +223,16 @@ function renderCell(
 
 function renderStatusCell(
   value: any,
-  handleChange: (value: Status) => void,
+  handleChange: (value: any) => void,
 ): React.ReactNode {
-  return <StatusCell value={value as Status} onChange={handleChange} />;
+  return <StatusCell value={value} onChange={handleChange} />;
 }
 
 function renderPriorityCell(
   value: any,
-  handleChange: (value: Priority) => void,
+  handleChange: (value: any) => void,
 ): React.ReactNode {
-  return <PriorityCell value={value as Priority} onChange={handleChange} />;
+  return <PriorityCell value={value} onChange={handleChange} />;
 }
 
 function renderEditableOwnerCell(

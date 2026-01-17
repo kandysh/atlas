@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Task as DbTask, FieldConfig } from "@/src/lib/db";
-import { Task as UiTask } from "@/src/lib/types";
 import {
   getTasks,
   createTask as createTaskAction,
@@ -17,38 +16,11 @@ import {
   getFields,
   updateFieldVisibility as updateFieldVisibilityAction,
 } from "@/src/lib/actions/fields";
-import { dbTaskToUiTask } from "@/src/lib/utils";
 import { toast } from "sonner";
 import { queryKeys } from "./keys";
 
 // Re-export queryKeys for backward compatibility
 export { queryKeys };
-
-/**
- * Hook to fetch workspace tasks with pagination
- */
-export function useWorkspaceTasks(workspaceId: string, page: number = 0) {
-  return useQuery({
-    queryKey: queryKeys.tasks.paginated(workspaceId, page),
-    queryFn: async () => {
-      const result = await getTasks(workspaceId, page);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      const dbTasks = result.data.tasks;
-      const uiTasks = dbTasks.map(dbTaskToUiTask);
-      return {
-        tasks: uiTasks,
-        dbTasks,
-        page: result.data.page,
-        perPage: result.data.perPage,
-        hasMore: result.data.hasMore,
-      };
-    },
-    staleTime: 30000, // 30 seconds
-    enabled: !!workspaceId,
-  });
-}
 
 /**
  * Hook to fetch workspace field configurations
@@ -109,7 +81,7 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
       patch,
     }: {
       displayId: string;
-      patch: Partial<UiTask>;
+      patch: Record<string, unknown>;
     }) => {
       // Get cached data to find the DB task ID
       const queryKey = queryKeys.tasks.paginated(workspaceId, page);
@@ -164,16 +136,16 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
       // Optimistically update to the new value
       queryClient.setQueryData(
         queryKey,
-        (old: { tasks?: UiTask[] } | undefined) => {
+        (old: { tasks?: DbTask[] } | undefined) => {
           if (!old?.tasks) return old;
 
           return {
             ...old,
-            tasks: old.tasks.map((task: UiTask) =>
-              task.id === displayId
+            tasks: old.tasks.map((task: DbTask) =>
+              task.displayId === displayId
                 ? {
                     ...task,
-                    ...patch,
+                    data: { ...(task.data || {}), ...patch },
                     updatedAt: new Date(),
                   }
                 : task
@@ -186,30 +158,11 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
       return { previousData, queryKey };
     },
 
-    // On success, show toast and update with server response
-    onSuccess: (updatedDbTask) => {
-      const queryKey = queryKeys.tasks.paginated(workspaceId, page);
-
-      // Update cache with the server response
-      queryClient.setQueryData(
-        queryKey,
-        (old: { tasks?: UiTask[]; dbTasks?: DbTask[] } | undefined) => {
-          if (!old?.tasks || !old?.dbTasks) return old;
-
-          const updatedUiTask = dbTaskToUiTask(updatedDbTask);
-
-          return {
-            ...old,
-            tasks: old.tasks.map((task: UiTask) =>
-              task.id === updatedDbTask.displayId ? updatedUiTask : task
-            ),
-            dbTasks: old.dbTasks.map((task: DbTask) =>
-              task.id === updatedDbTask.id ? updatedDbTask : task
-            ),
-          };
-        }
-      );
-
+    // On success, show toast and refetch
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.paginated(workspaceId, page),
+      });
       toast.success("Saved");
     },
 

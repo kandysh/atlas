@@ -2,9 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { useState, useMemo, useCallback } from "react";
-import { Task } from "@/src/lib/types";
+import { Task } from "@/src/lib/db";
 import { DataTable } from "@/src/components/ui/data-table";
-import { TaskDetailDrawer } from "./task-detail-drawer";
+import { DynamicTaskDrawer } from "./dynamic-task-drawer";
 import { DynamicToolbar } from "./dynamic-toolbar";
 import { 
   useCreateTask, 
@@ -17,17 +17,14 @@ import {
 } from "@/src/lib/query/hooks";
 import { useWorkspace } from "@/src/providers";
 import { buildColumnsFromFieldConfigs } from "@/src/lib/utils";
-import { createColumns } from "./columns";
 
 interface TasksDataTableProps {
-  columns?: ColumnDef<Task, unknown>[];
   data: Task[];
   dbTasks?: { id: string; displayId: string }[];
   workspaceId?: string;
 }
 
 export function TasksDataTable({ 
-  columns: externalColumns, 
   data,
   dbTasks = [],
   workspaceId 
@@ -48,17 +45,6 @@ export function TasksDataTable({
   
   const fieldConfigs = fieldsData?.fields || [];
 
-  // Extract unique values for legacy toolbar filters
-  const { uniqueOwners, uniqueAssetClasses } = useMemo(() => {
-    const owners = Array.from(new Set(data.map((task) => task.owner))).filter(Boolean);
-    const assetClasses = Array.from(new Set(data.map((task) => task.assetClass))).filter(Boolean);
-
-    return {
-      uniqueOwners: owners.sort(),
-      uniqueAssetClasses: assetClasses.sort(),
-    };
-  }, [data]);
-
   const handleRowClick = useCallback((task: Task) => {
     setSelectedTask(task);
     setIsDrawerOpen(true);
@@ -69,36 +55,6 @@ export function TasksDataTable({
       title: "New Task",
       status: "todo",
       priority: "medium",
-    }, {
-      onSuccess: (newTask) => {
-        // Open drawer with the new task for immediate editing
-        if (newTask) {
-          const newUiTask = {
-            id: newTask.displayId,
-            title: (newTask.data as Record<string, unknown>)?.title as string || "New Task",
-            status: ((newTask.data as Record<string, unknown>)?.status as string) || "todo",
-            priority: ((newTask.data as Record<string, unknown>)?.priority as string) || "medium",
-            owner: "",
-            assetClass: "",
-            teamsInvolved: [],
-            theme: "",
-            problemStatement: "",
-            solutionDesign: "",
-            benefits: "",
-            currentHrs: 0,
-            savedHrs: 0,
-            workedHrs: 0,
-            tools: [],
-            otherUseCases: "",
-            tags: [],
-            completionDate: null,
-            createdAt: newTask.createdAt,
-            updatedAt: newTask.updatedAt,
-          } as Task;
-          setSelectedTask(newUiTask);
-          setIsDrawerOpen(true);
-        }
-      }
     });
   }, [createTaskMutation]);
 
@@ -154,8 +110,6 @@ export function TasksDataTable({
   }, [updateTaskMutation]);
   
   const columns = useMemo(() => {
-    if (externalColumns) return externalColumns;
-    
     if (!isLoadingFields && fieldConfigs.length > 0) {
       return buildColumnsFromFieldConfigs(
         fieldConfigs, 
@@ -167,16 +121,8 @@ export function TasksDataTable({
       );
     }
     
-    return createColumns(
-      uniqueOwners, 
-      uniqueAssetClasses, 
-      handleTaskUpdate,
-      handleRowClick,
-      handleDeleteTask,
-      handleDuplicateTask
-    );
+    return [] as ColumnDef<Task>[];
   }, [
-    externalColumns, 
     fieldConfigs, 
     isLoadingFields, 
     data, 
@@ -184,8 +130,6 @@ export function TasksDataTable({
     handleRowClick,
     handleDeleteTask,
     handleDuplicateTask,
-    uniqueOwners, 
-    uniqueAssetClasses
   ]);
 
   return (
@@ -195,8 +139,6 @@ export function TasksDataTable({
         data={data}
         onRowClick={handleRowClick}
         emptyStateMessage="No tasks found."
-        // TODO: Implement drag-and-drop reordering - currently disabled
-        enableDragHandle={false}
         toolbar={(table) => (
           <DynamicToolbar
             table={table}
@@ -209,13 +151,18 @@ export function TasksDataTable({
         )}
       />
 
-      <TaskDetailDrawer
+      <DynamicTaskDrawer
         task={selectedTask}
         tasks={data}
+        fieldConfigs={fieldConfigs}
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        onUpdate={handleTaskUpdate}
-        dbTaskId={selectedTask ? getDbId(selectedTask.id) : null}
+        onUpdate={(taskId, patch) => {
+          updateTaskMutation.mutate({
+            displayId: taskId,
+            patch,
+          });
+        }}
         workspaceId={activeWorkspaceId}
       />
     </>

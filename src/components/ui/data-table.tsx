@@ -16,11 +16,7 @@ import {
 } from "@tanstack/react-table";
 import { useState, ReactNode } from "react";
 import { Button } from "@/src/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  // GripVertical, // TODO: Re-enable when drag-and-drop is implemented
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { DataTableEmptyState } from "./data-table-empty-state";
 
@@ -30,7 +26,6 @@ interface DataTableProps<TData, TValue> {
   onRowClick?: (row: TData, event: React.MouseEvent) => void;
   pageSize?: number;
   enableRowSelection?: boolean;
-  enableDragHandle?: boolean;
   emptyStateMessage?: string;
   toolbar?: (table: ReturnType<typeof useReactTable<TData>>) => ReactNode;
   className?: string;
@@ -42,7 +37,6 @@ export function DataTable<TData, TValue>({
   onRowClick,
   pageSize = 20,
   enableRowSelection = true,
-  enableDragHandle = false, // Disabled by default - TODO: implement drag-and-drop reordering
   emptyStateMessage = "No results found.",
   toolbar,
   className,
@@ -106,9 +100,6 @@ export function DataTable<TData, TValue>({
           <table className="w-full min-w-[800px]">
             <thead className="border-b border-border bg-muted/30">
               <tr>
-                {/* TODO: Implement drag-and-drop reordering
-                {enableDragHandle && <th className="w-10 px-2 py-3"></th>}
-                */}
                 {enableRowSelection && (
                   <th className="w-12 px-4 py-3 sticky left-0 bg-muted/30 z-10">
                     <input
@@ -151,15 +142,6 @@ export function DataTable<TData, TValue>({
                     )}
                     onClick={(e) => handleRowClick(row.original, e)}
                   >
-                    {/* TODO: Implement drag-and-drop reordering
-                    {enableDragHandle && (
-                      <td className="px-2 py-3">
-                        <div className="flex items-center justify-center cursor-grab active:cursor-grabbing">
-                          <GripVertical className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors duration-200" />
-                        </div>
-                      </td>
-                    )}
-                    */}
                     {enableRowSelection && (
                       <td className="px-4 py-3 sticky left-0 bg-card z-10">
                         <input
