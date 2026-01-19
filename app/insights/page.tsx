@@ -34,8 +34,6 @@ export default function InsightsPage() {
     error,
   } = useServerAnalytics(currentWorkspace?.id || "", filters);
 
-  const isLoading = workspaceLoading || analyticsLoading;
-
   const handleFilterChange = useCallback((newFilters: AnalyticsFilters) => {
     setFilters(newFilters);
   }, []);

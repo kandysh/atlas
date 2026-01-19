@@ -1,6 +1,6 @@
 import { db } from "@/src/lib/db";
 import { tasks, workspaces } from "@/src/lib/db/schema";
-import { eq, max, and } from "drizzle-orm";
+import { eq, max } from "drizzle-orm";
 import { generateTaskDisplayId } from "@/src/lib/utils";
 
 /**

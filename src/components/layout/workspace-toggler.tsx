@@ -1,15 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import {
   ChevronsUpDown,
   Plus,
   Check,
-  LayoutDashboard,
-  CheckCircle2,
-  BarChart3,
   Loader2,
 } from "lucide-react";
 import {
@@ -30,7 +25,6 @@ import {
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { cn } from "@/src/lib/utils";
 import { useWorkspace } from "@/src/providers/workspace-provider";
 import { useSidebar } from "@/src/components/ui/sidebar";
 import { toast } from "sonner";

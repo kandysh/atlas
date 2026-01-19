@@ -10,7 +10,6 @@ import {
   Trash2,
   ChevronDown,
   X,
-  ListFilter
 } from "lucide-react";
 import {
   DropdownMenu,

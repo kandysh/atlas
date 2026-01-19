@@ -22,7 +22,6 @@ import {
   // GripVertical, // TODO: Re-enable when drag-and-drop is implemented
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import { DataTableEmptyState } from "./data-table-empty-state";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

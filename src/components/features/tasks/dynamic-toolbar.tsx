@@ -131,15 +131,6 @@ export function DynamicToolbar({
     });
   };
 
-  const getFilterLabel = (fieldKey: string, fieldName: string) => {
-    const column = table.getColumn(fieldKey);
-    const filterValue = column?.getFilterValue() as string[] | undefined;
-    const count = filterValue?.length ?? 0;
-    if (count === 0) return fieldName;
-    if (count === 1) return `1 ${fieldName.toLowerCase()}`;
-    return `${count} selected`;
-  };
-
   const getDisplayLabel = (field: FieldConfig, value: string): string => {
     if (field.type === "status") {
       return statusLabels[value as Status] || value;

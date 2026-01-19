@@ -413,9 +413,7 @@ export function TaskDetailDrawer({
                   Time & Metrics
                 </h4>
 
-                <div
-                  className={`grid grid-cols-${Math.min(hourFields.length, 3)} gap-4`}
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {hourFields.map((fieldConfig, index) => (
                     <div
                       key={fieldConfig.id}
