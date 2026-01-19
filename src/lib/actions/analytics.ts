@@ -755,18 +755,18 @@ async function getTeams(workspaceId: string): Promise<string[]> {
 
 async function getPriorities(workspaceId: string): Promise<string[]> {
   const result = await db.execute(sql`
-    SELECT DISTINCT data->>'priority' as priority
-    FROM tasks
-    WHERE workspace_id = ${workspaceId}
-      AND data->>'priority' IS NOT NULL
-    ORDER BY 
+    SELECT DISTINCT data->>'priority' as priority,
       CASE data->>'priority'
         WHEN 'urgent' THEN 1
         WHEN 'high' THEN 2
         WHEN 'medium' THEN 3
         WHEN 'low' THEN 4
         ELSE 5
-      END
+      END as sort_order
+    FROM tasks
+    WHERE workspace_id = ${workspaceId}
+      AND data->>'priority' IS NOT NULL
+    ORDER BY sort_order
   `);
 
   return (result.rows as { priority: string }[]).map((row) => row.priority);

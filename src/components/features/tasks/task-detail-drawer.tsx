@@ -75,28 +75,43 @@ const FIELD_ICONS: Record<string, LucideIcon> = {
 // Get icon for a field
 function getFieldIcon(key: string, type: string): LucideIcon {
   if (FIELD_ICONS[key]) return FIELD_ICONS[key];
-  
+
   // Fallback based on type
   switch (type) {
-    case "status": return CircleDot;
-    case "priority": return Flag;
-    case "editable-owner": return User;
-    case "editable-date": 
-    case "date": return Calendar;
+    case "status":
+      return CircleDot;
+    case "priority":
+      return Flag;
+    case "editable-owner":
+      return User;
+    case "editable-date":
+    case "date":
+      return Calendar;
     case "editable-number":
-    case "number": return Hash;
+    case "number":
+      return Hash;
     case "editable-tags":
     case "multiselect":
-    case "badge-list": return Tag;
-    case "checkbox": return CheckSquare;
+    case "badge-list":
+      return Tag;
+    case "checkbox":
+      return CheckSquare;
     case "editable-combobox":
-    case "select": return List;
-    default: return AlignLeft;
+    case "select":
+      return List;
+    default:
+      return AlignLeft;
   }
 }
 
 // Fields that should be displayed in a special way (not in properties grid)
-const SPECIAL_FIELDS = new Set(["title", "problemStatement", "solutionDesign", "benefits", "otherUseCases"]);
+const SPECIAL_FIELDS = new Set([
+  "title",
+  "problemStatement",
+  "solutionDesign",
+  "benefits",
+  "otherUseCases",
+]);
 const HOUR_FIELDS = new Set(["currentHrs", "workedHrs", "savedHrs"]);
 
 export function TaskDetailDrawer({
@@ -112,44 +127,51 @@ export function TaskDetailDrawer({
   // Compute unique values from tasks array for select-type fields
   const uniqueFieldValues = useMemo(() => {
     const valueMap: Record<string, string[]> = {};
-    
+
     const selectFields = fieldConfigs.filter(
       (config) =>
         config.type === "select" ||
         config.type === "editable-owner" ||
-        config.type === "editable-combobox"
+        config.type === "editable-combobox",
     );
-    
+
     selectFields.forEach((field) => {
       const values = tasks
         .map((t) => t[field.key] as string)
         .filter((value) => value != null && value !== "")
         .map((value) => String(value));
-      
+
       valueMap[field.key] = Array.from(new Set(values)).sort();
     });
-    
+
     return valueMap;
   }, [tasks, fieldConfigs]);
 
   // Sort and filter field configs
   const sortedFieldConfigs = useMemo(() => {
-    return [...fieldConfigs]
-      .filter((config) => config.visible)
-      .sort((a, b) => a.order - b.order);
+    return [...fieldConfigs].sort((a, b) => a.order - b.order);
   }, [fieldConfigs]);
 
   // Separate fields by category
   const { textFields, propertyFields, hourFields, tagFields } = useMemo(() => {
-    const textFields = sortedFieldConfigs.filter((f) => SPECIAL_FIELDS.has(f.key));
+    const textFields = sortedFieldConfigs.filter((f) =>
+      SPECIAL_FIELDS.has(f.key),
+    );
     const hourFields = sortedFieldConfigs.filter((f) => HOUR_FIELDS.has(f.key));
     const tagFields = sortedFieldConfigs.filter(
-      (f) => (f.type === "editable-tags" || f.type === "badge-list") && !HOUR_FIELDS.has(f.key) && !SPECIAL_FIELDS.has(f.key)
+      (f) =>
+        (f.type === "editable-tags" || f.type === "badge-list") &&
+        !HOUR_FIELDS.has(f.key) &&
+        !SPECIAL_FIELDS.has(f.key),
     );
     const propertyFields = sortedFieldConfigs.filter(
-      (f) => !SPECIAL_FIELDS.has(f.key) && !HOUR_FIELDS.has(f.key) && f.type !== "editable-tags" && f.type !== "badge-list"
+      (f) =>
+        !SPECIAL_FIELDS.has(f.key) &&
+        !HOUR_FIELDS.has(f.key) &&
+        f.type !== "editable-tags" &&
+        f.type !== "badge-list",
     );
-    
+
     return { textFields, propertyFields, hourFields, tagFields };
   }, [sortedFieldConfigs]);
 
@@ -203,9 +225,10 @@ export function TaskDetailDrawer({
         );
       case "editable-combobox":
       case "select":
-        const comboOptions = fieldOptions.length > 0 
-          ? fieldOptions 
-          : (options?.choices as string[]) || [];
+        const comboOptions =
+          fieldOptions.length > 0
+            ? fieldOptions
+            : (options?.choices as string[]) || [];
         return (
           <EditableComboboxCell
             value={(value as string) || ""}
@@ -222,7 +245,11 @@ export function TaskDetailDrawer({
             value={(value as string) || ""}
             onChange={handleChange as (v: string) => void}
             multiline={SPECIAL_FIELDS.has(key)}
-            className={SPECIAL_FIELDS.has(key) ? "text-sm text-foreground/80 leading-relaxed" : undefined}
+            className={
+              SPECIAL_FIELDS.has(key)
+                ? "text-sm text-foreground/80 leading-relaxed"
+                : undefined
+            }
           />
         );
       case "editable-number":
@@ -252,9 +279,10 @@ export function TaskDetailDrawer({
           />
         );
       case "multiselect":
-        const multiselectOptions = fieldOptions.length > 0 
-          ? fieldOptions 
-          : (options?.choices as string[]) || [];
+        const multiselectOptions =
+          fieldOptions.length > 0
+            ? fieldOptions
+            : (options?.choices as string[]) || [];
         return (
           <EditableMultiselectCell
             value={(value as string[]) || []}
@@ -322,7 +350,8 @@ export function TaskDetailDrawer({
           {/* Content */}
           <div className="flex-1 p-6 space-y-6">
             {/* Title - Always show if present in configs or as fallback */}
-            {(textFields.find((f) => f.key === "title") || !fieldConfigs.length) && (
+            {(textFields.find((f) => f.key === "title") ||
+              !fieldConfigs.length) && (
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   Title
@@ -356,9 +385,15 @@ export function TaskDetailDrawer({
 
                 <div className="grid gap-4">
                   {propertyFields.map((fieldConfig) => {
-                    const Icon = getFieldIcon(fieldConfig.key, fieldConfig.type);
+                    const Icon = getFieldIcon(
+                      fieldConfig.key,
+                      fieldConfig.type,
+                    );
                     return (
-                      <div key={fieldConfig.id} className="flex items-center justify-between">
+                      <div
+                        key={fieldConfig.id}
+                        className="flex items-center justify-between"
+                      >
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Icon className="h-4 w-4" />
                           {fieldConfig.name}
@@ -378,13 +413,22 @@ export function TaskDetailDrawer({
                   Time & Metrics
                 </h4>
 
-                <div className={`grid grid-cols-${Math.min(hourFields.length, 3)} gap-4`}>
+                <div
+                  className={`grid grid-cols-${Math.min(hourFields.length, 3)} gap-4`}
+                >
                   {hourFields.map((fieldConfig, index) => (
-                    <div key={fieldConfig.id} className="bg-muted/30 rounded-lg p-4 text-center">
-                      <div className={`text-2xl font-bold ${index === hourFields.length - 1 ? "text-success" : "text-foreground"}`}>
+                    <div
+                      key={fieldConfig.id}
+                      className="bg-muted/30 rounded-lg p-4 text-center"
+                    >
+                      <div
+                        className={`text-2xl font-bold ${index === hourFields.length - 1 ? "text-success" : "text-foreground"}`}
+                      >
                         <EditableNumberCell
                           value={(task[fieldConfig.key] as number) || 0}
-                          onChange={(value) => onUpdate(task.id, fieldConfig.key, value)}
+                          onChange={(value) =>
+                            onUpdate(task.id, fieldConfig.key, value)
+                          }
                         />
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
@@ -400,7 +444,10 @@ export function TaskDetailDrawer({
             {tagFields.map((fieldConfig) => {
               const Icon = getFieldIcon(fieldConfig.key, fieldConfig.type);
               return (
-                <div key={fieldConfig.id} className="space-y-2 pt-4 border-t border-border">
+                <div
+                  key={fieldConfig.id}
+                  className="space-y-2 pt-4 border-t border-border"
+                >
                   <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     <Icon className="h-3.5 w-3.5" />
                     {fieldConfig.name}
@@ -448,7 +495,11 @@ export function TaskDetailDrawer({
             </div>
 
             {/* Recent Activity / History */}
-            <TaskHistory taskId={task.id} dbTaskId={dbTaskId} workspaceId={workspaceId} />
+            <TaskHistory
+              taskId={task.id}
+              dbTaskId={dbTaskId}
+              workspaceId={workspaceId}
+            />
           </div>
         </div>
       </div>
