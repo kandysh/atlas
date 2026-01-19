@@ -1,12 +1,19 @@
 'use server';
 
-import { db } from '@/src/lib/db';
+import { db, tasks } from '@/src/lib/db';
 import { sql, SQL } from 'drizzle-orm';
+import { getTableConfig } from 'drizzle-orm/pg-core';
 import {
   DonutChartData,
   ThroughPutOverTimeData,
   ToolsUsed,
 } from '@/src/lib/types/analytics';
+
+// Get the actual table name from the schema (handles env-specific table naming and schema prefix)
+const tableConfig = getTableConfig(tasks);
+const tasksTable = tableConfig.schema
+  ? sql`${sql.identifier(tableConfig.schema)}.${sql.identifier(tableConfig.name)}`
+  : sql.identifier(tableConfig.name);
 
 // Types for analytics queries
 export interface RollingCycle {
@@ -292,7 +299,7 @@ async function getStatusCounts(
     SELECT 
       COALESCE(data->>'status', 'todo') as status,
       COUNT(*)::int as count
-    FROM tasks
+    FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY COALESCE(data->>'status', 'todo')
   `);
@@ -331,7 +338,7 @@ async function getThroughputOverTime(
       TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM-01') as date,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as hours,
       COUNT(*)::int as count
-    FROM tasks
+    FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM-01')
     ORDER BY date ASC
@@ -365,7 +372,7 @@ async function getCycleTimeData(
         EXTRACT(EPOCH FROM (
           (data->>'completionDate')::timestamp - created_at
         )) / 86400 as cycle_days
-      FROM tasks
+      FROM ${tasksTable}
       WHERE ${whereClause}
     ),
     monthly_avg AS (
@@ -419,7 +426,7 @@ async function getHoursSavedWorked(
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved,
       (SUM(COALESCE((data->>'savedHrs')::numeric, 0)) - 
        SUM(COALESCE((data->>'workedHrs')::numeric, 0)))::float as net
-    FROM tasks
+    FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM')
     ORDER BY month ASC
@@ -465,7 +472,7 @@ async function getRemainingWorkTrend(
           MAX(created_at),
           COALESCE(MAX((data->>'completionDate')::timestamp), MAX(created_at))
         )) as end_month
-      FROM tasks
+      FROM ${tasksTable}
       WHERE ${baseWhereClause}
     ),
     months AS (
@@ -479,7 +486,7 @@ async function getRemainingWorkTrend(
       SELECT 
         DATE_TRUNC('month', created_at) as month,
         COUNT(*)::int as created
-      FROM tasks
+      FROM ${tasksTable}
       WHERE ${baseWhereClause}
       GROUP BY DATE_TRUNC('month', created_at)
     ),
@@ -487,7 +494,7 @@ async function getRemainingWorkTrend(
       SELECT 
         DATE_TRUNC('month', (data->>'completionDate')::timestamp) as month,
         COUNT(*)::int as completed
-      FROM tasks
+      FROM ${tasksTable}
       WHERE ${completedWhereClause}
       GROUP BY DATE_TRUNC('month', (data->>'completionDate')::timestamp)
     )
@@ -519,7 +526,7 @@ async function getToolsUsed(
     SELECT 
       LOWER(tool) as tool,
       COUNT(*)::int as count
-    FROM tasks,
+    FROM ${tasksTable},
       jsonb_array_elements_text(COALESCE(data->'tools', '[]'::jsonb)) as tool
     WHERE ${whereClause}
       AND tool IS NOT NULL
@@ -534,7 +541,7 @@ async function getToolsUsed(
 async function getAssetClasses(workspaceId: string): Promise<string[]> {
   const result = await db.execute(sql`
     SELECT DISTINCT LOWER(data->>'assetClass') as asset_class
-    FROM tasks
+    FROM ${tasksTable}
     WHERE workspace_id = ${workspaceId}
       AND data->>'assetClass' IS NOT NULL
       AND data->>'assetClass' != ''
@@ -570,7 +577,7 @@ async function getOwnerProductivity(
         )) / 86400
       )::float as avg_cycle_days,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as total_hours_saved
-    FROM tasks
+    FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY data->>'owner'
     ORDER BY completed_tasks DESC
@@ -604,7 +611,7 @@ async function getTeamsWorkload(
     SELECT 
       LOWER(team) as team,
       COUNT(*)::int as count
-    FROM tasks,
+    FROM ${tasksTable},
       jsonb_array_elements_text(COALESCE(data->'teamsInvolved', '[]'::jsonb)) as team
     WHERE ${whereClause}
       AND team IS NOT NULL
@@ -632,7 +639,7 @@ async function getAssetClassDistribution(
     SELECT 
       COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned') as asset_class,
       COUNT(*)::int as count
-    FROM tasks
+    FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned')
     ORDER BY count DESC
@@ -675,7 +682,7 @@ async function getPriorityAging(
       COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 7 
         AND EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 14)::int as bucket_7_14,
       COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 14)::int as bucket_14_plus
-    FROM tasks
+    FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY COALESCE(data->>'priority', 'medium')
     ORDER BY 
@@ -726,7 +733,7 @@ async function getHoursEfficiency(
               SUM(COALESCE((data->>'currentHrs')::numeric, 0)) * 100)::float
         ELSE 0
       END as efficiency
-    FROM tasks
+    FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM')
     ORDER BY month ASC
@@ -768,7 +775,7 @@ async function getKpiSummary(
         ELSE NULL END
       )::float as avg_cycle_days,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as total_hours_saved
-    FROM tasks
+    FROM ${tasksTable}
     WHERE ${whereClause}
   `);
 
@@ -792,7 +799,7 @@ async function getKpiSummary(
 async function getOwners(workspaceId: string): Promise<string[]> {
   const result = await db.execute(sql`
     SELECT DISTINCT data->>'owner' as owner
-    FROM tasks
+    FROM ${tasksTable}
     WHERE workspace_id = ${workspaceId}
       AND data->>'owner' IS NOT NULL
       AND data->>'owner' != ''
@@ -805,7 +812,7 @@ async function getOwners(workspaceId: string): Promise<string[]> {
 async function getTeams(workspaceId: string): Promise<string[]> {
   const result = await db.execute(sql`
     SELECT DISTINCT LOWER(team) as team
-    FROM tasks,
+    FROM ${tasksTable},
       jsonb_array_elements_text(COALESCE(data->'teamsInvolved', '[]'::jsonb)) as team
     WHERE workspace_id = ${workspaceId}
       AND team IS NOT NULL
@@ -826,7 +833,7 @@ async function getPriorities(workspaceId: string): Promise<string[]> {
         WHEN 'low' THEN 4
         ELSE 5
       END as sort_order
-    FROM tasks
+    FROM ${tasksTable}
     WHERE workspace_id = ${workspaceId}
       AND data->>'priority' IS NOT NULL
     ORDER BY sort_order
@@ -838,7 +845,7 @@ async function getPriorities(workspaceId: string): Promise<string[]> {
 async function getStatuses(workspaceId: string): Promise<string[]> {
   const result = await db.execute(sql`
     SELECT DISTINCT data->>'status' as status
-    FROM tasks
+    FROM ${tasksTable}
     WHERE workspace_id = ${workspaceId}
       AND data->>'status' IS NOT NULL
     ORDER BY status ASC
