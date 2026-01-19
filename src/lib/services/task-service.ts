@@ -55,7 +55,7 @@ export async function generateDisplayIdForTask(
  */
 export async function createTaskWithDisplayId(
   workspaceId: string,
-  data: Record<string, any>,
+  data: Record<string, unknown>,
 ) {
   const { displayId, sequenceNumber } =
     await generateDisplayIdForTask(workspaceId);

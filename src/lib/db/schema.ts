@@ -85,7 +85,7 @@ export const fieldConfigs = pgTable('field_configs', {
     defaultValue?: string | number | boolean;
     required?: boolean;
     suffix?: string;
-    [key: string]: any;
+    [key: string]: string | string[] | number | boolean | undefined;
   }>(),
   order: integer('order').notNull().default(0),
   visible: boolean('visible').notNull().default(true),
@@ -105,9 +105,7 @@ export const tasks = pgTable(
     sequenceNumber: integer('sequence_number').notNull(),
     data: jsonb('data')
       .notNull()
-      .$type<{
-        [key: string]: any;
-      }>()
+      .$type<Record<string, unknown>>()
       .default({}),
     subtasks: jsonb('subtasks')
       .$type<
@@ -115,7 +113,7 @@ export const tasks = pgTable(
           id: string;
           title: string;
           completed: boolean;
-          [key: string]: any;
+          [key: string]: unknown;
         }>
       >()
       .default([]),

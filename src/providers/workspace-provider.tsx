@@ -35,7 +35,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [currentWorkspace, setCurrentWorkspace] = useState<DBWorkspace | null>(
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(
     null,
   );
 
@@ -100,7 +100,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         queryKey: queryKeys.workspaces.byUser(user!.id),
       });
       // Set the new workspace as current
-      setCurrentWorkspace(newWorkspace);
+      setSelectedWorkspaceId(newWorkspace.id);
     },
   });
 
@@ -111,23 +111,27 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     [createWorkspaceMutation],
   );
 
-  const workspaces = workspacesData || [];
+  const workspaces = useMemo(() => workspacesData || [], [workspacesData]);
   const isLoading = isLoadingUser || isLoadingWorkspaces;
 
-  // Auto-select first workspace when data loads
-  useMemo(() => {
-    if (workspaces.length > 0 && !currentWorkspace) {
-      setCurrentWorkspace(workspaces[0]);
+  // Derive current workspace: use selected if valid, otherwise fallback to first
+  const currentWorkspace = useMemo(() => {
+    if (workspaces.length === 0) return null;
+    
+    // If we have a selected workspace, check if it still exists
+    if (selectedWorkspaceId) {
+      const selected = workspaces.find((w) => w.id === selectedWorkspaceId);
+      if (selected) return selected;
     }
+    
+    // Fallback to first workspace
+    return workspaces[0];
+  }, [workspaces, selectedWorkspaceId]);
 
-    // Validate current workspace still exists
-    if (currentWorkspace && workspaces.length > 0) {
-      const stillExists = workspaces.some((w) => w.id === currentWorkspace.id);
-      if (!stillExists) {
-        setCurrentWorkspace(workspaces[0]);
-      }
-    }
-  }, [workspaces, currentWorkspace]);
+  // Wrapper to set workspace by storing its ID
+  const setCurrentWorkspace = useCallback((workspace: DBWorkspace) => {
+    setSelectedWorkspaceId(workspace.id);
+  }, []);
 
   // Compute error message
   const error = useMemo(() => {
@@ -161,6 +165,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }),
     [
       currentWorkspace,
+      setCurrentWorkspace,
       workspaces,
       user,
       isLoading,

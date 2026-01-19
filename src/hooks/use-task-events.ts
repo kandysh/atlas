@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Task as DbTask } from '@/src/lib/db';
 import { Task as UiTask } from '@/src/lib/types';
@@ -13,6 +13,53 @@ import { dbTaskToUiTask } from '@/src/lib/utils';
 export function useTaskEvents(workspaceId: string, page: number = 0) {
   const queryClient = useQueryClient();
   const eventSourceRef = useRef<EventSource | null>(null);
+
+  /**
+   * Update a task in the query cache
+   */
+  const updateTaskInCache = useCallback(
+    (updatedTask: DbTask) => {
+      const queryKey = queryKeys.tasks.paginated(workspaceId, page);
+
+      queryClient.setQueryData(
+        queryKey,
+        (old: { tasks?: UiTask[]; dbTasks?: DbTask[] } | undefined) => {
+          if (!old?.tasks) return old;
+
+          // Compare using displayId (UI's task.id)
+          const taskExists = old.tasks.some(
+            (t: UiTask) => t.id === updatedTask.displayId,
+          );
+
+          if (taskExists) {
+            // Update existing task - convert DB task to UI task
+            const uiTask = dbTaskToUiTask(updatedTask);
+            return {
+              ...old,
+              tasks: old.tasks.map((task: UiTask) =>
+                task.id === updatedTask.displayId ? uiTask : task,
+              ),
+              // Also update dbTasks if present
+              dbTasks: old.dbTasks?.map((t: DbTask) =>
+                t.id === updatedTask.id ? updatedTask : t,
+              ),
+            };
+          } else {
+            // Add new task to the beginning
+            const uiTask = dbTaskToUiTask(updatedTask);
+            return {
+              ...old,
+              tasks: [uiTask, ...old.tasks],
+              dbTasks: old.dbTasks
+                ? [updatedTask, ...old.dbTasks]
+                : [updatedTask],
+            };
+          }
+        },
+      );
+    },
+    [workspaceId, page, queryClient],
+  );
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -76,53 +123,9 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
       eventSource.close();
       eventSourceRef.current = null;
     };
-  }, [workspaceId, page, queryClient]);
-
-  /**
-   * Update a task in the query cache
-   */
-  const updateTaskInCache = (updatedTask: DbTask) => {
-    const queryKey = queryKeys.tasks.paginated(workspaceId, page);
-
-    queryClient.setQueryData(
-      queryKey,
-      (old: { tasks?: UiTask[]; dbTasks?: DbTask[] } | undefined) => {
-        if (!old?.tasks) return old;
-
-        // Compare using displayId (UI's task.id)
-        const taskExists = old.tasks.some(
-          (t: UiTask) => t.id === updatedTask.displayId,
-        );
-
-        if (taskExists) {
-          // Update existing task - convert DB task to UI task
-          const uiTask = dbTaskToUiTask(updatedTask);
-          return {
-            ...old,
-            tasks: old.tasks.map((task: UiTask) =>
-              task.id === updatedTask.displayId ? uiTask : task,
-            ),
-            // Also update dbTasks if present
-            dbTasks: old.dbTasks?.map((t: DbTask) =>
-              t.id === updatedTask.id ? updatedTask : t,
-            ),
-          };
-        } else {
-          // Add new task to the beginning
-          const uiTask = dbTaskToUiTask(updatedTask);
-          return {
-            ...old,
-            tasks: [uiTask, ...old.tasks],
-            dbTasks: old.dbTasks
-              ? [updatedTask, ...old.dbTasks]
-              : [updatedTask],
-          };
-        }
-      },
-    );
-  };
+  }, [workspaceId, page, queryClient, updateTaskInCache]);
 
   return {
-    isConnected: eventSourceRef.current?.readyState === EventSource.OPEN,
+    // Note: isConnected status should be tracked via state if needed for rendering
   };
 }

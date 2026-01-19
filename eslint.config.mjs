@@ -5,11 +5,8 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 const eslintConfig = [
   ...nextCoreWebVitals,
   ...nextTypescript,
-  ...eslintConfigPrettier,
+  eslintConfigPrettier,
   {
-    plugins: {
-      prettier: eslintPluginPrettier,
-    },
     ignores: [
       'node_modules/**',
       '.next/**',

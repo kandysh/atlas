@@ -39,7 +39,7 @@ export function TasksDataTable({
 
   const createTaskMutation = useCreateTask(activeWorkspaceId);
   const updateTaskMutation = useUpdateTask(activeWorkspaceId, 0);
-  const deleteTaskMutation = useDeleteTask(activeWorkspaceId, 0);
+  const deleteTaskMutation = useDeleteTask(activeWorkspaceId);
   const deleteTasksMutation = useDeleteTasks(activeWorkspaceId);
   const duplicateTaskMutation = useDuplicateTask(activeWorkspaceId);
   const updateFieldVisibilityMutation =

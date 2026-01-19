@@ -77,7 +77,7 @@ export function validateFields(
       ) {
         errors.push(`${fieldConfig.name} is required`);
       }
-    } catch (error) {
+    } catch {
       errors.push(`${fieldConfig.name} validation failed`);
     }
   }

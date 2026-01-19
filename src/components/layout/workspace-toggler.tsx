@@ -67,7 +67,7 @@ export function WorkspaceToggler() {
 
   const isCollapsed = state === 'collapsed';
 
-  const WorkspaceList = () => (
+  const workspaceListContent = (
     <>
       <div className="px-2 py-1.5">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -134,7 +134,7 @@ export function WorkspaceToggler() {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-64" align="start" side="right">
-            <WorkspaceList />
+            {workspaceListContent}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -212,7 +212,7 @@ export function WorkspaceToggler() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="w-64" align="start" side="right">
-          <WorkspaceList />
+          {workspaceListContent}
         </DropdownMenuContent>
       </DropdownMenu>
 

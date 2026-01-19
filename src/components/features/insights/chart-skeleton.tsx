@@ -3,6 +3,9 @@
 import { Card, CardContent, CardHeader } from '@/src/components/ui/card';
 import { Skeleton } from '@/src/components/ui/skeleton';
 
+// Pre-defined heights for skeleton bars (avoid Math.random during render)
+const BAR_HEIGHTS = [65, 82, 48, 91, 73, 56];
+
 interface ChartSkeletonProps {
   hasFooter?: boolean;
 }
@@ -61,11 +64,11 @@ export function BarChartSkeleton() {
       </CardHeader>
       <CardContent>
         <div className="h-[250px] flex items-end gap-2">
-          {[...Array(6)].map((_, i) => (
+          {BAR_HEIGHTS.map((height, i) => (
             <div key={i} className="flex-1 flex flex-col justify-end">
               <Skeleton
                 className="w-full rounded-t"
-                style={{ height: `${Math.random() * 60 + 40}%` }}
+                style={{ height: `${height}%` }}
               />
             </div>
           ))}

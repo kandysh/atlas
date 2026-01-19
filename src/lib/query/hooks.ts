@@ -236,7 +236,7 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
 /**
  * Hook to delete a single task
  */
-export function useDeleteTask(workspaceId: string, page: number = 0) {
+export function useDeleteTask(workspaceId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -247,7 +247,7 @@ export function useDeleteTask(workspaceId: string, page: number = 0) {
       }
       return taskId;
     },
-    onSuccess: (deletedTaskId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tasks.byWorkspace(workspaceId),
       });
@@ -301,7 +301,7 @@ export function useDuplicateTask(workspaceId: string) {
       }
       return result.task;
     },
-    onSuccess: (newTask) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tasks.byWorkspace(workspaceId),
       });

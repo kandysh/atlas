@@ -7,6 +7,10 @@ import { useWorkspaceTasks } from '@/src/lib/query/hooks';
 
 export default function Page() {
   const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();
+  
+  // Always call hooks before any early returns
+  const workspaceId = currentWorkspace?.id || '';
+  const { data, isLoading, error } = useWorkspaceTasks(workspaceId, 0);
 
   // Show loading state while workspace is loading
   if (workspaceLoading) {
@@ -39,14 +43,6 @@ export default function Page() {
       </div>
     );
   }
-
-  const workspaceId = currentWorkspace.id;
-
-  // Fetch tasks from API
-  const { data, isLoading, error } = useWorkspaceTasks(workspaceId, 0);
-
-  // Connect to SSE for live updates
-  // useTaskEvents(workspaceId, 0);
 
   // Get tasks from DB only - single source of truth
   const tasks = data?.tasks || [];
