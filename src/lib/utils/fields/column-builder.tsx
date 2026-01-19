@@ -68,16 +68,31 @@ export function extractUniqueFieldValues(
     (config) =>
       config.type === 'select' ||
       config.type === 'editable-owner' ||
-      config.type === 'editable-combobox',
+      config.type === 'editable-combobox' ||
+      config.type === 'editable-tags' ||
+      config.type === 'multiselect',
   );
 
   selectFields.forEach((field) => {
-    const values = tasks
-      .map((task) => (task as Record<string, FieldValue>)[field.key])
-      .filter((value) => value != null && value !== '')
-      .map((value) => String(value)); // Ensure all values are strings
+    if (field.type === 'editable-tags' || field.type === 'multiselect') {
+      // For array fields, flatten all values
+      const values = tasks
+        .map((task) => (task as Record<string, FieldValue>)[field.key])
+        .filter((value) => Array.isArray(value))
+        .flatMap((value) => value as string[])
+        .filter((value) => value != null && value !== '')
+        .map((value) => String(value));
+      console.log(values, field.key);
+      uniqueValues[field.key] = Array.from(new Set(values)).sort();
+    } else {
+      // For single-value fields
+      const values = tasks
+        .map((task) => (task as Record<string, FieldValue>)[field.key])
+        .filter((value) => value != null && value !== '')
+        .map((value) => String(value));
 
-    uniqueValues[field.key] = Array.from(new Set(values)).sort();
+      uniqueValues[field.key] = Array.from(new Set(values)).sort();
+    }
   });
 
   return uniqueValues;
@@ -194,6 +209,71 @@ function createActionsColumn(
 
 /**
  * Render the appropriate cell component based on field config
+ * Can be used in both tables and drawers
+ */
+export function renderFieldCell(
+  value: FieldValue,
+  fieldConfig: FieldConfig,
+  onChange: (value: FieldValue) => void,
+  uniqueValues: UniqueValuesMap = {},
+): React.ReactNode {
+  const { key, type, options } = fieldConfig;
+  const fieldOptions = uniqueValues[key] || [];
+
+  switch (type) {
+    case 'status':
+      return renderStatusCell(value, onChange as (v: Status) => void);
+    case 'priority':
+      return renderPriorityCell(value, onChange as (v: Priority) => void);
+    case 'editable-owner':
+      return renderEditableOwnerCell(value, onChange as (v: string) => void, fieldOptions);
+    case 'editable-combobox':
+      return renderEditableComboboxCell(
+        value,
+        onChange as (v: string) => void,
+        fieldOptions,
+        options,
+      );
+    case 'editable-text':
+      return renderEditableTextCell(value, onChange as (v: string) => void, key);
+    case 'editable-number':
+      return renderEditableNumberCell(value, onChange as (v: number) => void, options);
+    case 'editable-date':
+      return (
+        <EditableDateCell
+          value={(value as Date | null) ?? null}
+          onChange={onChange as (v: Date | null) => void}
+        />
+      );
+    case 'editable-tags':
+      return renderEditableTagsCell(
+        value,
+        onChange as (v: string[]) => void,
+        fieldOptions,
+        options,
+        fieldConfig.name,
+      );
+    case 'badge-list':
+      return renderBadgeList(value);
+    case 'checkbox':
+      return (
+        <EditableCheckboxCell value={Boolean(value)} onChange={onChange as (v: boolean) => void} />
+      );
+    case 'multiselect':
+      return renderEditableMultiselectCell(
+        value,
+        onChange as (v: string[]) => void,
+        fieldOptions,
+        options,
+        fieldConfig.name,
+      );
+    default:
+      return renderFallbackCell(value, type, onChange);
+  }
+}
+
+/**
+ * Render the appropriate cell component based on field config
  */
 function renderCell(
   task: Task,
@@ -201,58 +281,14 @@ function renderCell(
   onUpdate?: (taskId: string, field: string, value: FieldValue) => void,
   uniqueValues: UniqueValuesMap = {},
 ): React.ReactNode {
-  const { key, type, options } = fieldConfig;
+  const { key } = fieldConfig;
   const value = (task as Record<string, FieldValue>)[key];
-  const fieldOptions = uniqueValues[key] || [];
 
   const handleChange = (newValue: FieldValue) => {
     onUpdate?.(task.id, key, newValue);
   };
 
-  switch (type) {
-    case 'status':
-      return renderStatusCell(value, handleChange);
-    case 'priority':
-      return renderPriorityCell(value, handleChange);
-    case 'editable-owner':
-      return renderEditableOwnerCell(value, handleChange, fieldOptions);
-    case 'editable-combobox':
-      return renderEditableComboboxCell(
-        value,
-        handleChange,
-        fieldOptions,
-        options,
-      );
-    case 'editable-text':
-      return renderEditableTextCell(value, handleChange, key);
-    case 'editable-number':
-      return renderEditableNumberCell(value, handleChange, options);
-    case 'editable-date':
-      return (
-        <EditableDateCell
-          value={(value as Date | null) ?? null}
-          onChange={handleChange}
-        />
-      );
-    case 'editable-tags':
-      return renderEditableTagsCell(value, handleChange, fieldConfig.name);
-    case 'badge-list':
-      return renderBadgeList(value);
-    case 'checkbox':
-      return (
-        <EditableCheckboxCell value={Boolean(value)} onChange={handleChange} />
-      );
-    case 'multiselect':
-      return renderEditableMultiselectCell(
-        value,
-        handleChange,
-        fieldOptions,
-        options,
-        fieldConfig.name,
-      );
-    default:
-      return renderFallbackCell(value, type, handleChange);
-  }
+  return renderFieldCell(value, fieldConfig, handleChange, uniqueValues);
 }
 
 function renderStatusCell(
@@ -290,15 +326,15 @@ function renderEditableComboboxCell(
   fieldOptions: string[],
   configOptions?: FieldOptions,
 ): React.ReactNode {
-  const rawOptions =
-    fieldOptions.length > 0
-      ? fieldOptions
-      : (configOptions?.choices as string[]) || [];
-
+  // Combine field options and config choices
+  const configChoices = (configOptions?.choices as string[]) || [];
+  const combined = [...new Set([...fieldOptions, ...configChoices])];
+  
   // Ensure all options are strings and filter out null/undefined
-  const options = rawOptions
-    .filter((opt) => opt != null)
-    .map((opt) => String(opt));
+  const options = combined
+    .filter((opt) => opt != null && opt !== '')
+    .map((opt) => String(opt))
+    .sort();
 
   return (
     <EditableComboboxCell
@@ -344,13 +380,25 @@ function renderEditableNumberCell(
 function renderEditableTagsCell(
   value: FieldValue,
   handleChange: (value: string[]) => void,
-  fieldName: string,
+  fieldOptions: string[],
+  configOptions?: FieldOptions,
+  fieldName?: string,
 ): React.ReactNode {
+  // Combine field options and config choices
+  const configChoices = (configOptions?.choices as string[]) || [];
+  const combined = [...new Set([...fieldOptions, ...configChoices])];
+  
+  const options = combined
+    .filter((opt) => opt != null && opt !== '')
+    .map((opt) => String(opt))
+    .sort();
+
   return (
     <EditableTagsCell
       value={(value as string[]) || []}
       onChange={handleChange}
-      placeholder={`Add ${fieldName.toLowerCase()}...`}
+      options={options}
+      placeholder={`Select ${fieldName?.toLowerCase() || 'tags'}...`}
     />
   );
 }
@@ -381,10 +429,14 @@ function renderEditableMultiselectCell(
   configOptions?: FieldOptions,
   fieldName?: string,
 ): React.ReactNode {
-  const options =
-    fieldOptions.length > 0
-      ? fieldOptions
-      : (configOptions?.choices as string[]) || [];
+  // Combine field options and config choices
+  const configChoices = (configOptions?.choices as string[]) || [];
+  const combined = [...new Set([...fieldOptions, ...configChoices])];
+  
+  const options = combined
+    .filter((opt) => opt != null && opt !== '')
+    .map((opt) => String(opt))
+    .sort();
 
   return (
     <EditableMultiselectCell

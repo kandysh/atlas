@@ -20,23 +20,16 @@ import {
   LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
-import { StatusCell } from './status-cell';
-import { PriorityCell } from './priority-cell';
 import { cn } from '@/src/lib/utils';
-import { Task, Status, Priority } from '@/src/lib/types';
+import { Task } from '@/src/lib/types';
 import { FieldConfig } from '@/src/lib/db/schema';
 import {
   EditableTextCell,
   EditableNumberCell,
-  EditableDateCell,
-  EditableTagsCell,
-  EditableComboboxCell,
-  EditableOwnerCell,
-  EditableCheckboxCell,
-  EditableMultiselectCell,
 } from './editable-cells';
 
 import { TaskHistory } from './task-history';
+import { extractUniqueFieldValues, renderFieldCell } from '@/src/lib/utils/fields/column-builder';
 
 type TaskDetailDrawerProps = {
   task: Task | null;
@@ -126,25 +119,7 @@ export function TaskDetailDrawer({
 }: TaskDetailDrawerProps) {
   // Compute unique values from tasks array for select-type fields
   const uniqueFieldValues = useMemo(() => {
-    const valueMap: Record<string, string[]> = {};
-
-    const selectFields = fieldConfigs.filter(
-      (config) =>
-        config.type === 'select' ||
-        config.type === 'editable-owner' ||
-        config.type === 'editable-combobox',
-    );
-
-    selectFields.forEach((field) => {
-      const values = tasks
-        .map((t) => t[field.key] as string)
-        .filter((value) => value != null && value !== '')
-        .map((value) => String(value));
-
-      valueMap[field.key] = Array.from(new Set(values)).sort();
-    });
-
-    return valueMap;
+    return extractUniqueFieldValues(tasks, fieldConfigs);
   }, [tasks, fieldConfigs]);
 
   // Sort and filter field configs
@@ -190,122 +165,14 @@ export function TaskDetailDrawer({
 
   // Render a field based on its config
   const renderField = (fieldConfig: FieldConfig) => {
-    const { key, name, type, options } = fieldConfig;
-    const value = task[key];
-    const fieldOptions = uniqueFieldValues[key] || [];
+    const { key } = fieldConfig;
+    const value = task[key] as string | number | boolean | string[] | Date | null | undefined;
 
-    const handleChange = (newValue: unknown) => {
+    const handleChange = (newValue: string | number | boolean | string[] | Date | null | undefined) => {
       onUpdate(task.id, key, newValue);
     };
 
-    switch (type) {
-      case 'status':
-        return (
-          <StatusCell
-            value={value as Status}
-            onChange={(v: Status) => handleChange(v)}
-          />
-        );
-      case 'priority':
-        return (
-          <PriorityCell
-            value={value as Priority}
-            onChange={(v: Priority) => handleChange(v)}
-          />
-        );
-      case 'editable-owner':
-        return (
-          <EditableOwnerCell
-            value={(value as string) || ''}
-            onChange={handleChange as (v: string) => void}
-            options={fieldOptions}
-            onAddOption={() => {}}
-            placeholder={`Select ${name.toLowerCase()}...`}
-          />
-        );
-      case 'editable-combobox':
-      case 'select':
-        const comboOptions =
-          fieldOptions.length > 0
-            ? fieldOptions
-            : (options?.choices as string[]) || [];
-        return (
-          <EditableComboboxCell
-            value={(value as string) || ''}
-            onChange={handleChange as (v: string) => void}
-            options={comboOptions}
-            onAddOption={() => {}}
-            placeholder={`Select ${name.toLowerCase()}...`}
-          />
-        );
-      case 'editable-text':
-      case 'text':
-        return (
-          <EditableTextCell
-            value={(value as string) || ''}
-            onChange={handleChange as (v: string) => void}
-            multiline={SPECIAL_FIELDS.has(key)}
-            className={
-              SPECIAL_FIELDS.has(key)
-                ? 'text-sm text-foreground/80 leading-relaxed'
-                : undefined
-            }
-          />
-        );
-      case 'editable-number':
-      case 'number':
-        return (
-          <EditableNumberCell
-            value={(value as number) || 0}
-            onChange={handleChange as (v: number) => void}
-            suffix={(options?.suffix as string) || ''}
-          />
-        );
-      case 'editable-date':
-      case 'date':
-        return (
-          <EditableDateCell
-            value={value as Date | null}
-            onChange={handleChange as (v: Date | null) => void}
-          />
-        );
-      case 'editable-tags':
-      case 'badge-list':
-        return (
-          <EditableTagsCell
-            value={(value as string[]) || []}
-            onChange={handleChange as (v: string[]) => void}
-            placeholder={`Add ${name.toLowerCase()}...`}
-          />
-        );
-      case 'multiselect':
-        const multiselectOptions =
-          fieldOptions.length > 0
-            ? fieldOptions
-            : (options?.choices as string[]) || [];
-        return (
-          <EditableMultiselectCell
-            value={(value as string[]) || []}
-            onChange={handleChange as (v: string[]) => void}
-            options={multiselectOptions}
-            placeholder={`Select ${name.toLowerCase()}...`}
-          />
-        );
-      case 'checkbox':
-        return (
-          <EditableCheckboxCell
-            value={(value as boolean) || false}
-            onChange={handleChange as (v: boolean) => void}
-          />
-        );
-      default:
-        return (
-          <EditableTextCell
-            value={String(value || '')}
-            onChange={handleChange as (v: string) => void}
-          />
-        );
-    }
+    return renderFieldCell(value, fieldConfig, handleChange, uniqueFieldValues);
   };
 
   return (

@@ -451,102 +451,137 @@ export function EditableDateCell({
 interface EditableTagsCellProps {
   value: string[];
   onChange: (value: string[]) => void;
+  options?: string[];
   className?: string;
   placeholder?: string;
 }
 
 export function EditableTagsCell({
-  value,
+  value = [],
   onChange,
+  options = [],
   className,
-  placeholder = 'Type and press Enter...',
+  placeholder = 'Select or add tags...',
 }: EditableTagsCellProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
-  useEffect(() => {
-    if (isEditing) {
-      inputRef.current?.focus();
-    }
-  }, [isEditing]);
+  const filteredOptions = searchValue
+    ? options.filter((option) =>
+        option.toLowerCase().includes(searchValue.toLowerCase()),
+      )
+    : options;
 
-  const handleAddTag = () => {
-    const trimmed = inputValue.trim();
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed]);
-      setInputValue('');
-    }
+  const handleToggle = (option: string) => {
+    const newValue = value.includes(option)
+      ? value.filter((v) => v !== option)
+      : [...value, option];
+    onChange(newValue);
+  };
+
+  const handleRemove = (option: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange(value.filter((v) => v !== option));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && searchValue) {
       e.preventDefault();
-      handleAddTag();
-    } else if (e.key === 'Escape') {
-      setInputValue('');
-      setIsEditing(false);
+      const trimmed = searchValue.trim();
+      
+      // If there's a filtered option, select the first one
+      if (filteredOptions.length > 0 && !value.includes(filteredOptions[0])) {
+        handleToggle(filteredOptions[0]);
+        setSearchValue('');
+      }
+      // Otherwise, add the new value
+      else if (trimmed && !value.includes(trimmed)) {
+        onChange([...value, trimmed]);
+        setSearchValue('');
+      }
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    onChange(value.filter((tag) => tag !== tagToRemove));
-  };
-
   return (
-    <div
-      className={cn(
-        'cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px]',
-        className,
-      )}
-      data-editable="true"
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsEditing(true);
-      }}
-    >
-      <div className="flex items-center gap-1 flex-wrap">
-        {value.map((tag) => (
-          <Badge
-            key={tag}
-            variant="secondary"
-            className="gap-1 pr-1"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span>{tag}</span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveTag(tag);
-              }}
-              className="hover:bg-muted rounded-full p-0.5"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          </Badge>
-        ))}
-        {isEditing && (
-          <Input
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          role="combobox"
+          aria-expanded={isOpen}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            'h-auto min-h-8 justify-start gap-1 font-normal hover:bg-muted/50 transition-all duration-200 w-full',
+            value.length === 0 && 'text-muted-foreground',
+            className,
+          )}
+        >
+          {value.length === 0 ? (
+            <span className="text-sm">{placeholder}</span>
+          ) : (
+            <div className="flex flex-wrap gap-1">
+              {value.map((item) => (
+                <Badge
+                  key={item}
+                  variant="secondary"
+                  className="text-xs px-2 py-0"
+                >
+                  {item}
+                  <span
+                    onClick={(e) => handleRemove(item, e)}
+                    className="ml-1 hover:text-destructive cursor-pointer inline-flex"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleRemove(item, e as unknown as React.MouseEvent);
+                      }
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </span>
+                </Badge>
+              ))}
+            </div>
+          )}
+          <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[250px] p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search or add..."
+            value={searchValue}
+            onValueChange={setSearchValue}
             onKeyDown={handleKeyDown}
-            onBlur={() => {
-              handleAddTag();
-              setIsEditing(false);
-            }}
-            placeholder={placeholder}
-            className="h-7 w-32 text-sm inline-block"
-            onClick={(e) => e.stopPropagation()}
           />
-        )}
-        {!isEditing && value.length === 0 && (
-          <span className="text-muted-foreground italic text-sm">
-            Click to add tags
-          </span>
-        )}
-      </div>
-    </div>
+          <CommandList className="max-h-[200px]">
+            <CommandEmpty className="py-2 px-3 text-sm text-muted-foreground">
+              Type and press Enter to add
+            </CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={option}
+                  value={option}
+                  onSelect={() => handleToggle(option)}
+                >
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      value.includes(option) ? 'opacity-100' : 'opacity-0',
+                    )}
+                  />
+                  {option}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -781,12 +816,20 @@ export function EditableMultiselectCell({
                   className="text-xs px-2 py-0"
                 >
                   {item}
-                  <button
+                  <span
                     onClick={(e) => handleRemove(item, e)}
-                    className="ml-1 hover:text-destructive"
+                    className="ml-1 hover:text-destructive cursor-pointer inline-flex"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleRemove(item, e as unknown as React.MouseEvent);
+                      }
+                    }}
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </span>
                 </Badge>
               ))}
             </div>
