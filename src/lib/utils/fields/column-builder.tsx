@@ -267,6 +267,14 @@ export function renderFieldCell(
         options,
         fieldConfig.name,
       );
+    case 'select':
+      return renderSelectCell(
+        value,
+        onChange as (v: string) => void,
+        fieldOptions,
+        options,
+        fieldConfig.name,
+      );
     default:
       return renderFallbackCell(value, type, onChange);
   }
@@ -444,6 +452,33 @@ function renderEditableMultiselectCell(
       onChange={handleChange}
       options={options}
       placeholder={`Select ${fieldName?.toLowerCase() || 'items'}...`}
+    />
+  );
+}
+
+function renderSelectCell(
+  value: FieldValue,
+  handleChange: (value: string) => void,
+  fieldOptions: string[],
+  configOptions?: FieldOptions,
+  fieldName?: string,
+): React.ReactNode {
+  // Combine field options and config choices
+  const configChoices = (configOptions?.choices as string[]) || [];
+  const combined = [...new Set([...fieldOptions, ...configChoices])];
+  
+  const options = combined
+    .filter((opt) => opt != null && opt !== '')
+    .map((opt) => String(opt))
+    .sort();
+
+  return (
+    <EditableComboboxCell
+      value={(value as string) || ''}
+      onChange={handleChange}
+      options={options}
+      onAddOption={handleChange}
+      placeholder={`Select ${fieldName?.toLowerCase() || 'option'}...`}
     />
   );
 }
