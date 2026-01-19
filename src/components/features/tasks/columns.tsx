@@ -56,13 +56,13 @@ export const createColumns = (
       return (
         <div className="flex flex-col gap-2 py-2 min-w-[300px]">
           <EditableTextCell
-            value={row.original.title}
+            value={(row.original.title as string) || ""}
             onChange={handleTitleChange}
             className="font-medium"
           />
-          {row.original.problemStatement && (
+          {(row.original.problemStatement as string) && (
             <EditableTextCell
-              value={row.original.problemStatement}
+              value={(row.original.problemStatement as string) || ""}
               onChange={handleProblemChange}
               multiline
               className="text-xs text-muted-foreground"
@@ -92,7 +92,7 @@ export const createColumns = (
       };
 
       return (
-        <StatusCell value={row.original.status} onChange={handleStatusChange} />
+        <StatusCell value={(row.original.status as Status) || "todo"} onChange={handleStatusChange} />
       );
     },
     filterFn: (row, id, value) => {
@@ -120,7 +120,7 @@ export const createColumns = (
 
       return (
         <PriorityCell
-          value={row.original.priority}
+          value={(row.original.priority as Priority) || "medium"}
           onChange={handlePriorityChange}
         />
       );
@@ -150,7 +150,7 @@ export const createColumns = (
 
       return (
         <EditableOwnerCell
-          value={row.original.owner}
+          value={(row.original.owner as string) || ""}
           onChange={handleOwnerChange}
           options={uniqueOwners}
           onAddOption={() => {}}
@@ -182,7 +182,7 @@ export const createColumns = (
 
       return (
         <EditableComboboxCell
-          value={row.original.assetClass}
+          value={(row.original.assetClass as string) || ""}
           onChange={handleAssetClassChange}
           options={uniqueAssetClasses}
           onAddOption={() => {}}
@@ -197,7 +197,7 @@ export const createColumns = (
     accessorKey: "teamsInvolved",
     header: "Teams",
     cell: ({ row }) => {
-      const teams = row.original.teamsInvolved;
+      const teams = (row.original.teamsInvolved as string[]) || [];
       if (teams.length === 0)
         return <span className="text-muted-foreground">-</span>;
       if (teams.length === 1)
@@ -233,7 +233,7 @@ export const createColumns = (
 
       return (
         <EditableNumberCell
-          value={row.original.currentHrs}
+          value={(row.original.currentHrs as number) || 0}
           onChange={handleHoursChange}
           suffix="h"
         />
@@ -261,7 +261,7 @@ export const createColumns = (
 
       return (
         <EditableNumberCell
-          value={row.original.workedHrs}
+          value={(row.original.workedHrs as number) || 0}
           onChange={handleWorkedChange}
           suffix="h"
         />
@@ -286,7 +286,7 @@ export const createColumns = (
       const date = row.original.createdAt;
       return (
         <div className="text-sm text-muted-foreground">
-          {format(new Date(date), "MMM d, yyyy")}
+          {date ? format(new Date(date), "MMM d, yyyy") : "-"}
         </div>
       );
     },

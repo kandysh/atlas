@@ -1,31 +1,27 @@
 import { Task as DbTask } from "@/src/lib/db";
-import { Task as UiTask, Status, Priority } from "@/src/lib/types";
+import { Task as UiTask } from "@/src/lib/types";
 
 /**
  * Convert database task (with JSONB data field) to UI task (flat structure)
+ * Dynamically maps all fields from the data column without hardcoding field names
  */
 export function dbTaskToUiTask(dbTask: DbTask): UiTask {
-  const data = dbTask.data as Record<string, any>;
+  const data = dbTask.data as Record<string, unknown>;
+  
+  // Process data to handle date conversions
+  const processedData: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    // Convert ISO date strings to Date objects for date-like fields
+    if (typeof value === "string" && key.toLowerCase().includes("date") && !isNaN(Date.parse(value))) {
+      processedData[key] = new Date(value);
+    } else {
+      processedData[key] = value;
+    }
+  }
   
   return {
     id: dbTask.displayId, // Use displayId as the UI id (TSK-001-0001)
-    owner: data.owner || "",
-    title: data.title || "",
-    assetClass: data.assetClass || "",
-    teamsInvolved: data.teamsInvolved || [],
-    theme: data.theme || "",
-    problemStatement: data.problemStatement || "",
-    solutionDesign: data.solutionDesign || "",
-    status: (data.status as Status) || "todo",
-    priority: (data.priority as Priority) || "medium",
-    benefits: data.benefits || "",
-    currentHrs: data.currentHrs || 0,
-    savedHrs: data.savedHrs || 0,
-    workedHrs: data.workedHrs || 0,
-    tools: data.tools || [],
-    otherUseCases: data.otherUseCases || "",
-    tags: data.tags || [],
-    completionDate: data.completionDate ? new Date(data.completionDate) : null,
+    ...processedData,
     createdAt: new Date(dbTask.createdAt),
     updatedAt: new Date(dbTask.updatedAt),
   };
@@ -33,27 +29,19 @@ export function dbTaskToUiTask(dbTask: DbTask): UiTask {
 
 /**
  * Convert UI task data to database JSONB data format
+ * Dynamically maps all fields without hardcoding
  */
-export function uiTaskToDbData(uiTask: Partial<UiTask>): Record<string, any> {
-  const dbData: Record<string, any> = {};
+export function uiTaskToDbData(uiTask: Partial<UiTask>): Record<string, unknown> {
+  const dbData: Record<string, unknown> = {};
   
-  if (uiTask.owner !== undefined) dbData.owner = uiTask.owner;
-  if (uiTask.title !== undefined) dbData.title = uiTask.title;
-  if (uiTask.assetClass !== undefined) dbData.assetClass = uiTask.assetClass;
-  if (uiTask.teamsInvolved !== undefined) dbData.teamsInvolved = uiTask.teamsInvolved;
-  if (uiTask.theme !== undefined) dbData.theme = uiTask.theme;
-  if (uiTask.problemStatement !== undefined) dbData.problemStatement = uiTask.problemStatement;
-  if (uiTask.solutionDesign !== undefined) dbData.solutionDesign = uiTask.solutionDesign;
-  if (uiTask.status !== undefined) dbData.status = uiTask.status;
-  if (uiTask.priority !== undefined) dbData.priority = uiTask.priority;
-  if (uiTask.benefits !== undefined) dbData.benefits = uiTask.benefits;
-  if (uiTask.currentHrs !== undefined) dbData.currentHrs = uiTask.currentHrs;
-  if (uiTask.savedHrs !== undefined) dbData.savedHrs = uiTask.savedHrs;
-  if (uiTask.workedHrs !== undefined) dbData.workedHrs = uiTask.workedHrs;
-  if (uiTask.tools !== undefined) dbData.tools = uiTask.tools;
-  if (uiTask.otherUseCases !== undefined) dbData.otherUseCases = uiTask.otherUseCases;
-  if (uiTask.tags !== undefined) dbData.tags = uiTask.tags;
-  if (uiTask.completionDate !== undefined) dbData.completionDate = uiTask.completionDate;
+  // Skip system fields that should not be stored in the data column
+  const systemFields = new Set(["id", "createdAt", "updatedAt"]);
+  
+  for (const [key, value] of Object.entries(uiTask)) {
+    if (!systemFields.has(key) && value !== undefined) {
+      dbData[key] = value;
+    }
+  }
   
   return dbData;
 }

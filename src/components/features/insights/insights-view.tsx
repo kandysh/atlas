@@ -4,30 +4,27 @@ import type React from "react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { CheckCircle2, Clock, AlertCircle } from "lucide-react"
-
-interface Task {
-  id: string
-  status: string
-  priority: string
-  dueDate: string | null
-}
+import { Task } from "@/src/lib/types"
 
 interface InsightsViewProps {
   tasks: Task[]
 }
 
 export function InsightsView({ tasks }: InsightsViewProps) {
-  const completedTasks = tasks.filter((t) => t.status === "Done").length
-  const inProgressTasks = tasks.filter((t) => t.status === "In Progress").length
-  const todoTasks = tasks.filter((t) => t.status === "To Do").length
-  const blockedTasks = tasks.filter((t) => t.status === "Blocked").length
+  // Use dynamic field access for status and priority
+  const completedTasks = tasks.filter((t) => (t.status as string) === "done" || (t.status as string) === "completed").length
+  const inProgressTasks = tasks.filter((t) => (t.status as string) === "in-progress").length
+  const todoTasks = tasks.filter((t) => (t.status as string) === "todo").length
+  const blockedTasks = tasks.filter((t) => (t.status as string) === "blocked").length
 
-  const urgentTasks = tasks.filter((t) => t.priority === "Urgent").length
-  const highTasks = tasks.filter((t) => t.priority === "High").length
+  const urgentTasks = tasks.filter((t) => (t.priority as string) === "urgent").length
+  const highTasks = tasks.filter((t) => (t.priority as string) === "high").length
 
   const overdueTasks = tasks.filter((t) => {
-    if (!t.dueDate) return false
-    return new Date(t.dueDate) < new Date() && t.status !== "Done"
+    const dueDate = t.dueDate || t.completionDate;
+    if (!dueDate) return false
+    const date = dueDate instanceof Date ? dueDate : new Date(dueDate as string);
+    return date < new Date() && (t.status as string) !== "done" && (t.status as string) !== "completed"
   }).length
 
   const completionRate = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0
@@ -111,13 +108,13 @@ export function InsightsView({ tasks }: InsightsViewProps) {
             <StatusBar label="High" count={highTasks} total={tasks.length} color="bg-priority-high" />
             <StatusBar
               label="Medium"
-              count={tasks.filter((t) => t.priority === "Medium").length}
+              count={tasks.filter((t) => (t.priority as string) === "medium").length}
               total={tasks.length}
               color="bg-priority-medium"
             />
             <StatusBar
               label="Low"
-              count={tasks.filter((t) => t.priority === "Low").length}
+              count={tasks.filter((t) => (t.priority as string) === "low").length}
               total={tasks.length}
               color="bg-priority-low"
             />

@@ -50,8 +50,8 @@ export function TasksDataTable({
 
   // Extract unique values for legacy toolbar filters
   const { uniqueOwners, uniqueAssetClasses } = useMemo(() => {
-    const owners = Array.from(new Set(data.map((task) => task.owner))).filter(Boolean);
-    const assetClasses = Array.from(new Set(data.map((task) => task.assetClass))).filter(Boolean);
+    const owners = Array.from(new Set(data.map((task) => task.owner as string))).filter(Boolean) as string[];
+    const assetClasses = Array.from(new Set(data.map((task) => task.assetClass as string))).filter(Boolean) as string[];
 
     return {
       uniqueOwners: owners.sort(),
@@ -217,6 +217,7 @@ export function TasksDataTable({
         onUpdate={handleTaskUpdate}
         dbTaskId={selectedTask ? getDbId(selectedTask.id) : null}
         workspaceId={activeWorkspaceId}
+        fieldConfigs={fieldConfigs}
       />
     </>
   );

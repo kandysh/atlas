@@ -13,12 +13,18 @@ import {
   CircleDot,
   Flag,
   Palette,
+  Hash,
+  AlignLeft,
+  CheckSquare,
+  List,
+  LucideIcon,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { StatusCell } from "./status-cell";
 import { PriorityCell } from "./priority-cell";
 import { cn } from "@/src/lib/utils";
 import { Task, Status, Priority } from "@/src/lib/types";
+import { FieldConfig } from "@/src/lib/db/schema";
 import {
   EditableTextCell,
   EditableNumberCell,
@@ -26,6 +32,8 @@ import {
   EditableTagsCell,
   EditableComboboxCell,
   EditableOwnerCell,
+  EditableCheckboxCell,
+  EditableMultiselectCell,
 } from "./editable-cells";
 
 import { TaskHistory } from "./task-history";
@@ -35,10 +43,61 @@ type TaskDetailDrawerProps = {
   tasks: Task[];
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (id: string, field: keyof Task, value: unknown) => void;
+  onUpdate: (id: string, field: string, value: unknown) => void;
   dbTaskId?: string | null;
   workspaceId: string;
+  fieldConfigs?: FieldConfig[];
 };
+
+// Icon mapping for common field keys
+const FIELD_ICONS: Record<string, LucideIcon> = {
+  status: CircleDot,
+  priority: Flag,
+  owner: User,
+  assetClass: Briefcase,
+  theme: Palette,
+  teamsInvolved: Users,
+  teams: Users,
+  completionDate: Calendar,
+  dueDate: Calendar,
+  tags: Tag,
+  tools: FileText,
+  currentHrs: Clock,
+  workedHrs: Clock,
+  savedHrs: Clock,
+  title: AlignLeft,
+  problemStatement: AlignLeft,
+  solutionDesign: AlignLeft,
+  benefits: AlignLeft,
+  otherUseCases: AlignLeft,
+};
+
+// Get icon for a field
+function getFieldIcon(key: string, type: string): LucideIcon {
+  if (FIELD_ICONS[key]) return FIELD_ICONS[key];
+  
+  // Fallback based on type
+  switch (type) {
+    case "status": return CircleDot;
+    case "priority": return Flag;
+    case "editable-owner": return User;
+    case "editable-date": 
+    case "date": return Calendar;
+    case "editable-number":
+    case "number": return Hash;
+    case "editable-tags":
+    case "multiselect":
+    case "badge-list": return Tag;
+    case "checkbox": return CheckSquare;
+    case "editable-combobox":
+    case "select": return List;
+    default: return AlignLeft;
+  }
+}
+
+// Fields that should be displayed in a special way (not in properties grid)
+const SPECIAL_FIELDS = new Set(["title", "problemStatement", "solutionDesign", "benefits", "otherUseCases"]);
+const HOUR_FIELDS = new Set(["currentHrs", "workedHrs", "savedHrs"]);
 
 export function TaskDetailDrawer({
   task,
@@ -48,24 +107,51 @@ export function TaskDetailDrawer({
   onUpdate,
   dbTaskId,
   workspaceId,
+  fieldConfigs = [],
 }: TaskDetailDrawerProps) {
-  // Compute unique values from tasks array (DB tasks as single source of truth)
-  const { uniqueOwners, uniqueAssetClasses, uniqueThemes } = useMemo(() => {
-    const owners = Array.from(
-      new Set(tasks.map((t) => t.owner).filter(Boolean)),
-    ).sort();
-    const assetClasses = Array.from(
-      new Set(tasks.map((t) => t.assetClass).filter(Boolean)),
-    ).sort();
-    const themes = Array.from(
-      new Set(tasks.map((t) => t.theme).filter(Boolean)),
-    ).sort();
-    return {
-      uniqueOwners: owners,
-      uniqueAssetClasses: assetClasses,
-      uniqueThemes: themes,
-    };
-  }, [tasks]);
+  // Compute unique values from tasks array for select-type fields
+  const uniqueFieldValues = useMemo(() => {
+    const valueMap: Record<string, string[]> = {};
+    
+    const selectFields = fieldConfigs.filter(
+      (config) =>
+        config.type === "select" ||
+        config.type === "editable-owner" ||
+        config.type === "editable-combobox"
+    );
+    
+    selectFields.forEach((field) => {
+      const values = tasks
+        .map((t) => t[field.key] as string)
+        .filter((value) => value != null && value !== "")
+        .map((value) => String(value));
+      
+      valueMap[field.key] = Array.from(new Set(values)).sort();
+    });
+    
+    return valueMap;
+  }, [tasks, fieldConfigs]);
+
+  // Sort and filter field configs
+  const sortedFieldConfigs = useMemo(() => {
+    return [...fieldConfigs]
+      .filter((config) => config.visible)
+      .sort((a, b) => a.order - b.order);
+  }, [fieldConfigs]);
+
+  // Separate fields by category
+  const { textFields, propertyFields, hourFields, tagFields } = useMemo(() => {
+    const textFields = sortedFieldConfigs.filter((f) => SPECIAL_FIELDS.has(f.key));
+    const hourFields = sortedFieldConfigs.filter((f) => HOUR_FIELDS.has(f.key));
+    const tagFields = sortedFieldConfigs.filter(
+      (f) => (f.type === "editable-tags" || f.type === "badge-list") && !HOUR_FIELDS.has(f.key) && !SPECIAL_FIELDS.has(f.key)
+    );
+    const propertyFields = sortedFieldConfigs.filter(
+      (f) => !SPECIAL_FIELDS.has(f.key) && !HOUR_FIELDS.has(f.key) && f.type !== "editable-tags" && f.type !== "badge-list"
+    );
+    
+    return { textFields, propertyFields, hourFields, tagFields };
+  }, [sortedFieldConfigs]);
 
   if (!task) return null;
 
@@ -78,6 +164,120 @@ export function TaskDetailDrawer({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Render a field based on its config
+  const renderField = (fieldConfig: FieldConfig) => {
+    const { key, name, type, options } = fieldConfig;
+    const value = task[key];
+    const fieldOptions = uniqueFieldValues[key] || [];
+
+    const handleChange = (newValue: unknown) => {
+      onUpdate(task.id, key, newValue);
+    };
+
+    switch (type) {
+      case "status":
+        return (
+          <StatusCell
+            value={value as Status}
+            onChange={(v: Status) => handleChange(v)}
+          />
+        );
+      case "priority":
+        return (
+          <PriorityCell
+            value={value as Priority}
+            onChange={(v: Priority) => handleChange(v)}
+          />
+        );
+      case "editable-owner":
+        return (
+          <EditableOwnerCell
+            value={(value as string) || ""}
+            onChange={handleChange as (v: string) => void}
+            options={fieldOptions}
+            onAddOption={() => {}}
+            placeholder={`Select ${name.toLowerCase()}...`}
+          />
+        );
+      case "editable-combobox":
+      case "select":
+        const comboOptions = fieldOptions.length > 0 
+          ? fieldOptions 
+          : (options?.choices as string[]) || [];
+        return (
+          <EditableComboboxCell
+            value={(value as string) || ""}
+            onChange={handleChange as (v: string) => void}
+            options={comboOptions}
+            onAddOption={() => {}}
+            placeholder={`Select ${name.toLowerCase()}...`}
+          />
+        );
+      case "editable-text":
+      case "text":
+        return (
+          <EditableTextCell
+            value={(value as string) || ""}
+            onChange={handleChange as (v: string) => void}
+            multiline={SPECIAL_FIELDS.has(key)}
+            className={SPECIAL_FIELDS.has(key) ? "text-sm text-foreground/80 leading-relaxed" : undefined}
+          />
+        );
+      case "editable-number":
+      case "number":
+        return (
+          <EditableNumberCell
+            value={(value as number) || 0}
+            onChange={handleChange as (v: number) => void}
+            suffix={(options?.suffix as string) || ""}
+          />
+        );
+      case "editable-date":
+      case "date":
+        return (
+          <EditableDateCell
+            value={value as Date | null}
+            onChange={handleChange as (v: Date | null) => void}
+          />
+        );
+      case "editable-tags":
+      case "badge-list":
+        return (
+          <EditableTagsCell
+            value={(value as string[]) || []}
+            onChange={handleChange as (v: string[]) => void}
+            placeholder={`Add ${name.toLowerCase()}...`}
+          />
+        );
+      case "multiselect":
+        const multiselectOptions = fieldOptions.length > 0 
+          ? fieldOptions 
+          : (options?.choices as string[]) || [];
+        return (
+          <EditableMultiselectCell
+            value={(value as string[]) || []}
+            onChange={handleChange as (v: string[]) => void}
+            options={multiselectOptions}
+            placeholder={`Select ${name.toLowerCase()}...`}
+          />
+        );
+      case "checkbox":
+        return (
+          <EditableCheckboxCell
+            value={(value as boolean) || false}
+            onChange={handleChange as (v: boolean) => void}
+          />
+        );
+      default:
+        return (
+          <EditableTextCell
+            value={String(value || "")}
+            onChange={handleChange as (v: string) => void}
+          />
+        );
+    }
   };
 
   return (
@@ -121,256 +321,94 @@ export function TaskDetailDrawer({
 
           {/* Content */}
           <div className="flex-1 p-6 space-y-6">
-            {/* Title */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Title
-              </label>
-              <EditableTextCell
-                value={task.title}
-                onChange={(value) => onUpdate(task.id, "title", value)}
-                className="text-xl font-semibold"
-              />
-            </div>
+            {/* Title - Always show if present in configs or as fallback */}
+            {(textFields.find((f) => f.key === "title") || !fieldConfigs.length) && (
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Title
+                </label>
+                <EditableTextCell
+                  value={(task.title as string) || ""}
+                  onChange={(value) => onUpdate(task.id, "title", value)}
+                  className="text-xl font-semibold"
+                />
+              </div>
+            )}
 
-            {/* Problem Statement */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Problem Statement
-              </label>
-              <EditableTextCell
-                value={task.problemStatement}
-                onChange={(value) =>
-                  onUpdate(task.id, "problemStatement", value)
-                }
-                multiline
-                className="text-sm text-foreground/80 leading-relaxed"
-              />
-            </div>
-
-            {/* Solution Design */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Solution Design
-              </label>
-              <EditableTextCell
-                value={task.solutionDesign}
-                onChange={(value) => onUpdate(task.id, "solutionDesign", value)}
-                multiline
-                className="text-sm text-foreground/80 leading-relaxed"
-              />
-            </div>
+            {/* Text fields (problemStatement, solutionDesign, benefits, otherUseCases) */}
+            {textFields
+              .filter((f) => f.key !== "title")
+              .map((fieldConfig) => (
+                <div key={fieldConfig.id} className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    {fieldConfig.name}
+                  </label>
+                  {renderField(fieldConfig)}
+                </div>
+              ))}
 
             {/* Properties Grid */}
-            <div className="space-y-4 pt-4 border-t border-border">
-              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Properties
-              </h4>
+            {propertyFields.length > 0 && (
+              <div className="space-y-4 pt-4 border-t border-border">
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Properties
+                </h4>
 
-              <div className="grid gap-4">
-                {/* Status */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CircleDot className="h-4 w-4" />
-                    Status
-                  </div>
-                  <StatusCell
-                    value={task.status}
-                    onChange={(value: Status) =>
-                      onUpdate(task.id, "status", value)
-                    }
-                  />
-                </div>
-
-                {/* Priority */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Flag className="h-4 w-4" />
-                    Priority
-                  </div>
-                  <PriorityCell
-                    value={task.priority}
-                    onChange={(value: Priority) =>
-                      onUpdate(task.id, "priority", value)
-                    }
-                  />
-                </div>
-
-                {/* Owner */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="h-4 w-4" />
-                    Owner
-                  </div>
-                  <EditableOwnerCell
-                    value={task.owner}
-                    onChange={(value) => onUpdate(task.id, "owner", value)}
-                    options={uniqueOwners}
-                    onAddOption={() => {}} // Option will be added when onChange is called
-                    placeholder="Select owner..."
-                  />
-                </div>
-
-                {/* Asset Class */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Briefcase className="h-4 w-4" />
-                    Asset Class
-                  </div>
-                  <EditableComboboxCell
-                    value={task.assetClass}
-                    onChange={(value) => onUpdate(task.id, "assetClass", value)}
-                    options={uniqueAssetClasses}
-                    onAddOption={() => {}} // Option will be added when onChange is called
-                    placeholder="Select asset class..."
-                  />
-                </div>
-
-                {/* Theme */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Palette className="h-4 w-4" />
-                    Theme
-                  </div>
-                  <EditableComboboxCell
-                    value={task.theme}
-                    onChange={(value) => onUpdate(task.id, "theme", value)}
-                    options={uniqueThemes}
-                    onAddOption={() => {}}
-                    placeholder="Select theme..."
-                  />
-                </div>
-
-                {/* Teams Involved */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    Teams
-                  </div>
-                  <EditableTagsCell
-                    value={task.teamsInvolved || []}
-                    onChange={(value) =>
-                      onUpdate(task.id, "teamsInvolved", value)
-                    }
-                    placeholder="Add team..."
-                    className="flex-1 max-w-[300px]"
-                  />
-                </div>
-
-                {/* Completion Date */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    Completion Date
-                  </div>
-                  <EditableDateCell
-                    value={task.completionDate}
-                    onChange={(value) =>
-                      onUpdate(task.id, "completionDate", value)
-                    }
-                  />
+                <div className="grid gap-4">
+                  {propertyFields.map((fieldConfig) => {
+                    const Icon = getFieldIcon(fieldConfig.key, fieldConfig.type);
+                    return (
+                      <div key={fieldConfig.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Icon className="h-4 w-4" />
+                          {fieldConfig.name}
+                        </div>
+                        {renderField(fieldConfig)}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Hours & Metrics */}
-            <div className="space-y-4 pt-4 border-t border-border">
-              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Time & Metrics
-              </h4>
+            {hourFields.length > 0 && (
+              <div className="space-y-4 pt-4 border-t border-border">
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Time & Metrics
+                </h4>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-muted/30 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    <EditableNumberCell
-                      value={task.currentHrs}
-                      onChange={(value) =>
-                        onUpdate(task.id, "currentHrs", value)
-                      }
-                    />
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Est. Hours
-                  </div>
-                </div>
-                <div className="bg-muted/30 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    <EditableNumberCell
-                      value={task.workedHrs}
-                      onChange={(value) =>
-                        onUpdate(task.id, "workedHrs", value)
-                      }
-                    />
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Worked
-                  </div>
-                </div>
-                <div className="bg-muted/30 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-success">
-                    <EditableNumberCell
-                      value={task.savedHrs}
-                      onChange={(value) => onUpdate(task.id, "savedHrs", value)}
-                    />
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Saved
-                  </div>
+                <div className={`grid grid-cols-${Math.min(hourFields.length, 3)} gap-4`}>
+                  {hourFields.map((fieldConfig, index) => (
+                    <div key={fieldConfig.id} className="bg-muted/30 rounded-lg p-4 text-center">
+                      <div className={`text-2xl font-bold ${index === hourFields.length - 1 ? "text-success" : "text-foreground"}`}>
+                        <EditableNumberCell
+                          value={(task[fieldConfig.key] as number) || 0}
+                          onChange={(value) => onUpdate(task.id, fieldConfig.key, value)}
+                        />
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {fieldConfig.name}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Benefits */}
-            <div className="space-y-2 pt-4 border-t border-border">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Benefits
-              </label>
-              <EditableTextCell
-                value={task.benefits}
-                onChange={(value) => onUpdate(task.id, "benefits", value)}
-                multiline
-                className="text-sm text-foreground/80 leading-relaxed"
-              />
-            </div>
-
-            {/* Other Use Cases */}
-            <div className="space-y-2 pt-4 border-t border-border">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Other Use Cases
-              </label>
-              <EditableTextCell
-                value={task.otherUseCases}
-                onChange={(value) => onUpdate(task.id, "otherUseCases", value)}
-                multiline
-                className="text-sm text-foreground/80 leading-relaxed"
-              />
-            </div>
-
-            {/* Tools */}
-            <div className="space-y-2 pt-4 border-t border-border">
-              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                <FileText className="h-3.5 w-3.5" />
-                Tools & Technologies
-              </div>
-              <EditableTagsCell
-                value={task.tools || []}
-                onChange={(value) => onUpdate(task.id, "tools", value)}
-                placeholder="Add tool..."
-              />
-            </div>
-
-            {/* Tags */}
-            <div className="space-y-2 pt-4 border-t border-border">
-              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                <Tag className="h-3.5 w-3.5" />
-                Tags
-              </div>
-              <EditableTagsCell
-                value={task.tags || []}
-                onChange={(value) => onUpdate(task.id, "tags", value)}
-                placeholder="Add tag..."
-              />
-            </div>
+            {/* Tag fields (tools, tags, etc.) */}
+            {tagFields.map((fieldConfig) => {
+              const Icon = getFieldIcon(fieldConfig.key, fieldConfig.type);
+              return (
+                <div key={fieldConfig.id} className="space-y-2 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <Icon className="h-3.5 w-3.5" />
+                    {fieldConfig.name}
+                  </div>
+                  {renderField(fieldConfig)}
+                </div>
+              );
+            })}
 
             {/* Timeline */}
             <div className="space-y-4 pt-4 border-t border-border">
