@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
+import { useMemo } from 'react';
 import {
   X,
   Calendar,
@@ -18,13 +18,13 @@ import {
   CheckSquare,
   List,
   LucideIcon,
-} from "lucide-react";
-import { Button } from "@/src/components/ui/button";
-import { StatusCell } from "./status-cell";
-import { PriorityCell } from "./priority-cell";
-import { cn } from "@/src/lib/utils";
-import { Task, Status, Priority } from "@/src/lib/types";
-import { FieldConfig } from "@/src/lib/db/schema";
+} from 'lucide-react';
+import { Button } from '@/src/components/ui/button';
+import { StatusCell } from './status-cell';
+import { PriorityCell } from './priority-cell';
+import { cn } from '@/src/lib/utils';
+import { Task, Status, Priority } from '@/src/lib/types';
+import { FieldConfig } from '@/src/lib/db/schema';
 import {
   EditableTextCell,
   EditableNumberCell,
@@ -34,9 +34,9 @@ import {
   EditableOwnerCell,
   EditableCheckboxCell,
   EditableMultiselectCell,
-} from "./editable-cells";
+} from './editable-cells';
 
-import { TaskHistory } from "./task-history";
+import { TaskHistory } from './task-history';
 
 type TaskDetailDrawerProps = {
   task: Task | null;
@@ -78,26 +78,26 @@ function getFieldIcon(key: string, type: string): LucideIcon {
 
   // Fallback based on type
   switch (type) {
-    case "status":
+    case 'status':
       return CircleDot;
-    case "priority":
+    case 'priority':
       return Flag;
-    case "editable-owner":
+    case 'editable-owner':
       return User;
-    case "editable-date":
-    case "date":
+    case 'editable-date':
+    case 'date':
       return Calendar;
-    case "editable-number":
-    case "number":
+    case 'editable-number':
+    case 'number':
       return Hash;
-    case "editable-tags":
-    case "multiselect":
-    case "badge-list":
+    case 'editable-tags':
+    case 'multiselect':
+    case 'badge-list':
       return Tag;
-    case "checkbox":
+    case 'checkbox':
       return CheckSquare;
-    case "editable-combobox":
-    case "select":
+    case 'editable-combobox':
+    case 'select':
       return List;
     default:
       return AlignLeft;
@@ -106,13 +106,13 @@ function getFieldIcon(key: string, type: string): LucideIcon {
 
 // Fields that should be displayed in a special way (not in properties grid)
 const SPECIAL_FIELDS = new Set([
-  "title",
-  "problemStatement",
-  "solutionDesign",
-  "benefits",
-  "otherUseCases",
+  'title',
+  'problemStatement',
+  'solutionDesign',
+  'benefits',
+  'otherUseCases',
 ]);
-const HOUR_FIELDS = new Set(["currentHrs", "workedHrs", "savedHrs"]);
+const HOUR_FIELDS = new Set(['currentHrs', 'workedHrs', 'savedHrs']);
 
 export function TaskDetailDrawer({
   task,
@@ -130,15 +130,15 @@ export function TaskDetailDrawer({
 
     const selectFields = fieldConfigs.filter(
       (config) =>
-        config.type === "select" ||
-        config.type === "editable-owner" ||
-        config.type === "editable-combobox",
+        config.type === 'select' ||
+        config.type === 'editable-owner' ||
+        config.type === 'editable-combobox',
     );
 
     selectFields.forEach((field) => {
       const values = tasks
         .map((t) => t[field.key] as string)
-        .filter((value) => value != null && value !== "")
+        .filter((value) => value != null && value !== '')
         .map((value) => String(value));
 
       valueMap[field.key] = Array.from(new Set(values)).sort();
@@ -160,7 +160,7 @@ export function TaskDetailDrawer({
     const hourFields = sortedFieldConfigs.filter((f) => HOUR_FIELDS.has(f.key));
     const tagFields = sortedFieldConfigs.filter(
       (f) =>
-        (f.type === "editable-tags" || f.type === "badge-list") &&
+        (f.type === 'editable-tags' || f.type === 'badge-list') &&
         !HOUR_FIELDS.has(f.key) &&
         !SPECIAL_FIELDS.has(f.key),
     );
@@ -168,8 +168,8 @@ export function TaskDetailDrawer({
       (f) =>
         !SPECIAL_FIELDS.has(f.key) &&
         !HOUR_FIELDS.has(f.key) &&
-        f.type !== "editable-tags" &&
-        f.type !== "badge-list",
+        f.type !== 'editable-tags' &&
+        f.type !== 'badge-list',
     );
 
     return { textFields, propertyFields, hourFields, tagFields };
@@ -178,13 +178,13 @@ export function TaskDetailDrawer({
   if (!task) return null;
 
   const formatFullDateTime = (date: Date | null | undefined) => {
-    if (!date) return "Not set";
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    if (!date) return 'Not set';
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -199,78 +199,78 @@ export function TaskDetailDrawer({
     };
 
     switch (type) {
-      case "status":
+      case 'status':
         return (
           <StatusCell
             value={value as Status}
             onChange={(v: Status) => handleChange(v)}
           />
         );
-      case "priority":
+      case 'priority':
         return (
           <PriorityCell
             value={value as Priority}
             onChange={(v: Priority) => handleChange(v)}
           />
         );
-      case "editable-owner":
+      case 'editable-owner':
         return (
           <EditableOwnerCell
-            value={(value as string) || ""}
+            value={(value as string) || ''}
             onChange={handleChange as (v: string) => void}
             options={fieldOptions}
             onAddOption={() => {}}
             placeholder={`Select ${name.toLowerCase()}...`}
           />
         );
-      case "editable-combobox":
-      case "select":
+      case 'editable-combobox':
+      case 'select':
         const comboOptions =
           fieldOptions.length > 0
             ? fieldOptions
             : (options?.choices as string[]) || [];
         return (
           <EditableComboboxCell
-            value={(value as string) || ""}
+            value={(value as string) || ''}
             onChange={handleChange as (v: string) => void}
             options={comboOptions}
             onAddOption={() => {}}
             placeholder={`Select ${name.toLowerCase()}...`}
           />
         );
-      case "editable-text":
-      case "text":
+      case 'editable-text':
+      case 'text':
         return (
           <EditableTextCell
-            value={(value as string) || ""}
+            value={(value as string) || ''}
             onChange={handleChange as (v: string) => void}
             multiline={SPECIAL_FIELDS.has(key)}
             className={
               SPECIAL_FIELDS.has(key)
-                ? "text-sm text-foreground/80 leading-relaxed"
+                ? 'text-sm text-foreground/80 leading-relaxed'
                 : undefined
             }
           />
         );
-      case "editable-number":
-      case "number":
+      case 'editable-number':
+      case 'number':
         return (
           <EditableNumberCell
             value={(value as number) || 0}
             onChange={handleChange as (v: number) => void}
-            suffix={(options?.suffix as string) || ""}
+            suffix={(options?.suffix as string) || ''}
           />
         );
-      case "editable-date":
-      case "date":
+      case 'editable-date':
+      case 'date':
         return (
           <EditableDateCell
             value={value as Date | null}
             onChange={handleChange as (v: Date | null) => void}
           />
         );
-      case "editable-tags":
-      case "badge-list":
+      case 'editable-tags':
+      case 'badge-list':
         return (
           <EditableTagsCell
             value={(value as string[]) || []}
@@ -278,7 +278,7 @@ export function TaskDetailDrawer({
             placeholder={`Add ${name.toLowerCase()}...`}
           />
         );
-      case "multiselect":
+      case 'multiselect':
         const multiselectOptions =
           fieldOptions.length > 0
             ? fieldOptions
@@ -291,7 +291,7 @@ export function TaskDetailDrawer({
             placeholder={`Select ${name.toLowerCase()}...`}
           />
         );
-      case "checkbox":
+      case 'checkbox':
         return (
           <EditableCheckboxCell
             value={(value as boolean) || false}
@@ -301,7 +301,7 @@ export function TaskDetailDrawer({
       default:
         return (
           <EditableTextCell
-            value={String(value || "")}
+            value={String(value || '')}
             onChange={handleChange as (v: string) => void}
           />
         );
@@ -313,8 +313,8 @@ export function TaskDetailDrawer({
       {/* Overlay */}
       <div
         className={cn(
-          "fixed inset-0 bg-background/80 backdrop-blur-sm z-40 transition-opacity duration-300",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none",
+          'fixed inset-0 bg-background/80 backdrop-blur-sm z-40 transition-opacity duration-300',
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
         )}
         onClick={onClose}
       />
@@ -322,8 +322,8 @@ export function TaskDetailDrawer({
       {/* Drawer */}
       <div
         className={cn(
-          "fixed right-0 top-0 h-full w-full md:w-[650px] bg-card border-l border-border shadow-2xl z-50 transition-transform duration-300 ease-out overflow-y-auto",
-          isOpen ? "translate-x-0" : "translate-x-full",
+          'fixed right-0 top-0 h-full w-full md:w-[650px] bg-card border-l border-border shadow-2xl z-50 transition-transform duration-300 ease-out overflow-y-auto',
+          isOpen ? 'translate-x-0' : 'translate-x-full',
         )}
       >
         <div className="flex flex-col h-full">
@@ -350,15 +350,15 @@ export function TaskDetailDrawer({
           {/* Content */}
           <div className="flex-1 p-6 space-y-6">
             {/* Title - Always show if present in configs or as fallback */}
-            {(textFields.find((f) => f.key === "title") ||
+            {(textFields.find((f) => f.key === 'title') ||
               !fieldConfigs.length) && (
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   Title
                 </label>
                 <EditableTextCell
-                  value={(task.title as string) || ""}
-                  onChange={(value) => onUpdate(task.id, "title", value)}
+                  value={(task.title as string) || ''}
+                  onChange={(value) => onUpdate(task.id, 'title', value)}
                   className="text-xl font-semibold"
                 />
               </div>
@@ -366,7 +366,7 @@ export function TaskDetailDrawer({
 
             {/* Text fields (problemStatement, solutionDesign, benefits, otherUseCases) */}
             {textFields
-              .filter((f) => f.key !== "title")
+              .filter((f) => f.key !== 'title')
               .map((fieldConfig) => (
                 <div key={fieldConfig.id} className="space-y-2">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -420,7 +420,7 @@ export function TaskDetailDrawer({
                       className="bg-muted/30 rounded-lg p-4 text-center"
                     >
                       <div
-                        className={`text-2xl font-bold ${index === hourFields.length - 1 ? "text-success" : "text-foreground"}`}
+                        className={`text-2xl font-bold ${index === hourFields.length - 1 ? 'text-success' : 'text-foreground'}`}
                       >
                         <EditableNumberCell
                           value={(task[fieldConfig.key] as number) || 0}

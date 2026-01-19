@@ -1,28 +1,28 @@
-import { AppSidebar, WorkspaceLoader } from "@/src/components/layout";
-import { SidebarProvider, SidebarInset } from "@/src/components/ui/sidebar";
-import ReactQueryProvider from "@/src/providers/react-query-provider";
-import { WorkspaceProvider } from "@/src/providers/workspace-provider";
-import { ThemeProvider } from "@/src/providers/theme-provider";
-import { Toaster } from "sonner";
-import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
+import { AppSidebar, WorkspaceLoader } from '@/src/components/layout';
+import { SidebarProvider, SidebarInset } from '@/src/components/ui/sidebar';
+import ReactQueryProvider from '@/src/providers/react-query-provider';
+import { WorkspaceProvider } from '@/src/providers/workspace-provider';
+import { ThemeProvider } from '@/src/providers/theme-provider';
+import { Toaster } from 'sonner';
+import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+import './globals.css';
 
 const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
+  variable: '--font-inter',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  display: "swap",
+  variable: '--font-jetbrains-mono',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Atlas - Task Management",
-  description: "Multi-tenant task management platform",
+  title: 'Atlas - Task Management',
+  description: 'Multi-tenant task management platform',
 };
 
 export default function RootLayout({

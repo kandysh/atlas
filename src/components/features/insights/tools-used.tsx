@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
 
 import {
   Card,
@@ -8,22 +8,22 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
+} from '@/src/components/ui/chart';
 
-import { ToolsUsed } from "@/src/lib/types";
+import { ToolsUsed } from '@/src/lib/types';
 
-export const description = "A radar chart";
+export const description = 'A radar chart';
 
 const chartConfig = {
   tool: {
-    label: "Tool",
-    color: "var(--chart-4)",
+    label: 'Tool',
+    color: 'var(--chart-4)',
   },
 } satisfies ChartConfig;
 

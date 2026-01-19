@@ -1,19 +1,14 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import {
-  ChevronsUpDown,
-  Plus,
-  Check,
-  Loader2,
-} from "lucide-react";
+import { useState } from 'react';
+import { ChevronsUpDown, Plus, Check, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu";
+} from '@/src/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -21,31 +16,37 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/src/components/ui/dialog";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
-import { useWorkspace } from "@/src/providers/workspace-provider";
-import { useSidebar } from "@/src/components/ui/sidebar";
-import { toast } from "sonner";
+} from '@/src/components/ui/dialog';
+import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/ui/input';
+import { Label } from '@/src/components/ui/label';
+import { useWorkspace } from '@/src/providers/workspace-provider';
+import { useSidebar } from '@/src/components/ui/sidebar';
+import { toast } from 'sonner';
 
 export function WorkspaceToggler() {
-  const { currentWorkspace, setCurrentWorkspace, workspaces, createWorkspace, isCreatingWorkspace } = useWorkspace();
+  const {
+    currentWorkspace,
+    setCurrentWorkspace,
+    workspaces,
+    createWorkspace,
+    isCreatingWorkspace,
+  } = useWorkspace();
   const { state } = useSidebar();
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [newWorkspaceName, setNewWorkspaceName] = useState("");
+  const [newWorkspaceName, setNewWorkspaceName] = useState('');
 
   if (!currentWorkspace) return null;
 
-  const handleWorkspaceChange = (workspace: typeof workspaces[0]) => {
+  const handleWorkspaceChange = (workspace: (typeof workspaces)[0]) => {
     setCurrentWorkspace(workspace);
     setOpen(false);
   };
 
   const handleCreateWorkspace = async () => {
     if (!newWorkspaceName.trim()) {
-      toast.error("Please enter a workspace name");
+      toast.error('Please enter a workspace name');
       return;
     }
 
@@ -53,18 +54,18 @@ export function WorkspaceToggler() {
       await createWorkspace(newWorkspaceName.trim());
       toast.success(`Workspace "${newWorkspaceName}" created`);
       setDialogOpen(false);
-      setNewWorkspaceName("");
+      setNewWorkspaceName('');
       setOpen(false);
     } catch (error) {
-      toast.error("Failed to create workspace");
+      toast.error('Failed to create workspace');
     }
   };
 
-  const getWorkspaceInfo = (workspace: typeof workspaces[0]) => {
+  const getWorkspaceInfo = (workspace: (typeof workspaces)[0]) => {
     return workspace.slug;
   };
 
-  const isCollapsed = state === "collapsed";
+  const isCollapsed = state === 'collapsed';
 
   const WorkspaceList = () => (
     <>
@@ -101,7 +102,7 @@ export function WorkspaceToggler() {
 
       <DropdownMenuSeparator />
 
-      <DropdownMenuItem 
+      <DropdownMenuItem
         className="cursor-pointer"
         onClick={() => {
           setOpen(false);
@@ -154,7 +155,7 @@ export function WorkspaceToggler() {
                   value={newWorkspaceName}
                   onChange={(e) => setNewWorkspaceName(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key === 'Enter') {
                       handleCreateWorkspace();
                     }
                   }}
@@ -166,8 +167,13 @@ export function WorkspaceToggler() {
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCreateWorkspace} disabled={isCreatingWorkspace}>
-                {isCreatingWorkspace && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button
+                onClick={handleCreateWorkspace}
+                disabled={isCreatingWorkspace}
+              >
+                {isCreatingWorkspace && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Create Workspace
               </Button>
             </DialogFooter>
@@ -227,7 +233,7 @@ export function WorkspaceToggler() {
                 value={newWorkspaceName}
                 onChange={(e) => setNewWorkspaceName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === 'Enter') {
                     handleCreateWorkspace();
                   }
                 }}
@@ -239,8 +245,13 @@ export function WorkspaceToggler() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateWorkspace} disabled={isCreatingWorkspace}>
-              {isCreatingWorkspace && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button
+              onClick={handleCreateWorkspace}
+              disabled={isCreatingWorkspace}
+            >
+              {isCreatingWorkspace && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Create Workspace
             </Button>
           </DialogFooter>

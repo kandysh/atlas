@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
   Card,
@@ -8,23 +8,23 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { OwnerProductivity } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/chart';
+import { OwnerProductivity } from '@/src/lib/actions/analytics';
 
 const chartConfig = {
   completedTasks: {
-    label: "Completed",
-    color: "var(--chart-1)",
+    label: 'Completed',
+    color: 'var(--chart-1)',
   },
   avgCycleDays: {
-    label: "Avg Cycle (days)",
-    color: "var(--chart-2)",
+    label: 'Avg Cycle (days)',
+    color: 'var(--chart-2)',
   },
 } satisfies ChartConfig;
 
@@ -37,10 +37,14 @@ export function OwnerProductivityChart({
   chartData,
   onOwnerClick,
 }: OwnerProductivityChartProps) {
-  const handleBarClick = (_data: unknown, _index: number, event: React.MouseEvent) => {
+  const handleBarClick = (
+    _data: unknown,
+    _index: number,
+    event: React.MouseEvent,
+  ) => {
     // Get owner from the chart data based on the clicked bar
     const target = event.target as SVGElement;
-    const barIndex = target.getAttribute("data-index");
+    const barIndex = target.getAttribute('data-index');
     if (barIndex !== null && onOwnerClick) {
       const dataItem = chartData[parseInt(barIndex, 10)];
       if (dataItem?.owner) {
@@ -53,9 +57,7 @@ export function OwnerProductivityChart({
     <Card>
       <CardHeader>
         <CardTitle>Owner Productivity</CardTitle>
-        <CardDescription>
-          Top 5 performers by completed tasks
-        </CardDescription>
+        <CardDescription>Top 5 performers by completed tasks</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -83,7 +85,7 @@ export function OwnerProductivityChart({
               content={
                 <ChartTooltipContent
                   formatter={(value, name) => {
-                    if (name === "avgCycleDays") {
+                    if (name === 'avgCycleDays') {
                       return `${Number(value).toFixed(1)} days`;
                     }
                     return value;

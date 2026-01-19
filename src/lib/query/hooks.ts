@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Task as DbTask, FieldConfig } from "@/src/lib/db";
-import { Task as UiTask } from "@/src/lib/types";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Task as DbTask, FieldConfig } from '@/src/lib/db';
+import { Task as UiTask } from '@/src/lib/types';
 import {
   getTasks,
   createTask as createTaskAction,
@@ -12,14 +12,14 @@ import {
   duplicateTask as duplicateTaskAction,
   getTaskEvents as getTaskEventsAction,
   TaskEventWithUser,
-} from "@/src/lib/actions/tasks";
-import { 
+} from '@/src/lib/actions/tasks';
+import {
   getFields,
   updateFieldVisibility as updateFieldVisibilityAction,
-} from "@/src/lib/actions/fields";
-import { dbTaskToUiTask } from "@/src/lib/utils";
-import { toast } from "sonner";
-import { queryKeys } from "./keys";
+} from '@/src/lib/actions/fields';
+import { dbTaskToUiTask } from '@/src/lib/utils';
+import { toast } from 'sonner';
+import { queryKeys } from './keys';
 
 // Re-export queryKeys for backward compatibility
 export { queryKeys };
@@ -87,11 +87,11 @@ export function useCreateTask(workspaceId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tasks.byWorkspace(workspaceId),
       });
-      toast.success("Task created successfully");
+      toast.success('Task created successfully');
     },
     onError: (error) => {
-      console.error("Failed to create task:", error);
-      toast.error("Failed to create task");
+      console.error('Failed to create task:', error);
+      toast.error('Failed to create task');
     },
   });
 }
@@ -126,7 +126,7 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
           | undefined;
 
         if (!freshData?.dbTasks) {
-          throw new Error("Cannot update task: unable to fetch task data");
+          throw new Error('Cannot update task: unable to fetch task data');
         }
       }
 
@@ -137,7 +137,7 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
 
       // Find the DB task by displayId
       const dbTask = currentData.dbTasks.find(
-        (t: DbTask) => t.displayId === displayId
+        (t: DbTask) => t.displayId === displayId,
       );
       if (!dbTask) {
         throw new Error(`Cannot find task with displayId: ${displayId}`);
@@ -176,10 +176,10 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
                     ...patch,
                     updatedAt: new Date(),
                   }
-                : task
+                : task,
             ),
           };
-        }
+        },
       );
 
       // Return context with previous data for rollback
@@ -201,27 +201,27 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
           return {
             ...old,
             tasks: old.tasks.map((task: UiTask) =>
-              task.id === updatedDbTask.displayId ? updatedUiTask : task
+              task.id === updatedDbTask.displayId ? updatedUiTask : task,
             ),
             dbTasks: old.dbTasks.map((task: DbTask) =>
-              task.id === updatedDbTask.id ? updatedDbTask : task
+              task.id === updatedDbTask.id ? updatedDbTask : task,
             ),
           };
-        }
+        },
       );
 
-      toast.success("Saved");
+      toast.success('Saved');
     },
 
     // On error, rollback and show error
     onError: (error, _variables, context) => {
-      console.error("Failed to update task:", error);
+      console.error('Failed to update task:', error);
 
       if (context?.previousData) {
         queryClient.setQueryData(context.queryKey, context.previousData);
       }
 
-      toast.error("Failed to save changes");
+      toast.error('Failed to save changes');
     },
 
     // Always refetch after error or success to sync with server
@@ -251,11 +251,11 @@ export function useDeleteTask(workspaceId: string, page: number = 0) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tasks.byWorkspace(workspaceId),
       });
-      toast.success("Task deleted");
+      toast.success('Task deleted');
     },
     onError: (error) => {
-      console.error("Failed to delete task:", error);
-      toast.error("Failed to delete task");
+      console.error('Failed to delete task:', error);
+      toast.error('Failed to delete task');
     },
   });
 }
@@ -281,8 +281,8 @@ export function useDeleteTasks(workspaceId: string) {
       toast.success(`${deletedCount} task(s) deleted`);
     },
     onError: (error) => {
-      console.error("Failed to delete tasks:", error);
-      toast.error("Failed to delete tasks");
+      console.error('Failed to delete tasks:', error);
+      toast.error('Failed to delete tasks');
     },
   });
 }
@@ -305,11 +305,11 @@ export function useDuplicateTask(workspaceId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tasks.byWorkspace(workspaceId),
       });
-      toast.success("Task duplicated");
+      toast.success('Task duplicated');
     },
     onError: (error) => {
-      console.error("Failed to duplicate task:", error);
-      toast.error("Failed to duplicate task");
+      console.error('Failed to duplicate task:', error);
+      toast.error('Failed to duplicate task');
     },
   });
 }
@@ -321,7 +321,13 @@ export function useUpdateFieldVisibility(workspaceId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ fieldId, visible }: { fieldId: string; visible: boolean }) => {
+    mutationFn: async ({
+      fieldId,
+      visible,
+    }: {
+      fieldId: string;
+      visible: boolean;
+    }) => {
       const result = await updateFieldVisibilityAction(fieldId, visible);
       if (!result.success) {
         throw new Error(result.error);
@@ -334,8 +340,8 @@ export function useUpdateFieldVisibility(workspaceId: string) {
       });
     },
     onError: (error) => {
-      console.error("Failed to update field visibility:", error);
-      toast.error("Failed to update column visibility");
+      console.error('Failed to update field visibility:', error);
+      toast.error('Failed to update column visibility');
     },
   });
 }
@@ -345,7 +351,7 @@ export function useUpdateFieldVisibility(workspaceId: string) {
  */
 export function useTaskEvents(taskId: string | null, limit: number = 10) {
   return useQuery({
-    queryKey: queryKeys.tasks.events(taskId || ""),
+    queryKey: queryKeys.tasks.events(taskId || ''),
     queryFn: async (): Promise<TaskEventWithUser[]> => {
       if (!taskId) return [];
       const result = await getTaskEventsAction(taskId, limit);

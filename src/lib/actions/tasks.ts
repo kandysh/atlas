@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
-import { db, tasks, workspaces, taskEvents, Task } from "@/src/lib/db";
-import { eq, desc, sql } from "drizzle-orm";
-import { generateTaskDisplayId } from "@/src/lib/utils";
-import { broadcastTaskUpdate } from "@/src/lib/sse/server";
-import { getCurrentUserId } from "./user";
+import { db, tasks, workspaces, taskEvents, Task } from '@/src/lib/db';
+import { eq, desc, sql } from 'drizzle-orm';
+import { generateTaskDisplayId } from '@/src/lib/utils';
+import { broadcastTaskUpdate } from '@/src/lib/sse/server';
+import { getCurrentUserId } from './user';
 
 export type TasksResult = {
   tasks: Task[];
@@ -18,11 +18,13 @@ export type TasksResult = {
  */
 export async function getTasks(
   workspaceId: string,
-  page: number = 0
-): Promise<{ success: true; data: TasksResult } | { success: false; error: string }> {
+  page: number = 0,
+): Promise<
+  { success: true; data: TasksResult } | { success: false; error: string }
+> {
   try {
     if (!workspaceId) {
-      return { success: false, error: "workspaceId is required" };
+      return { success: false, error: 'workspaceId is required' };
     }
 
     const perPage = 50;
@@ -45,8 +47,8 @@ export async function getTasks(
       },
     };
   } catch (error) {
-    console.error("Error fetching tasks:", error);
-    return { success: false, error: "Failed to fetch tasks" };
+    console.error('Error fetching tasks:', error);
+    return { success: false, error: 'Failed to fetch tasks' };
   }
 }
 
@@ -55,15 +57,15 @@ export async function getTasks(
  */
 export async function createTask(
   workspaceId: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<{ success: true; task: Task } | { success: false; error: string }> {
   try {
     if (!workspaceId) {
-      return { success: false, error: "workspaceId is required" };
+      return { success: false, error: 'workspaceId is required' };
     }
 
     if (!data) {
-      return { success: false, error: "data is required" };
+      return { success: false, error: 'data is required' };
     }
 
     // Get the next sequence number for this workspace
@@ -85,10 +87,13 @@ export async function createTask(
       .limit(1);
 
     if (!workspace) {
-      return { success: false, error: "Workspace not found" };
+      return { success: false, error: 'Workspace not found' };
     }
 
-    const displayId = generateTaskDisplayId(workspace.numericId, sequenceNumber);
+    const displayId = generateTaskDisplayId(
+      workspace.numericId,
+      sequenceNumber,
+    );
 
     // Insert the new task
     const [newTask] = await db
@@ -108,15 +113,15 @@ export async function createTask(
       workspaceId,
       taskId: newTask.id,
       userId,
-      eventType: "created",
+      eventType: 'created',
       newValue: data,
       metadata: { version: 1, displayId },
     });
 
     return { success: true, task: newTask };
   } catch (error) {
-    console.error("Error creating task:", error);
-    return { success: false, error: "Failed to create task" };
+    console.error('Error creating task:', error);
+    return { success: false, error: 'Failed to create task' };
   }
 }
 
@@ -125,15 +130,15 @@ export async function createTask(
  */
 export async function updateTask(
   taskId: string,
-  patch: Record<string, unknown>
+  patch: Record<string, unknown>,
 ): Promise<{ success: true; task: Task } | { success: false; error: string }> {
   try {
     if (!taskId) {
-      return { success: false, error: "taskId is required" };
+      return { success: false, error: 'taskId is required' };
     }
 
-    if (!patch || typeof patch !== "object") {
-      return { success: false, error: "patch object is required" };
+    if (!patch || typeof patch !== 'object') {
+      return { success: false, error: 'patch object is required' };
     }
 
     // Get current task to log changes
@@ -144,7 +149,7 @@ export async function updateTask(
       .limit(1);
 
     if (!currentTask) {
-      return { success: false, error: "Task not found" };
+      return { success: false, error: 'Task not found' };
     }
 
     // Update the task using JSONB merge (data || patch)
@@ -166,11 +171,14 @@ export async function updateTask(
         workspaceId: currentTask.workspaceId,
         taskId: currentTask.id,
         userId,
-        eventType: "updated",
+        eventType: 'updated',
         field,
         oldValue: oldValue !== undefined ? oldValue : null,
         newValue: newValue !== undefined ? newValue : null,
-        metadata: { version: updatedTask.version, displayId: currentTask.displayId },
+        metadata: {
+          version: updatedTask.version,
+          displayId: currentTask.displayId,
+        },
       });
     });
     await Promise.all(eventPromises);
@@ -180,8 +188,8 @@ export async function updateTask(
 
     return { success: true, task: updatedTask };
   } catch (error) {
-    console.error("Error updating task:", error);
-    return { success: false, error: "Failed to update task" };
+    console.error('Error updating task:', error);
+    return { success: false, error: 'Failed to update task' };
   }
 }
 
@@ -189,11 +197,11 @@ export async function updateTask(
  * Delete a task by ID
  */
 export async function deleteTask(
-  taskId: string
+  taskId: string,
 ): Promise<{ success: true } | { success: false; error: string }> {
   try {
     if (!taskId) {
-      return { success: false, error: "taskId is required" };
+      return { success: false, error: 'taskId is required' };
     }
 
     const result = await db
@@ -202,13 +210,13 @@ export async function deleteTask(
       .returning({ id: tasks.id });
 
     if (result.length === 0) {
-      return { success: false, error: "Task not found" };
+      return { success: false, error: 'Task not found' };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Error deleting task:", error);
-    return { success: false, error: "Failed to delete task" };
+    console.error('Error deleting task:', error);
+    return { success: false, error: 'Failed to delete task' };
   }
 }
 
@@ -216,11 +224,13 @@ export async function deleteTask(
  * Delete multiple tasks by IDs
  */
 export async function deleteTasks(
-  taskIds: string[]
-): Promise<{ success: true; deletedCount: number } | { success: false; error: string }> {
+  taskIds: string[],
+): Promise<
+  { success: true; deletedCount: number } | { success: false; error: string }
+> {
   try {
     if (!taskIds || taskIds.length === 0) {
-      return { success: false, error: "taskIds array is required" };
+      return { success: false, error: 'taskIds array is required' };
     }
 
     let deletedCount = 0;
@@ -234,8 +244,8 @@ export async function deleteTasks(
 
     return { success: true, deletedCount };
   } catch (error) {
-    console.error("Error deleting tasks:", error);
-    return { success: false, error: "Failed to delete tasks" };
+    console.error('Error deleting tasks:', error);
+    return { success: false, error: 'Failed to delete tasks' };
   }
 }
 
@@ -243,11 +253,11 @@ export async function deleteTasks(
  * Duplicate a task
  */
 export async function duplicateTask(
-  taskId: string
+  taskId: string,
 ): Promise<{ success: true; task: Task } | { success: false; error: string }> {
   try {
     if (!taskId) {
-      return { success: false, error: "taskId is required" };
+      return { success: false, error: 'taskId is required' };
     }
 
     // Get the original task
@@ -258,7 +268,7 @@ export async function duplicateTask(
       .limit(1);
 
     if (!originalTask) {
-      return { success: false, error: "Task not found" };
+      return { success: false, error: 'Task not found' };
     }
 
     // Get next sequence number
@@ -280,16 +290,19 @@ export async function duplicateTask(
       .limit(1);
 
     if (!workspace) {
-      return { success: false, error: "Workspace not found" };
+      return { success: false, error: 'Workspace not found' };
     }
 
-    const displayId = generateTaskDisplayId(workspace.numericId, sequenceNumber);
+    const displayId = generateTaskDisplayId(
+      workspace.numericId,
+      sequenceNumber,
+    );
 
     // Duplicate task data with modified title
     const duplicatedData = {
       ...(originalTask.data as Record<string, unknown>),
-      title: `${(originalTask.data as Record<string, unknown>)?.title || "Task"} (Copy)`,
-      status: "todo", // Reset status to todo
+      title: `${(originalTask.data as Record<string, unknown>)?.title || 'Task'} (Copy)`,
+      status: 'todo', // Reset status to todo
     };
 
     // Insert the duplicated task
@@ -310,11 +323,11 @@ export async function duplicateTask(
       workspaceId: originalTask.workspaceId,
       taskId: newTask.id,
       userId,
-      eventType: "duplicated",
+      eventType: 'duplicated',
       newValue: duplicatedData,
-      metadata: { 
-        version: 1, 
-        displayId, 
+      metadata: {
+        version: 1,
+        displayId,
         sourceTaskId: originalTask.id,
         sourceDisplayId: originalTask.displayId,
       },
@@ -322,8 +335,8 @@ export async function duplicateTask(
 
     return { success: true, task: newTask };
   } catch (error) {
-    console.error("Error duplicating task:", error);
-    return { success: false, error: "Failed to duplicate task" };
+    console.error('Error duplicating task:', error);
+    return { success: false, error: 'Failed to duplicate task' };
   }
 }
 
@@ -346,11 +359,14 @@ export type TaskEventWithUser = {
  */
 export async function getTaskEvents(
   taskId: string,
-  limit: number = 10
-): Promise<{ success: true; events: TaskEventWithUser[] } | { success: false; error: string }> {
+  limit: number = 10,
+): Promise<
+  | { success: true; events: TaskEventWithUser[] }
+  | { success: false; error: string }
+> {
   try {
     if (!taskId) {
-      return { success: false, error: "taskId is required" };
+      return { success: false, error: 'taskId is required' };
     }
 
     const events = await db.query.taskEvents.findMany({
@@ -369,16 +385,18 @@ export async function getTaskEvents(
       oldValue: event.oldValue,
       newValue: event.newValue,
       createdAt: event.createdAt,
-      user: event.user ? {
-        id: event.user.id,
-        name: event.user.name,
-        email: event.user.email,
-      } : null,
+      user: event.user
+        ? {
+            id: event.user.id,
+            name: event.user.name,
+            email: event.user.email,
+          }
+        : null,
     }));
 
     return { success: true, events: formattedEvents };
   } catch (error) {
-    console.error("Error fetching task events:", error);
-    return { success: false, error: "Failed to fetch task events" };
+    console.error('Error fetching task events:', error);
+    return { success: false, error: 'Failed to fetch task events' };
   }
 }

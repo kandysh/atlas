@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { ChevronDown, Minus, ChevronUp, AlertCircle } from "lucide-react";
+import { ChevronDown, Minus, ChevronUp, AlertCircle } from 'lucide-react';
 import {
   Command,
   CommandEmpty,
@@ -8,16 +8,16 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/src/components/ui/command";
+} from '@/src/components/ui/command';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/src/components/ui/popover";
-import { Button } from "@/src/components/ui/button";
-import { cn } from "@/src/lib/utils";
-import { useState } from "react";
-import { Priority } from "@/src/lib/types";
+} from '@/src/components/ui/popover';
+import { Button } from '@/src/components/ui/button';
+import { cn } from '@/src/lib/utils';
+import { useState } from 'react';
+import { Priority } from '@/src/lib/types';
 
 type PriorityCellProps = {
   value: Priority;
@@ -26,28 +26,28 @@ type PriorityCellProps = {
 
 const priorityConfig = {
   low: {
-    label: "Low",
+    label: 'Low',
     icon: ChevronDown,
-    color: "text-priority-low",
-    bgColor: "bg-priority-low/10",
+    color: 'text-priority-low',
+    bgColor: 'bg-priority-low/10',
   },
   medium: {
-    label: "Medium",
+    label: 'Medium',
     icon: Minus,
-    color: "text-priority-medium",
-    bgColor: "bg-priority-medium/10",
+    color: 'text-priority-medium',
+    bgColor: 'bg-priority-medium/10',
   },
   high: {
-    label: "High",
+    label: 'High',
     icon: ChevronUp,
-    color: "text-priority-high",
-    bgColor: "bg-priority-high/10",
+    color: 'text-priority-high',
+    bgColor: 'bg-priority-high/10',
   },
   urgent: {
-    label: "Urgent",
+    label: 'Urgent',
     icon: AlertCircle,
-    color: "text-priority-urgent",
-    bgColor: "bg-priority-urgent/10",
+    color: 'text-priority-urgent',
+    bgColor: 'bg-priority-urgent/10',
   },
 };
 
@@ -64,15 +64,15 @@ export function PriorityCell({ value, onChange }: PriorityCellProps) {
           size="sm"
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 hover:scale-105 hover:shadow-sm",
+            'h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 hover:scale-105 hover:shadow-sm',
             config.bgColor,
           )}
         >
           <Icon
             className={cn(
-              "h-3.5 w-3.5 transition-all duration-200",
+              'h-3.5 w-3.5 transition-all duration-200',
               config.color,
-              value === "urgent" && "animate-pulse",
+              value === 'urgent' && 'animate-pulse',
             )}
           />
           <span className="text-sm">{config.label}</span>
@@ -113,7 +113,7 @@ export function PriorityCell({ value, onChange }: PriorityCellProps) {
                   >
                     <ItemIcon
                       className={cn(
-                        "h-3.5 w-3.5 transition-all duration-200",
+                        'h-3.5 w-3.5 transition-all duration-200',
                         cfg.color,
                       )}
                     />

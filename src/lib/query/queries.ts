@@ -1,11 +1,11 @@
-import { FieldConfig } from "@/src/lib/db";
+import { FieldConfig } from '@/src/lib/db';
 
 /**
  * Validate field values based on field type
  */
 export function validateFields(
   patch: Record<string, unknown>,
-  fieldConfigs: FieldConfig[]
+  fieldConfigs: FieldConfig[],
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -20,50 +20,50 @@ export function validateFields(
 
     try {
       switch (type) {
-        case "text":
-          if (typeof value !== "string") {
+        case 'text':
+          if (typeof value !== 'string') {
             errors.push(`${fieldConfig.name} must be a string`);
           }
           break;
 
-        case "number":
-          if (typeof value !== "number" || isNaN(value)) {
+        case 'number':
+          if (typeof value !== 'number' || isNaN(value)) {
             errors.push(`${fieldConfig.name} must be a number`);
           }
           break;
 
-        case "checkbox":
-          if (typeof value !== "boolean") {
+        case 'checkbox':
+          if (typeof value !== 'boolean') {
             errors.push(`${fieldConfig.name} must be a boolean`);
           }
           break;
 
-        case "date":
-          if (!(value instanceof Date) && typeof value !== "string") {
+        case 'date':
+          if (!(value instanceof Date) && typeof value !== 'string') {
             errors.push(`${fieldConfig.name} must be a date`);
           }
           break;
 
-        case "select":
-          if (typeof value !== "string") {
+        case 'select':
+          if (typeof value !== 'string') {
             errors.push(`${fieldConfig.name} must be a string`);
           } else if (options?.choices && !options.choices.includes(value)) {
             errors.push(
-              `${fieldConfig.name} must be one of: ${options.choices.join(", ")}`
+              `${fieldConfig.name} must be one of: ${options.choices.join(', ')}`,
             );
           }
           break;
 
-        case "multiselect":
+        case 'multiselect':
           if (!Array.isArray(value)) {
             errors.push(`${fieldConfig.name} must be an array`);
           } else if (options?.choices) {
             const invalidChoices = value.filter(
-              (v) => !options.choices?.includes(v)
+              (v) => !options.choices?.includes(v),
             );
             if (invalidChoices.length > 0) {
               errors.push(
-                `${fieldConfig.name} contains invalid choices: ${invalidChoices.join(", ")}`
+                `${fieldConfig.name} contains invalid choices: ${invalidChoices.join(', ')}`,
               );
             }
           }
@@ -73,7 +73,7 @@ export function validateFields(
       // Check required fields
       if (
         options?.required &&
-        (value === null || value === undefined || value === "")
+        (value === null || value === undefined || value === '')
       ) {
         errors.push(`${fieldConfig.name} is required`);
       }

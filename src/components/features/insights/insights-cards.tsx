@@ -1,13 +1,10 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
-import { Card, CardContent } from "@/src/components/ui/card";
-import { Button } from "@/src/components/ui/button";
-import { AlertCircle, TrendingUp, DollarSign, Clock } from "lucide-react";
-import {
-  AnalyticsData,
-  AnalyticsFilters,
-} from "@/src/lib/actions/analytics";
+import { useMemo } from 'react';
+import { Card, CardContent } from '@/src/components/ui/card';
+import { Button } from '@/src/components/ui/button';
+import { AlertCircle, TrendingUp, DollarSign, Clock } from 'lucide-react';
+import { AnalyticsData, AnalyticsFilters } from '@/src/lib/actions/analytics';
 
 // Default hourly rate for savings calculation
 // TODO: Make this configurable per workspace/organization
@@ -29,8 +26,8 @@ interface Insight {
   filter?: AnalyticsFilters;
 }
 
-export function InsightsCards({ 
-  data, 
+export function InsightsCards({
+  data,
   onFilterChange,
   hourlyRate = DEFAULT_HOURLY_RATE,
 }: InsightsCardsProps) {
@@ -39,7 +36,9 @@ export function InsightsCards({
 
     // Find tasks stuck in testing for too long
     const testingAging = data.priorityAging.find(
-      (p) => p.priority.toLowerCase() === "high" || p.priority.toLowerCase() === "urgent"
+      (p) =>
+        p.priority.toLowerCase() === 'high' ||
+        p.priority.toLowerCase() === 'urgent',
     );
     const stuckInTesting = testingAging
       ? testingAging.bucket7to14 + testingAging.bucket14plus
@@ -47,13 +46,13 @@ export function InsightsCards({
 
     if (stuckInTesting > 0) {
       result.push({
-        id: "stuck-testing",
+        id: 'stuck-testing',
         icon: AlertCircle,
-        iconColor: "text-amber-500",
-        bgColor: "bg-amber-500/10",
+        iconColor: 'text-amber-500',
+        bgColor: 'bg-amber-500/10',
         message: `${stuckInTesting} high priority tasks stuck >7 days`,
-        action: "Show",
-        filter: { priority: "high" },
+        action: 'Show',
+        filter: { priority: 'high' },
       });
     }
 
@@ -67,12 +66,12 @@ export function InsightsCards({
 
       if (performanceRatio >= 1.5) {
         result.push({
-          id: "top-performer",
+          id: 'top-performer',
           icon: TrendingUp,
-          iconColor: "text-green-500",
-          bgColor: "bg-green-500/10",
+          iconColor: 'text-green-500',
+          bgColor: 'bg-green-500/10',
           message: `${topPerformer.owner} completes ${performanceRatio.toFixed(1)}x faster than avg`,
-          action: "Filter",
+          action: 'Filter',
           filter: { assignee: topPerformer.owner },
         });
       }
@@ -82,26 +81,27 @@ export function InsightsCards({
     const savedValue = data.kpiSummary.totalHoursSaved * hourlyRate;
     if (savedValue > 0) {
       result.push({
-        id: "savings",
+        id: 'savings',
         icon: DollarSign,
-        iconColor: "text-purple-500",
-        bgColor: "bg-purple-500/10",
+        iconColor: 'text-purple-500',
+        bgColor: 'bg-purple-500/10',
         message: `$${savedValue.toLocaleString()} saved via automation`,
-        action: "Details",
+        action: 'Details',
       });
     }
 
     // Open tasks warning
-    const openTasksRatio = data.kpiSummary.openTasks / Math.max(data.kpiSummary.totalTasks, 1);
+    const openTasksRatio =
+      data.kpiSummary.openTasks / Math.max(data.kpiSummary.totalTasks, 1);
     if (openTasksRatio > 0.7) {
       result.push({
-        id: "backlog-warning",
+        id: 'backlog-warning',
         icon: Clock,
-        iconColor: "text-red-500",
-        bgColor: "bg-red-500/10",
+        iconColor: 'text-red-500',
+        bgColor: 'bg-red-500/10',
         message: `${Math.round(openTasksRatio * 100)}% of tasks are still open`,
-        action: "View",
-        filter: { status: "todo" },
+        action: 'View',
+        filter: { status: 'todo' },
       });
     }
 
@@ -119,10 +119,7 @@ export function InsightsCards({
           {insights.map((insight) => {
             const Icon = insight.icon;
             return (
-              <div
-                key={insight.id}
-                className="flex items-center gap-3 text-sm"
-              >
+              <div key={insight.id} className="flex items-center gap-3 text-sm">
                 <div className={`p-1.5 rounded-lg ${insight.bgColor}`}>
                   <Icon className={`h-4 w-4 ${insight.iconColor}`} />
                 </div>
@@ -131,7 +128,9 @@ export function InsightsCards({
                   variant="ghost"
                   size="sm"
                   className="h-7 px-2 text-xs"
-                  onClick={() => insight.filter && onFilterChange(insight.filter)}
+                  onClick={() =>
+                    insight.filter && onFilterChange(insight.filter)
+                  }
                 >
                   [{insight.action}]
                 </Button>

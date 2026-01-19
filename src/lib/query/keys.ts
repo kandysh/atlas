@@ -1,4 +1,4 @@
-import type { AnalyticsFilters } from "@/src/lib/actions/analytics";
+import type { AnalyticsFilters } from '@/src/lib/actions/analytics';
 
 /**
  * Centralized query key factory for React Query
@@ -7,38 +7,38 @@ import type { AnalyticsFilters } from "@/src/lib/actions/analytics";
 export const queryKeys = {
   // User keys
   user: {
-    all: ["user"] as const,
-    current: () => [...queryKeys.user.all, "current"] as const,
+    all: ['user'] as const,
+    current: () => [...queryKeys.user.all, 'current'] as const,
   },
 
   // Workspace keys
   workspaces: {
-    all: ["workspaces"] as const,
+    all: ['workspaces'] as const,
     byUser: (userId: number) =>
-      [...queryKeys.workspaces.all, "user", userId] as const,
+      [...queryKeys.workspaces.all, 'user', userId] as const,
   },
 
   // Task keys
   tasks: {
-    all: ["tasks"] as const,
+    all: ['tasks'] as const,
     byWorkspace: (workspaceId: string) =>
       [...queryKeys.tasks.all, { workspaceId }] as const,
     paginated: (workspaceId: string, page: number) =>
       [...queryKeys.tasks.all, { workspaceId, page }] as const,
     events: (taskId: string) =>
-      [...queryKeys.tasks.all, "events", { taskId }] as const,
+      [...queryKeys.tasks.all, 'events', { taskId }] as const,
   },
 
   // Field config keys
   fields: {
-    all: ["fields"] as const,
+    all: ['fields'] as const,
     byWorkspace: (workspaceId: string) =>
       [...queryKeys.fields.all, { workspaceId }] as const,
   },
 
   // Analytics keys
   analytics: {
-    all: ["analytics"] as const,
+    all: ['analytics'] as const,
     byWorkspace: (workspaceId: string, filters?: AnalyticsFilters) =>
       [...queryKeys.analytics.all, { workspaceId, ...filters }] as const,
   },

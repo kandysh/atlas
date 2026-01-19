@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import React, { useState, useRef, useEffect } from "react";
-import { Input } from "@/src/components/ui/input";
-import { Textarea } from "@/src/components/ui/textarea";
-import { Calendar } from "@/src/components/ui/calendar";
+import React, { useState, useRef, useEffect } from 'react';
+import { Input } from '@/src/components/ui/input';
+import { Textarea } from '@/src/components/ui/textarea';
+import { Calendar } from '@/src/components/ui/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/src/components/ui/popover";
-import { Button } from "@/src/components/ui/button";
-import { Badge } from "@/src/components/ui/badge";
+} from '@/src/components/ui/popover';
+import { Button } from '@/src/components/ui/button';
+import { Badge } from '@/src/components/ui/badge';
 import {
   Command,
   CommandEmpty,
@@ -18,15 +18,15 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/src/components/ui/command";
+} from '@/src/components/ui/command';
 import {
   Calendar as CalendarIcon,
   X,
   ChevronsUpDown,
   Check,
-} from "lucide-react";
-import { cn } from "@/src/lib/utils";
-import { Checkbox } from "@/src/components/ui/checkbox";
+} from 'lucide-react';
+import { cn } from '@/src/lib/utils';
+import { Checkbox } from '@/src/components/ui/checkbox';
 
 interface EditableTextCellProps {
   value: string;
@@ -58,7 +58,7 @@ export function EditableTextCell({
   }, [isEditing, multiline]);
 
   const handleSave = () => {
-    if (editValue.trim() !== value && editValue.trim() !== "") {
+    if (editValue.trim() !== value && editValue.trim() !== '') {
       onChange(editValue.trim());
     } else {
       setEditValue(value); // Revert if empty
@@ -67,10 +67,10 @@ export function EditableTextCell({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey && !multiline) {
+    if (e.key === 'Enter' && !e.shiftKey && !multiline) {
       e.preventDefault();
       handleSave();
-    } else if (e.key === "Escape") {
+    } else if (e.key === 'Escape') {
       setEditValue(value);
       setIsEditing(false);
     }
@@ -102,7 +102,7 @@ export function EditableTextCell({
   return (
     <div
       className={cn(
-        "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-8 flex items-center hover:shadow-sm",
+        'cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-8 flex items-center hover:shadow-sm',
         className,
       )}
       data-editable="true"
@@ -112,7 +112,7 @@ export function EditableTextCell({
         setEditValue(value);
       }}
     >
-      <span className={cn("flex-1", multiline && "line-clamp-2")}>
+      <span className={cn('flex-1', multiline && 'line-clamp-2')}>
         {value || (
           <span className="text-muted-foreground italic">Click to edit</span>
         )}
@@ -131,7 +131,7 @@ interface EditableNumberCellProps {
 export function EditableNumberCell({
   value,
   onChange,
-  suffix = "",
+  suffix = '',
   className,
 }: EditableNumberCellProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -156,10 +156,10 @@ export function EditableNumberCell({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       handleSave();
-    } else if (e.key === "Escape") {
+    } else if (e.key === 'Escape') {
       setEditValue(value.toString());
       setIsEditing(false);
     }
@@ -183,7 +183,7 @@ export function EditableNumberCell({
   return (
     <div
       className={cn(
-        "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px] flex items-center",
+        'cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px] flex items-center',
         className,
       )}
       data-editable="true"
@@ -215,16 +215,16 @@ export function EditableOwnerCell({
   onChange,
   options,
   onAddOption,
-  placeholder = "Select owner...",
+  placeholder = 'Select owner...',
   className,
 }: EditableOwnerCellProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
 
   // Ensure options are strings and filter safely
-  const safeOptions = options.filter((opt): opt is string => 
-    typeof opt === "string" && opt.length > 0
+  const safeOptions = options.filter(
+    (opt): opt is string => typeof opt === 'string' && opt.length > 0,
   );
 
   const filteredOptions = safeOptions.filter((option) =>
@@ -232,35 +232,41 @@ export function EditableOwnerCell({
   );
 
   // Callback ref to scroll to selected item
-  const selectedRef = React.useCallback((node: HTMLDivElement | null) => {
-    if (node && isOpen) {
-      // Small delay to ensure the list is rendered
-      setTimeout(() => {
-        const listElement = node.closest('[data-slot="command-list"]');
-        if (listElement && node) {
-          const listRect = listElement.getBoundingClientRect();
-          const nodeRect = node.getBoundingClientRect();
-          
-          // Check if item is not in view
-          if (nodeRect.top < listRect.top || nodeRect.bottom > listRect.bottom) {
-            node.scrollIntoView({ 
-              behavior: "smooth",
-              block: "center"
-            });
+  const selectedRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node && isOpen) {
+        // Small delay to ensure the list is rendered
+        setTimeout(() => {
+          const listElement = node.closest('[data-slot="command-list"]');
+          if (listElement && node) {
+            const listRect = listElement.getBoundingClientRect();
+            const nodeRect = node.getBoundingClientRect();
+
+            // Check if item is not in view
+            if (
+              nodeRect.top < listRect.top ||
+              nodeRect.bottom > listRect.bottom
+            ) {
+              node.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+              });
+            }
           }
-        }
-      }, 50);
-    }
-  }, [isOpen]);
+        }, 50);
+      }
+    },
+    [isOpen],
+  );
 
   const handleSelect = (selectedValue: string) => {
     onChange(selectedValue);
     setIsOpen(false);
-    setSearchValue("");
+    setSearchValue('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       const trimmed = searchValue.trim();
 
@@ -273,16 +279,16 @@ export function EditableOwnerCell({
         onAddOption?.(trimmed);
         onChange(trimmed);
         setIsOpen(false);
-        setSearchValue("");
+        setSearchValue('');
       }
     }
   };
 
   const getInitials = (name: string) => {
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase();
   };
 
@@ -296,8 +302,8 @@ export function EditableOwnerCell({
           aria-expanded={isOpen}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 w-auto",
-            !value && "text-muted-foreground",
+            'h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 w-auto',
+            !value && 'text-muted-foreground',
             className,
           )}
         >
@@ -346,8 +352,8 @@ export function EditableOwnerCell({
                   </div>
                   <Check
                     className={cn(
-                      "ml-auto h-4 w-4",
-                      value === option ? "opacity-100" : "opacity-0",
+                      'ml-auto h-4 w-4',
+                      value === option ? 'opacity-100' : 'opacity-0',
                     )}
                   />
                 </CommandItem>
@@ -374,37 +380,39 @@ export function EditableDateCell({
   const [isOpen, setIsOpen] = useState(false);
 
   const formatDate = (date: Date | null) => {
-    if (!date) return "Not set";
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
+    if (!date) return 'Not set';
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
   };
 
   // Color coding based on date relative to today
   const getDateColorClass = (date: Date | null) => {
-    if (!date) return "text-muted-foreground";
-    
+    if (!date) return 'text-muted-foreground';
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const dateValue = new Date(date);
     dateValue.setHours(0, 0, 0, 0);
-    
-    const diffDays = Math.floor((dateValue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
+
+    const diffDays = Math.floor(
+      (dateValue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
     if (diffDays < 0) {
       // Past date - overdue
-      return "text-date-overdue";
+      return 'text-date-overdue';
     } else if (diffDays === 0) {
       // Today
-      return "text-date-today";
+      return 'text-date-today';
     } else if (diffDays <= 7) {
       // Within a week
-      return "text-date-soon";
+      return 'text-date-soon';
     } else {
       // Future
-      return "text-date-future";
+      return 'text-date-future';
     }
   };
 
@@ -416,7 +424,7 @@ export function EditableDateCell({
           size="sm"
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "justify-start text-left font-normal hover:bg-accent/50",
+            'justify-start text-left font-normal hover:bg-accent/50',
             getDateColorClass(value),
             className,
           )}
@@ -451,10 +459,10 @@ export function EditableTagsCell({
   value,
   onChange,
   className,
-  placeholder = "Type and press Enter...",
+  placeholder = 'Type and press Enter...',
 }: EditableTagsCellProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -467,16 +475,16 @@ export function EditableTagsCell({
     const trimmed = inputValue.trim();
     if (trimmed && !value.includes(trimmed)) {
       onChange([...value, trimmed]);
-      setInputValue("");
+      setInputValue('');
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       handleAddTag();
-    } else if (e.key === "Escape") {
-      setInputValue("");
+    } else if (e.key === 'Escape') {
+      setInputValue('');
       setIsEditing(false);
     }
   };
@@ -488,7 +496,7 @@ export function EditableTagsCell({
   return (
     <div
       className={cn(
-        "cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px]",
+        'cursor-pointer hover:bg-accent/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors min-h-[32px]',
         className,
       )}
       data-editable="true"
@@ -556,16 +564,16 @@ export function EditableComboboxCell({
   onChange,
   options,
   onAddOption,
-  placeholder = "Select or type...",
+  placeholder = 'Select or type...',
   className,
 }: EditableComboboxCellProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
 
   // Ensure options are strings and filter safely
-  const safeOptions = options.filter((opt): opt is string => 
-    typeof opt === "string" && opt.length > 0
+  const safeOptions = options.filter(
+    (opt): opt is string => typeof opt === 'string' && opt.length > 0,
   );
 
   const filteredOptions = safeOptions.filter((option) =>
@@ -573,35 +581,41 @@ export function EditableComboboxCell({
   );
 
   // Callback ref to scroll to selected item
-  const selectedRef = React.useCallback((node: HTMLDivElement | null) => {
-    if (node && isOpen) {
-      // Small delay to ensure the list is rendered
-      setTimeout(() => {
-        const listElement = node.closest('[data-slot="command-list"]');
-        if (listElement && node) {
-          const listRect = listElement.getBoundingClientRect();
-          const nodeRect = node.getBoundingClientRect();
-          
-          // Check if item is not in view
-          if (nodeRect.top < listRect.top || nodeRect.bottom > listRect.bottom) {
-            node.scrollIntoView({ 
-              behavior: "smooth",
-              block: "center"
-            });
+  const selectedRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node && isOpen) {
+        // Small delay to ensure the list is rendered
+        setTimeout(() => {
+          const listElement = node.closest('[data-slot="command-list"]');
+          if (listElement && node) {
+            const listRect = listElement.getBoundingClientRect();
+            const nodeRect = node.getBoundingClientRect();
+
+            // Check if item is not in view
+            if (
+              nodeRect.top < listRect.top ||
+              nodeRect.bottom > listRect.bottom
+            ) {
+              node.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+              });
+            }
           }
-        }
-      }, 50);
-    }
-  }, [isOpen]);
+        }, 50);
+      }
+    },
+    [isOpen],
+  );
 
   const handleSelect = (selectedValue: string) => {
     onChange(selectedValue);
     setIsOpen(false);
-    setSearchValue("");
+    setSearchValue('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       const trimmed = searchValue.trim();
 
@@ -614,7 +628,7 @@ export function EditableComboboxCell({
         onAddOption?.(trimmed);
         onChange(trimmed);
         setIsOpen(false);
-        setSearchValue("");
+        setSearchValue('');
       }
     }
   };
@@ -629,8 +643,8 @@ export function EditableComboboxCell({
           aria-expanded={isOpen}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 w-auto",
-            !value && "text-muted-foreground",
+            'h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 w-auto',
+            !value && 'text-muted-foreground',
             className,
           )}
         >
@@ -660,8 +674,8 @@ export function EditableComboboxCell({
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option ? "opacity-100" : "opacity-0",
+                      'mr-2 h-4 w-4',
+                      value === option ? 'opacity-100' : 'opacity-0',
                     )}
                   />
                   {option}
@@ -687,7 +701,7 @@ export function EditableCheckboxCell({
   className,
 }: EditableCheckboxCellProps) {
   return (
-    <div className={cn("flex items-center", className)}>
+    <div className={cn('flex items-center', className)}>
       <Checkbox
         checked={value}
         onCheckedChange={(checked) => onChange(checked === true)}
@@ -709,11 +723,11 @@ export function EditableMultiselectCell({
   value = [],
   onChange,
   options = [],
-  placeholder = "Select items...",
+  placeholder = 'Select items...',
   className,
 }: EditableMultiselectCellProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
 
   const filteredOptions = searchValue
     ? options.filter((option) =>
@@ -734,10 +748,10 @@ export function EditableMultiselectCell({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && searchValue && !options.includes(searchValue)) {
+    if (e.key === 'Enter' && searchValue && !options.includes(searchValue)) {
       e.preventDefault();
       onChange([...value, searchValue]);
-      setSearchValue("");
+      setSearchValue('');
     }
   };
 
@@ -751,8 +765,8 @@ export function EditableMultiselectCell({
           aria-expanded={isOpen}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "h-auto min-h-8 justify-start gap-1 font-normal hover:bg-muted/50 transition-all duration-200 w-full",
-            value.length === 0 && "text-muted-foreground",
+            'h-auto min-h-8 justify-start gap-1 font-normal hover:bg-muted/50 transition-all duration-200 w-full',
+            value.length === 0 && 'text-muted-foreground',
             className,
           )}
         >
@@ -801,8 +815,8 @@ export function EditableMultiselectCell({
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
-                      value.includes(option) ? "opacity-100" : "opacity-0",
+                      'mr-2 h-4 w-4',
+                      value.includes(option) ? 'opacity-100' : 'opacity-0',
                     )}
                   />
                   {option}

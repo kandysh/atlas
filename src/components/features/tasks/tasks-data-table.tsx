@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { useState, useMemo, useCallback } from "react";
-import { Task } from "@/src/lib/types";
-import { DataTable } from "@/src/components/ui/data-table";
-import { TaskDetailDrawer } from "./task-detail-drawer";
-import { DynamicToolbar } from "./dynamic-toolbar";
+import { ColumnDef } from '@tanstack/react-table';
+import { useState, useMemo, useCallback } from 'react';
+import { Task } from '@/src/lib/types';
+import { DataTable } from '@/src/components/ui/data-table';
+import { TaskDetailDrawer } from './task-detail-drawer';
+import { DynamicToolbar } from './dynamic-toolbar';
 import {
   useCreateTask,
   useUpdateTask,
@@ -14,9 +14,9 @@ import {
   useDuplicateTask,
   useWorkspaceFields,
   useUpdateFieldVisibility,
-} from "@/src/lib/query/hooks";
-import { useWorkspace } from "@/src/providers";
-import { buildColumnsFromFieldConfigs } from "@/src/lib/utils";
+} from '@/src/lib/query/hooks';
+import { useWorkspace } from '@/src/providers';
+import { buildColumnsFromFieldConfigs } from '@/src/lib/utils';
 
 interface TasksDataTableProps {
   columns?: ColumnDef<Task, unknown>[];
@@ -35,7 +35,7 @@ export function TasksDataTable({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { currentWorkspace } = useWorkspace();
 
-  const activeWorkspaceId = workspaceId || currentWorkspace?.id || "1";
+  const activeWorkspaceId = workspaceId || currentWorkspace?.id || '1';
 
   const createTaskMutation = useCreateTask(activeWorkspaceId);
   const updateTaskMutation = useUpdateTask(activeWorkspaceId, 0);
@@ -57,9 +57,9 @@ export function TasksDataTable({
   const handleAddTask = useCallback(() => {
     createTaskMutation.mutate(
       {
-        title: "New Task",
-        status: "todo",
-        priority: "medium",
+        title: 'New Task',
+        status: 'todo',
+        priority: 'medium',
       },
       {
         onSuccess: (newTask) => {
@@ -69,25 +69,25 @@ export function TasksDataTable({
               id: newTask.displayId,
               title:
                 ((newTask.data as Record<string, unknown>)?.title as string) ||
-                "New Task",
+                'New Task',
               status:
                 ((newTask.data as Record<string, unknown>)?.status as string) ||
-                "todo",
+                'todo',
               priority:
                 ((newTask.data as Record<string, unknown>)
-                  ?.priority as string) || "medium",
-              owner: "",
-              assetClass: "",
+                  ?.priority as string) || 'medium',
+              owner: '',
+              assetClass: '',
               teamsInvolved: [],
-              theme: "",
-              problemStatement: "",
-              solutionDesign: "",
-              benefits: "",
+              theme: '',
+              problemStatement: '',
+              solutionDesign: '',
+              benefits: '',
               currentHrs: 0,
               savedHrs: 0,
               workedHrs: 0,
               tools: [],
-              otherUseCases: "",
+              otherUseCases: '',
               tags: [],
               completionDate: null,
               createdAt: newTask.createdAt,

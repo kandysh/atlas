@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   ColumnDef,
@@ -13,15 +13,15 @@ import {
   RowSelectionState,
   getFacetedRowModel,
   getFacetedUniqueValues,
-} from "@tanstack/react-table";
-import { useState, ReactNode } from "react";
-import { Button } from "@/src/components/ui/button";
+} from '@tanstack/react-table';
+import { useState, ReactNode } from 'react';
+import { Button } from '@/src/components/ui/button';
 import {
   ChevronLeft,
   ChevronRight,
   // GripVertical, // TODO: Re-enable when drag-and-drop is implemented
-} from "lucide-react";
-import { cn } from "@/src/lib/utils";
+} from 'lucide-react';
+import { cn } from '@/src/lib/utils';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -42,13 +42,13 @@ export function DataTable<TData, TValue>({
   pageSize = 20,
   enableRowSelection = true,
   enableDragHandle = false, // Disabled by default - TODO: implement drag-and-drop reordering
-  emptyStateMessage = "No results found.",
+  emptyStateMessage = 'No results found.',
   toolbar,
   className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [globalFilter, setGlobalFilter] = useState('');
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState({});
 
@@ -86,7 +86,7 @@ export function DataTable<TData, TValue>({
     // Don't trigger row click if clicking on interactive elements
     if (
       (e.target as HTMLElement).closest(
-        'button, input, textarea, [role="combobox"], [data-radix-collection-item], [data-editable="true"], [cmdk-item], [role="option"]'
+        'button, input, textarea, [role="combobox"], [data-radix-collection-item], [data-editable="true"], [cmdk-item], [role="option"]',
       )
     ) {
       return;
@@ -95,7 +95,7 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Toolbar */}
       {toolbar && toolbar(table)}
 
@@ -130,10 +130,10 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </th>
-                  ))
+                  )),
                 )}
               </tr>
             </thead>
@@ -142,11 +142,11 @@ export function DataTable<TData, TValue>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
+                    data-state={row.getIsSelected() && 'selected'}
                     className={cn(
-                      "border-b border-border hover:bg-muted/20 transition-all duration-200",
-                      onRowClick && "cursor-pointer",
-                      row.getIsSelected() && "bg-muted/30"
+                      'border-b border-border hover:bg-muted/20 transition-all duration-200',
+                      onRowClick && 'cursor-pointer',
+                      row.getIsSelected() && 'bg-muted/30',
                     )}
                     onClick={(e) => handleRowClick(row.original, e)}
                   >
@@ -173,7 +173,7 @@ export function DataTable<TData, TValue>({
                       <td key={cell.id} className="px-4 py-3">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </td>
                     ))}
@@ -199,7 +199,7 @@ export function DataTable<TData, TValue>({
         <div>
           {selectedRowCount > 0 ? (
             <span>
-              {selectedRowCount} of {table.getFilteredRowModel().rows.length}{" "}
+              {selectedRowCount} of {table.getFilteredRowModel().rows.length}{' '}
               row(s) selected
             </span>
           ) : (
@@ -218,7 +218,7 @@ export function DataTable<TData, TValue>({
             Previous
           </Button>
           <span className="text-sm">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            Page {table.getState().pagination.pageIndex + 1} of{' '}
             {table.getPageCount()}
           </span>
           <Button

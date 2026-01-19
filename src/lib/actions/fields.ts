@@ -1,17 +1,19 @@
-"use server";
+'use server';
 
-import { db, fieldConfigs, FieldConfig } from "@/src/lib/db";
-import { eq, asc } from "drizzle-orm";
+import { db, fieldConfigs, FieldConfig } from '@/src/lib/db';
+import { eq, asc } from 'drizzle-orm';
 
 /**
  * Get field configurations for a workspace
  */
 export async function getFields(
-  workspaceId: string
-): Promise<{ success: true; fields: FieldConfig[] } | { success: false; error: string }> {
+  workspaceId: string,
+): Promise<
+  { success: true; fields: FieldConfig[] } | { success: false; error: string }
+> {
   try {
     if (!workspaceId) {
-      return { success: false, error: "workspaceId is required" };
+      return { success: false, error: 'workspaceId is required' };
     }
 
     const fields = await db
@@ -22,8 +24,8 @@ export async function getFields(
 
     return { success: true, fields };
   } catch (error) {
-    console.error("Error fetching fields:", error);
-    return { success: false, error: "Failed to fetch fields" };
+    console.error('Error fetching fields:', error);
+    return { success: false, error: 'Failed to fetch fields' };
   }
 }
 
@@ -32,11 +34,13 @@ export async function getFields(
  */
 export async function updateFieldVisibility(
   fieldId: string,
-  visible: boolean
-): Promise<{ success: true; field: FieldConfig } | { success: false; error: string }> {
+  visible: boolean,
+): Promise<
+  { success: true; field: FieldConfig } | { success: false; error: string }
+> {
   try {
     if (!fieldId) {
-      return { success: false, error: "fieldId is required" };
+      return { success: false, error: 'fieldId is required' };
     }
 
     const [updatedField] = await db
@@ -49,13 +53,13 @@ export async function updateFieldVisibility(
       .returning();
 
     if (!updatedField) {
-      return { success: false, error: "Field not found" };
+      return { success: false, error: 'Field not found' };
     }
 
     return { success: true, field: updatedField };
   } catch (error) {
-    console.error("Error updating field visibility:", error);
-    return { success: false, error: "Failed to update field visibility" };
+    console.error('Error updating field visibility:', error);
+    return { success: false, error: 'Failed to update field visibility' };
   }
 }
 
@@ -63,11 +67,11 @@ export async function updateFieldVisibility(
  * Batch update multiple field visibilities
  */
 export async function updateFieldsVisibility(
-  updates: { fieldId: string; visible: boolean }[]
+  updates: { fieldId: string; visible: boolean }[],
 ): Promise<{ success: true } | { success: false; error: string }> {
   try {
     if (!updates || updates.length === 0) {
-      return { success: false, error: "updates array is required" };
+      return { success: false, error: 'updates array is required' };
     }
 
     await Promise.all(
@@ -75,13 +79,13 @@ export async function updateFieldsVisibility(
         db
           .update(fieldConfigs)
           .set({ visible, updatedAt: new Date() })
-          .where(eq(fieldConfigs.id, fieldId))
-      )
+          .where(eq(fieldConfigs.id, fieldId)),
+      ),
     );
 
     return { success: true };
   } catch (error) {
-    console.error("Error updating field visibilities:", error);
-    return { success: false, error: "Failed to update field visibilities" };
+    console.error('Error updating field visibilities:', error);
+    return { success: false, error: 'Failed to update field visibilities' };
   }
 }

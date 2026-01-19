@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
 
 import {
   Card,
@@ -9,28 +9,28 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { RollingCycle } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/chart';
+import { RollingCycle } from '@/src/lib/actions/analytics';
 
-export const description = "A multiple line chart";
+export const description = 'A multiple line chart';
 
 const chartConfig = {
   cycle: {
-    label: "Cycle Time",
+    label: 'Cycle Time',
   },
   rollingAvg: {
-    label: "Rolling",
-    color: "var(--chart-1)",
+    label: 'Rolling',
+    color: 'var(--chart-1)',
   },
   avgCycleDays: {
-    label: "Average",
-    color: "var(--chart-2)",
+    label: 'Average',
+    color: 'var(--chart-2)',
   },
 } satisfies ChartConfig;
 

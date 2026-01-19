@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
   Card,
@@ -8,19 +8,19 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { TeamsWorkload } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/chart';
+import { TeamsWorkload } from '@/src/lib/actions/analytics';
 
 const chartConfig = {
   count: {
-    label: "Tasks",
-    color: "var(--chart-3)",
+    label: 'Tasks',
+    color: 'var(--chart-3)',
   },
 } satisfies ChartConfig;
 
@@ -33,9 +33,13 @@ export function TeamsWorkloadChart({
   chartData,
   onTeamClick,
 }: TeamsWorkloadChartProps) {
-  const handleBarClick = (_data: unknown, _index: number, event: React.MouseEvent) => {
+  const handleBarClick = (
+    _data: unknown,
+    _index: number,
+    event: React.MouseEvent,
+  ) => {
     const target = event.target as SVGElement;
-    const barIndex = target.getAttribute("data-index");
+    const barIndex = target.getAttribute('data-index');
     if (barIndex !== null && onTeamClick) {
       const dataItem = chartData[parseInt(barIndex, 10)];
       if (dataItem?.team) {
@@ -48,9 +52,7 @@ export function TeamsWorkloadChart({
     <Card>
       <CardHeader>
         <CardTitle>Teams Workload</CardTitle>
-        <CardDescription>
-          Task distribution across teams
-        </CardDescription>
+        <CardDescription>Task distribution across teams</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -73,10 +75,7 @@ export function TeamsWorkloadChart({
               }
             />
             <XAxis type="number" hide />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent />}
-            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <Bar
               dataKey="count"
               fill={chartConfig.count.color}

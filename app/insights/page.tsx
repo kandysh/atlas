@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 import {
   CumulativeFlowChart,
   CycleTimeChart,
@@ -18,10 +18,10 @@ import {
   InsightsCards,
   ChartSkeleton,
   DonutChartSkeleton,
-} from "@/src/components/features/insights";
-import { useServerAnalytics, AnalyticsFilters } from "@/src/hooks/analytics";
-import { useWorkspace } from "@/src/providers";
-import { Skeleton } from "@/src/components/ui/skeleton";
+} from '@/src/components/features/insights';
+import { useServerAnalytics, AnalyticsFilters } from '@/src/hooks/analytics';
+import { useWorkspace } from '@/src/providers';
+import { Skeleton } from '@/src/components/ui/skeleton';
 
 export default function InsightsPage() {
   const [filters, setFilters] = useState<AnalyticsFilters>({});
@@ -32,7 +32,7 @@ export default function InsightsPage() {
     data,
     isLoading: analyticsLoading,
     error,
-  } = useServerAnalytics(currentWorkspace?.id || "", filters);
+  } = useServerAnalytics(currentWorkspace?.id || '', filters);
 
   const handleFilterChange = useCallback((newFilters: AnalyticsFilters) => {
     setFilters(newFilters);
@@ -145,12 +145,12 @@ export default function InsightsPage() {
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Analytics and performance metrics
-          {analyticsLoading && " • Refreshing..."}
+          {analyticsLoading && ' • Refreshing...'}
         </p>
       </div>
 
       {/* Filter Controls */}
-      <nav 
+      <nav
         className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 -my-2"
         aria-label="Dashboard filters"
       >
@@ -170,7 +170,10 @@ export default function InsightsPage() {
 
       {/* Insights Cards */}
       {!analyticsLoading && data && (
-        <InsightsCards data={analyticsData} onFilterChange={handleFilterChange} />
+        <InsightsCards
+          data={analyticsData}
+          onFilterChange={handleFilterChange}
+        />
       )}
 
       {/* Charts Grid - 11 Charts in 3-column responsive layout */}

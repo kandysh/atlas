@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { TasksDataTable } from "@/src/components/features/tasks";
-import { Task } from "@/src/lib/types";
-import { useWorkspace } from "@/src/providers";
-import { useWorkspaceTasks } from "@/src/lib/query/hooks";
+import { TasksDataTable } from '@/src/components/features/tasks';
+import { Task } from '@/src/lib/types';
+import { useWorkspace } from '@/src/providers';
+import { useWorkspaceTasks } from '@/src/lib/query/hooks';
 
 export default function Page() {
   const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();
@@ -54,7 +54,7 @@ export default function Page() {
 
   // Filter out completed tasks for active board
   const activeTasks: Task[] = tasks.filter(
-    (task) => task.status !== "completed",
+    (task) => task.status !== 'completed',
   );
 
   // Filter dbTasks to match active tasks for delete ID mapping
@@ -73,10 +73,10 @@ export default function Page() {
             Error loading tasks. Showing cached data if available.
           </p>
         </div>
-        <TasksDataTable 
-          data={activeTasks} 
+        <TasksDataTable
+          data={activeTasks}
           dbTasks={activeDbTasks}
-          workspaceId={workspaceId} 
+          workspaceId={workspaceId}
         />
       </div>
     );
@@ -88,14 +88,14 @@ export default function Page() {
         <h1 className="text-3xl font-semibold tracking-tight">Active Tasks</h1>
         <p className="text-sm text-muted-foreground mt-1">
           {currentWorkspace.name} • {activeTasks.length} active tasks
-          {isLoading && " • Loading..."}
+          {isLoading && ' • Loading...'}
         </p>
       </div>
 
-      <TasksDataTable 
-        data={activeTasks} 
+      <TasksDataTable
+        data={activeTasks}
         dbTasks={activeDbTasks}
-        workspaceId={workspaceId} 
+        workspaceId={workspaceId}
       />
     </div>
   );

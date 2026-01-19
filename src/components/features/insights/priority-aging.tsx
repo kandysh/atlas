@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
   Card,
@@ -9,7 +9,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
@@ -17,25 +17,25 @@ import {
   ChartLegend,
   ChartLegendContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { PriorityAging } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/chart';
+import { PriorityAging } from '@/src/lib/actions/analytics';
 
 const chartConfig = {
   bucket0to3: {
-    label: "0-3 days",
-    color: "var(--chart-2)",
+    label: '0-3 days',
+    color: 'var(--chart-2)',
   },
   bucket3to7: {
-    label: "3-7 days",
-    color: "var(--chart-3)",
+    label: '3-7 days',
+    color: 'var(--chart-3)',
   },
   bucket7to14: {
-    label: "7-14 days",
-    color: "var(--chart-4)",
+    label: '7-14 days',
+    color: 'var(--chart-4)',
   },
   bucket14plus: {
-    label: "14+ days",
-    color: "hsl(var(--destructive))",
+    label: '14+ days',
+    color: 'hsl(var(--destructive))',
   },
 } satisfies ChartConfig;
 
@@ -48,9 +48,13 @@ export function PriorityAgingChart({
   chartData,
   onPriorityClick,
 }: PriorityAgingChartProps) {
-  const handleBarClick = (_data: unknown, _index: number, event: React.MouseEvent) => {
+  const handleBarClick = (
+    _data: unknown,
+    _index: number,
+    event: React.MouseEvent,
+  ) => {
     const target = event.target as SVGElement;
-    const barIndex = target.getAttribute("data-index");
+    const barIndex = target.getAttribute('data-index');
     if (barIndex !== null && onPriorityClick) {
       const dataItem = chartData[parseInt(barIndex, 10)];
       if (dataItem?.priority) {
@@ -63,9 +67,7 @@ export function PriorityAgingChart({
     <Card>
       <CardHeader>
         <CardTitle>Priority Aging</CardTitle>
-        <CardDescription>
-          Open tasks by priority and age bucket
-        </CardDescription>
+        <CardDescription>Open tasks by priority and age bucket</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -82,10 +84,7 @@ export function PriorityAgingChart({
               tickMargin={8}
             />
             <YAxis tickLine={false} axisLine={false} />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent />}
-            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <ChartLegend content={<ChartLegendContent />} />
             <Bar
               dataKey="bucket0to3"

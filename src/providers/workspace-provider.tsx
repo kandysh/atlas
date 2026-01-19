@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   createContext,
@@ -7,15 +7,15 @@ import {
   useState,
   useMemo,
   useCallback,
-} from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Workspace as DBWorkspace, User } from "@/src/lib/db/schema";
+} from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Workspace as DBWorkspace, User } from '@/src/lib/db/schema';
 import {
   getWorkspaces,
   createWorkspace as createWorkspaceAction,
-} from "@/src/lib/actions/workspaces";
-import { initUser } from "@/src/lib/actions/user";
-import { queryKeys } from "@/src/lib/query/keys";
+} from '@/src/lib/actions/workspaces';
+import { initUser } from '@/src/lib/actions/user';
+import { queryKeys } from '@/src/lib/query/keys';
 
 interface WorkspaceContextType {
   currentWorkspace: DBWorkspace | null;
@@ -30,13 +30,14 @@ interface WorkspaceContextType {
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [currentWorkspace, setCurrentWorkspace] =
-    useState<DBWorkspace | null>(null);
+  const [currentWorkspace, setCurrentWorkspace] = useState<DBWorkspace | null>(
+    null,
+  );
 
   // Fetch current user from USERINFO env var using server action
   const {
@@ -65,12 +66,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   } = useQuery({
     queryKey: user
       ? queryKeys.workspaces.byUser(user.id)
-      : ["workspaces", "pending"],
+      : ['workspaces', 'pending'],
     queryFn: async () => {
       if (!user) return [];
       const result = await getWorkspaces(user.id);
       if (!result.success) {
-        throw new Error(result.error || "Failed to load workspaces");
+        throw new Error(result.error || 'Failed to load workspaces');
       }
       return result.workspaces || [];
     },
@@ -85,7 +86,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Mutation to create a new workspace using server action
   const createWorkspaceMutation = useMutation({
     mutationFn: async (name: string) => {
-      if (!user) throw new Error("User not initialized");
+      if (!user) throw new Error('User not initialized');
 
       const result = await createWorkspaceAction(name, user.id);
       if (!result.success) {
@@ -107,18 +108,18 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     async (name: string) => {
       return createWorkspaceMutation.mutateAsync(name);
     },
-    [createWorkspaceMutation]
+    [createWorkspaceMutation],
   );
 
   const workspaces = workspacesData || [];
   const isLoading = isLoadingUser || isLoadingWorkspaces;
-  
+
   // Auto-select first workspace when data loads
   useMemo(() => {
     if (workspaces.length > 0 && !currentWorkspace) {
       setCurrentWorkspace(workspaces[0]);
     }
-    
+
     // Validate current workspace still exists
     if (currentWorkspace && workspaces.length > 0) {
       const stillExists = workspaces.some((w) => w.id === currentWorkspace.id);
@@ -131,39 +132,44 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Compute error message
   const error = useMemo(() => {
     if (userError) {
-      return userError instanceof Error 
-        ? userError.message 
-        : "Failed to initialize user";
+      return userError instanceof Error
+        ? userError.message
+        : 'Failed to initialize user';
     }
     if (workspacesError) {
-      return workspacesError instanceof Error 
-        ? workspacesError.message 
-        : "Failed to load workspaces";
+      return workspacesError instanceof Error
+        ? workspacesError.message
+        : 'Failed to load workspaces';
     }
     return null;
   }, [userError, workspacesError]);
 
   // Memoize context value to prevent unnecessary re-renders
-  const contextValue = useMemo<WorkspaceContextType>(() => ({
-    currentWorkspace,
-    setCurrentWorkspace,
-    workspaces,
-    user: user || null,
-    isLoading,
-    error,
-    refetch: () => { refetch(); },
-    createWorkspace,
-    isCreatingWorkspace: createWorkspaceMutation.isPending,
-  }), [
-    currentWorkspace, 
-    workspaces, 
-    user, 
-    isLoading, 
-    error, 
-    refetch, 
-    createWorkspace,
-    createWorkspaceMutation.isPending,
-  ]);
+  const contextValue = useMemo<WorkspaceContextType>(
+    () => ({
+      currentWorkspace,
+      setCurrentWorkspace,
+      workspaces,
+      user: user || null,
+      isLoading,
+      error,
+      refetch: () => {
+        refetch();
+      },
+      createWorkspace,
+      isCreatingWorkspace: createWorkspaceMutation.isPending,
+    }),
+    [
+      currentWorkspace,
+      workspaces,
+      user,
+      isLoading,
+      error,
+      refetch,
+      createWorkspace,
+      createWorkspaceMutation.isPending,
+    ],
+  );
 
   return (
     <WorkspaceContext.Provider value={contextValue}>
@@ -175,7 +181,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 export function useWorkspace() {
   const context = useContext(WorkspaceContext);
   if (context === undefined) {
-    throw new Error("useWorkspace must be used within a WorkspaceProvider");
+    throw new Error('useWorkspace must be used within a WorkspaceProvider');
   }
   return context;
 }

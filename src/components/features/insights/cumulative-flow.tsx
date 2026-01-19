@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
 
 import {
   Card,
@@ -8,21 +8,21 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { RemainingWorkTrend } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/chart';
+import { RemainingWorkTrend } from '@/src/lib/actions/analytics';
 
-export const description = "A line chart with dots";
+export const description = 'A line chart with dots';
 
 const chartConfig = {
   remaining: {
-    label: "Remaining",
-    color: "var(--chart-3)",
+    label: 'Remaining',
+    color: 'var(--chart-3)',
   },
 } satisfies ChartConfig;
 

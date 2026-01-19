@@ -1,6 +1,6 @@
-"use client";
-import { Skeleton } from "@/src/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "./card";
+'use client';
+import { Skeleton } from '@/src/components/ui/skeleton';
+import { Card, CardContent, CardHeader } from './card';
 
 export function SkeletonCard() {
   return (

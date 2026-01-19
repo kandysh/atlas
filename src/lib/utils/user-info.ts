@@ -10,7 +10,7 @@ export function getUserInfo(): {
   try {
     const userInfoEnv = process.env.USERINFO;
     if (!userInfoEnv) {
-      console.error("USERINFO environment variable not set");
+      console.error('USERINFO environment variable not set');
       return null;
     }
 
@@ -21,7 +21,7 @@ export function getUserInfo(): {
     const name = userInfo.details?.name || userInfo.name;
 
     if (!email || !name) {
-      console.error("USERINFO must contain email and name");
+      console.error('USERINFO must contain email and name');
       return null;
     }
 
@@ -33,7 +33,7 @@ export function getUserInfo(): {
       },
     };
   } catch (error) {
-    console.error("Failed to parse USERINFO:", error);
+    console.error('Failed to parse USERINFO:', error);
     return null;
   }
 }

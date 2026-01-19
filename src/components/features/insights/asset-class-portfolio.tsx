@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Label, Pie, PieChart } from "recharts";
+import { Label, Pie, PieChart } from 'recharts';
 
 import {
   Card,
@@ -8,18 +8,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { AssetClassDistribution } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/chart';
+import { AssetClassDistribution } from '@/src/lib/actions/analytics';
 
 const chartConfig = {
   count: {
-    label: "Count",
+    label: 'Count',
   },
 } satisfies ChartConfig;
 
@@ -67,7 +67,7 @@ export function AssetClassPortfolioChart({
             >
               <Label
                 content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                     return (
                       <text
                         x={viewBox.cx}

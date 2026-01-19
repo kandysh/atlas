@@ -1,23 +1,17 @@
-"use client";
+'use client';
 
-import { Table } from "@tanstack/react-table";
-import { Task, Status, Priority } from "@/src/lib/types";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { 
-  Plus, 
-  Search, 
-  Trash2,
-  ChevronDown,
-  X,
-} from "lucide-react";
+import { Table } from '@tanstack/react-table';
+import { Task, Status, Priority } from '@/src/lib/types';
+import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/ui/input';
+import { Plus, Search, Trash2, ChevronDown, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
-} from "@/src/components/ui/dropdown-menu";
-import { cn } from "@/src/lib/utils";
+} from '@/src/components/ui/dropdown-menu';
+import { cn } from '@/src/lib/utils';
 
 interface TasksToolbarProps {
   table: Table<Task>;
@@ -28,19 +22,19 @@ interface TasksToolbarProps {
 }
 
 const statusLabels: Record<Status, string> = {
-  "todo": "To Do",
-  "in-progress": "In Progress",
-  "testing": "Testing",
-  "done": "Done",
-  "completed": "Completed",
-  "blocked": "Blocked",
+  todo: 'To Do',
+  'in-progress': 'In Progress',
+  testing: 'Testing',
+  done: 'Done',
+  completed: 'Completed',
+  blocked: 'Blocked',
 };
 
 const priorityLabels: Record<Priority, string> = {
-  "low": "Low",
-  "medium": "Medium",
-  "high": "High",
-  "urgent": "Urgent",
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  urgent: 'Urgent',
 };
 
 export function TasksToolbar({
@@ -51,22 +45,34 @@ export function TasksToolbar({
   onDeleteSelected,
 }: TasksToolbarProps) {
   const selectedRowCount = Object.keys(table.getState().rowSelection).length;
-  const globalFilter = table.getState().globalFilter ?? "";
+  const globalFilter = table.getState().globalFilter ?? '';
 
-  const statusColumn = table.getColumn("status");
-  const priorityColumn = table.getColumn("priority");
-  const ownerColumn = table.getColumn("owner");
-  const assetClassColumn = table.getColumn("assetClass");
+  const statusColumn = table.getColumn('status');
+  const priorityColumn = table.getColumn('priority');
+  const ownerColumn = table.getColumn('owner');
+  const assetClassColumn = table.getColumn('assetClass');
 
   const statusFilter = (statusColumn?.getFilterValue() as string[]) ?? [];
   const priorityFilter = (priorityColumn?.getFilterValue() as string[]) ?? [];
   const ownerFilter = (ownerColumn?.getFilterValue() as string[]) ?? [];
-  const assetClassFilter = (assetClassColumn?.getFilterValue() as string[]) ?? [];
+  const assetClassFilter =
+    (assetClassColumn?.getFilterValue() as string[]) ?? [];
 
-  const statuses: Status[] = ["todo", "in-progress", "testing", "done", "completed", "blocked"];
-  const priorities: Priority[] = ["low", "medium", "high", "urgent"];
+  const statuses: Status[] = [
+    'todo',
+    'in-progress',
+    'testing',
+    'done',
+    'completed',
+    'blocked',
+  ];
+  const priorities: Priority[] = ['low', 'medium', 'high', 'urgent'];
 
-  const totalFilters = statusFilter.length + priorityFilter.length + ownerFilter.length + assetClassFilter.length;
+  const totalFilters =
+    statusFilter.length +
+    priorityFilter.length +
+    ownerFilter.length +
+    assetClassFilter.length;
 
   const handleDeleteSelected = () => {
     const selectedIds = Object.keys(table.getState().rowSelection);
@@ -139,16 +145,22 @@ export function TasksToolbar({
         {/* Status Filter */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className={cn(
-              "inline-flex items-center gap-1.5 h-9 px-3 text-sm rounded-md border transition-colors",
-              "hover:bg-accent hover:text-accent-foreground",
-              "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-              statusFilter.length > 0 
-                ? "bg-accent/50 border-accent-foreground/20 text-foreground" 
-                : "border-input bg-background text-muted-foreground"
-            )}>
+            <button
+              className={cn(
+                'inline-flex items-center gap-1.5 h-9 px-3 text-sm rounded-md border transition-colors',
+                'hover:bg-accent hover:text-accent-foreground',
+                'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                statusFilter.length > 0
+                  ? 'bg-accent/50 border-accent-foreground/20 text-foreground'
+                  : 'border-input bg-background text-muted-foreground',
+              )}
+            >
               <span className="status-dot status-todo" />
-              <span>{statusFilter.length > 0 ? getFilterLabel(statusFilter.length, "status") : "Status"}</span>
+              <span>
+                {statusFilter.length > 0
+                  ? getFilterLabel(statusFilter.length, 'status')
+                  : 'Status'}
+              </span>
               <ChevronDown className="h-3.5 w-3.5 opacity-50" />
             </button>
           </DropdownMenuTrigger>
@@ -170,16 +182,22 @@ export function TasksToolbar({
         {/* Priority Filter */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className={cn(
-              "inline-flex items-center gap-1.5 h-9 px-3 text-sm rounded-md border transition-colors",
-              "hover:bg-accent hover:text-accent-foreground",
-              "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-              priorityFilter.length > 0 
-                ? "bg-accent/50 border-accent-foreground/20 text-foreground" 
-                : "border-input bg-background text-muted-foreground"
-            )}>
+            <button
+              className={cn(
+                'inline-flex items-center gap-1.5 h-9 px-3 text-sm rounded-md border transition-colors',
+                'hover:bg-accent hover:text-accent-foreground',
+                'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                priorityFilter.length > 0
+                  ? 'bg-accent/50 border-accent-foreground/20 text-foreground'
+                  : 'border-input bg-background text-muted-foreground',
+              )}
+            >
               <span className="priority-dot priority-medium" />
-              <span>{priorityFilter.length > 0 ? getFilterLabel(priorityFilter.length, "priority") : "Priority"}</span>
+              <span>
+                {priorityFilter.length > 0
+                  ? getFilterLabel(priorityFilter.length, 'priority')
+                  : 'Priority'}
+              </span>
               <ChevronDown className="h-3.5 w-3.5 opacity-50" />
             </button>
           </DropdownMenuTrigger>
@@ -202,19 +220,28 @@ export function TasksToolbar({
         {uniqueOwners.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className={cn(
-                "inline-flex items-center gap-1.5 h-9 px-3 text-sm rounded-md border transition-colors",
-                "hover:bg-accent hover:text-accent-foreground",
-                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                ownerFilter.length > 0 
-                  ? "bg-accent/50 border-accent-foreground/20 text-foreground" 
-                  : "border-input bg-background text-muted-foreground"
-              )}>
-              <span>{ownerFilter.length > 0 ? getFilterLabel(ownerFilter.length, "owner") : "Owner"}</span>
+              <button
+                className={cn(
+                  'inline-flex items-center gap-1.5 h-9 px-3 text-sm rounded-md border transition-colors',
+                  'hover:bg-accent hover:text-accent-foreground',
+                  'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                  ownerFilter.length > 0
+                    ? 'bg-accent/50 border-accent-foreground/20 text-foreground'
+                    : 'border-input bg-background text-muted-foreground',
+                )}
+              >
+                <span>
+                  {ownerFilter.length > 0
+                    ? getFilterLabel(ownerFilter.length, 'owner')
+                    : 'Owner'}
+                </span>
                 <ChevronDown className="h-3.5 w-3.5 opacity-50" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48 max-h-64 overflow-auto">
+            <DropdownMenuContent
+              align="start"
+              className="w-48 max-h-64 overflow-auto"
+            >
               {uniqueOwners.map((owner) => (
                 <DropdownMenuCheckboxItem
                   key={owner}
@@ -232,19 +259,28 @@ export function TasksToolbar({
         {uniqueAssetClasses.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className={cn(
-                "inline-flex items-center gap-1.5 h-9 px-3 text-sm rounded-md border transition-colors",
-                "hover:bg-accent hover:text-accent-foreground",
-                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                assetClassFilter.length > 0 
-                  ? "bg-accent/50 border-accent-foreground/20 text-foreground" 
-                  : "border-input bg-background text-muted-foreground"
-              )}>
-                <span>{assetClassFilter.length > 0 ? getFilterLabel(assetClassFilter.length, "class") : "Asset Class"}</span>
+              <button
+                className={cn(
+                  'inline-flex items-center gap-1.5 h-9 px-3 text-sm rounded-md border transition-colors',
+                  'hover:bg-accent hover:text-accent-foreground',
+                  'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                  assetClassFilter.length > 0
+                    ? 'bg-accent/50 border-accent-foreground/20 text-foreground'
+                    : 'border-input bg-background text-muted-foreground',
+                )}
+              >
+                <span>
+                  {assetClassFilter.length > 0
+                    ? getFilterLabel(assetClassFilter.length, 'class')
+                    : 'Asset Class'}
+                </span>
                 <ChevronDown className="h-3.5 w-3.5 opacity-50" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48 max-h-64 overflow-auto">
+            <DropdownMenuContent
+              align="start"
+              className="w-48 max-h-64 overflow-auto"
+            >
               {uniqueAssetClasses.map((assetClass) => (
                 <DropdownMenuCheckboxItem
                   key={assetClass}
@@ -283,7 +319,7 @@ export function TasksToolbar({
             Delete ({selectedRowCount})
           </Button>
         )}
-        
+
         {onAddTask && (
           <Button onClick={onAddTask} size="sm" className="h-9">
             <Plus className="h-4 w-4 mr-1.5" />

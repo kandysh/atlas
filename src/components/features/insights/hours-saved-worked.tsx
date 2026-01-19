@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
 
 import {
   Card,
@@ -8,29 +8,29 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { MonthlyHoursPoint } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/chart';
+import { MonthlyHoursPoint } from '@/src/lib/actions/analytics';
 
-export const description = "A multiple line chart";
+export const description = 'A multiple line chart';
 
 const chartConfig = {
   worked: {
-    label: "Worked",
-    color: "var(--chart-1)",
+    label: 'Worked',
+    color: 'var(--chart-1)',
   },
   saved: {
-    label: "Saved",
-    color: "var(--chart-2)",
+    label: 'Saved',
+    color: 'var(--chart-2)',
   },
   net: {
-    label: "Net",
-    color: "var(--chart-3)",
+    label: 'Net',
+    color: 'var(--chart-3)',
   },
 } satisfies ChartConfig;
 
@@ -64,8 +64,8 @@ export default function HoursSavedWorkedChart({
               axisLine={false}
               tickMargin={8}
               tickFormatter={(value) =>
-                new Date(value).toLocaleDateString("en-US", {
-                  month: "long",
+                new Date(value).toLocaleDateString('en-US', {
+                  month: 'long',
                 })
               }
             />
@@ -74,14 +74,14 @@ export default function HoursSavedWorkedChart({
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) =>
-                    new Date(value).toLocaleDateString("en-US", {
-                      month: "long",
+                    new Date(value).toLocaleDateString('en-US', {
+                      month: 'long',
                     })
                   }
                 />
               }
             />
-            {["worked", "saved", "net"].map((key) => (
+            {['worked', 'saved', 'net'].map((key) => (
               <Line
                 key={key}
                 dataKey={key}

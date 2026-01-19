@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { FileX2, Plus } from "lucide-react";
-import { Button } from "@/src/components/ui/button";
+import { FileX2, Plus } from 'lucide-react';
+import { Button } from '@/src/components/ui/button';
 
 interface DataTableEmptyStateProps {
   title?: string;
@@ -12,9 +12,9 @@ interface DataTableEmptyStateProps {
 }
 
 export function DataTableEmptyState({
-  title = "No tasks",
-  description = "Get started by creating your first task.",
-  actionLabel = "Add Task",
+  title = 'No tasks',
+  description = 'Get started by creating your first task.',
+  actionLabel = 'Add Task',
   onAction,
   icon: Icon = FileX2,
 }: DataTableEmptyStateProps) {

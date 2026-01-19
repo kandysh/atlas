@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useWorkspace } from "@/src/providers";
-import { ReactNode, useState } from "react";
-import { Loader2, AlertTriangle, Plus } from "lucide-react";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
+import { useWorkspace } from '@/src/providers';
+import { ReactNode, useState } from 'react';
+import { Loader2, AlertTriangle, Plus } from 'lucide-react';
+import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/src/components/ui/dialog";
+} from '@/src/components/ui/dialog';
 
 interface WorkspaceLoaderProps {
   children: ReactNode;
@@ -20,19 +20,27 @@ interface WorkspaceLoaderProps {
 }
 
 export function WorkspaceLoader({ children, fallback }: WorkspaceLoaderProps) {
-  const { isLoading, error, refetch, workspaces, createWorkspace, isCreatingWorkspace, user } = useWorkspace();
+  const {
+    isLoading,
+    error,
+    refetch,
+    workspaces,
+    createWorkspace,
+    isCreatingWorkspace,
+    user,
+  } = useWorkspace();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [workspaceName, setWorkspaceName] = useState("");
+  const [workspaceName, setWorkspaceName] = useState('');
 
   const handleCreateWorkspace = async () => {
     if (!workspaceName.trim()) return;
-    
+
     try {
       await createWorkspace(workspaceName.trim());
       setShowCreateDialog(false);
-      setWorkspaceName("");
+      setWorkspaceName('');
     } catch (error) {
-      console.error("Failed to create workspace:", error);
+      console.error('Failed to create workspace:', error);
     }
   };
 
@@ -40,9 +48,15 @@ export function WorkspaceLoader({ children, fallback }: WorkspaceLoaderProps) {
     return (
       fallback || (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="space-y-4 text-center" role="status" aria-live="polite">
+          <div
+            className="space-y-4 text-center"
+            role="status"
+            aria-live="polite"
+          >
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-            <p className="text-sm text-muted-foreground">Loading workspace...</p>
+            <p className="text-sm text-muted-foreground">
+              Loading workspace...
+            </p>
           </div>
         </div>
       )
@@ -50,20 +64,22 @@ export function WorkspaceLoader({ children, fallback }: WorkspaceLoaderProps) {
   }
 
   // Show error for critical failures
-  if (error && workspaces.length === 0 && !error.includes("No workspaces")) {
+  if (error && workspaces.length === 0 && !error.includes('No workspaces')) {
     return (
       <div className="flex items-center justify-center min-h-screen p-4">
-        <div className="space-y-4 text-center max-w-md" role="alert" aria-live="assertive">
+        <div
+          className="space-y-4 text-center max-w-md"
+          role="alert"
+          aria-live="assertive"
+        >
           <AlertTriangle className="h-16 w-16 text-destructive mx-auto" />
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight">Unable to Load Workspace</h2>
+            <h2 className="text-xl font-semibold tracking-tight">
+              Unable to Load Workspace
+            </h2>
             <p className="text-sm text-muted-foreground">{error}</p>
           </div>
-          <Button
-            onClick={() => refetch()}
-            variant="default"
-            className="mt-4"
-          >
+          <Button onClick={() => refetch()} variant="default" className="mt-4">
             Try Again
           </Button>
         </div>
@@ -77,12 +93,14 @@ export function WorkspaceLoader({ children, fallback }: WorkspaceLoaderProps) {
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="space-y-6 text-center max-w-md">
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight">Welcome to Atlas</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">
+              Welcome to Atlas
+            </h2>
             <p className="text-sm text-muted-foreground">
               Get started by creating your first workspace
             </p>
           </div>
-          
+
           <div className="space-y-4">
             <Input
               type="text"
@@ -90,7 +108,7 @@ export function WorkspaceLoader({ children, fallback }: WorkspaceLoaderProps) {
               value={workspaceName}
               onChange={(e) => setWorkspaceName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && workspaceName.trim()) {
+                if (e.key === 'Enter' && workspaceName.trim()) {
                   handleCreateWorkspace();
                 }
               }}

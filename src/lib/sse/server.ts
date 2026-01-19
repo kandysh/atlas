@@ -1,4 +1,4 @@
-import { Task } from "@/src/lib/db";
+import { Task } from '@/src/lib/db';
 
 // Store active SSE connections
 // In production, use Redis or another shared store for multi-instance deployments
@@ -8,8 +8,8 @@ const sseClients = new Map<string, ReadableStreamDefaultController>();
  * Broadcast a task update to all connected SSE clients
  */
 export function broadcastTaskUpdate(task: Task) {
-  const message = `data: ${JSON.stringify({ type: "task_update", task })}\n\n`;
-  
+  const message = `data: ${JSON.stringify({ type: 'task_update', task })}\n\n`;
+
   for (const [clientId, controller] of sseClients.entries()) {
     try {
       controller.enqueue(new TextEncoder().encode(message));
@@ -26,10 +26,12 @@ export function broadcastTaskUpdate(task: Task) {
  */
 export function registerSseClient(
   clientId: string,
-  controller: ReadableStreamDefaultController
+  controller: ReadableStreamDefaultController,
 ) {
   sseClients.set(clientId, controller);
-  console.log(`SSE client registered: ${clientId}. Total clients: ${sseClients.size}`);
+  console.log(
+    `SSE client registered: ${clientId}. Total clients: ${sseClients.size}`,
+  );
 }
 
 /**
@@ -37,7 +39,9 @@ export function registerSseClient(
  */
 export function unregisterSseClient(clientId: string) {
   sseClients.delete(clientId);
-  console.log(`SSE client unregistered: ${clientId}. Total clients: ${sseClients.size}`);
+  console.log(
+    `SSE client unregistered: ${clientId}. Total clients: ${sseClients.size}`,
+  );
 }
 
 /**

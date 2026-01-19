@@ -2,7 +2,7 @@
  * Task ID Generator
  * Generates Jira-style human-readable task IDs
  * Format: TSK-{workspaceId:03}-{sequence:04}
- * 
+ *
  * Examples:
  * - Workspace 1: TSK-001-0001, TSK-001-0002, ...
  * - Workspace 42: TSK-042-0001, TSK-042-0002, ...
@@ -17,10 +17,10 @@
  */
 export function generateTaskDisplayId(
   workspaceNumericId: number,
-  sequenceNumber: number
+  sequenceNumber: number,
 ): string {
-  const workspaceIdPadded = String(workspaceNumericId).padStart(3, "0");
-  const sequencePadded = String(sequenceNumber).padStart(4, "0");
+  const workspaceIdPadded = String(workspaceNumericId).padStart(3, '0');
+  const sequencePadded = String(sequenceNumber).padStart(4, '0');
   return `TSK-${workspaceIdPadded}-${sequencePadded}`;
 }
 
@@ -35,11 +35,11 @@ export function parseTaskDisplayId(displayId: string): {
 } | null {
   const pattern = /^TSK-(\d{3})-(\d{4})$/;
   const match = displayId.match(pattern);
-  
+
   if (!match) {
     return null;
   }
-  
+
   return {
     workspaceNumericId: parseInt(match[1], 10),
     sequenceNumber: parseInt(match[2], 10),

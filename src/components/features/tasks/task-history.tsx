@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useTaskEvents, useWorkspaceFields } from "@/src/lib/query/hooks";
-import { 
-  History, 
-  Plus, 
-  Pencil, 
-  Copy, 
+import { useTaskEvents, useWorkspaceFields } from '@/src/lib/query/hooks';
+import {
+  History,
+  Plus,
+  Pencil,
+  Copy,
   Trash2,
   ChevronDown,
   ChevronUp,
-} from "lucide-react";
-import { cn } from "@/src/lib/utils";
-import { useState, useMemo } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { FieldConfig } from "@/src/lib/db";
+} from 'lucide-react';
+import { cn } from '@/src/lib/utils';
+import { useState, useMemo } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import { FieldConfig } from '@/src/lib/db';
 
 interface TaskHistoryProps {
   taskId: string | null;
@@ -22,45 +22,45 @@ interface TaskHistoryProps {
 }
 
 function formatValue(
-  field: string | null, 
+  field: string | null,
   value: unknown,
-  fieldConfig?: FieldConfig
+  fieldConfig?: FieldConfig,
 ): string {
-  if (value === null || value === undefined) return "empty";
-  
+  if (value === null || value === undefined) return 'empty';
+
   // If field has choices in options, find the matching label
   if (fieldConfig?.options && 'choices' in fieldConfig.options) {
     const choices = fieldConfig.options.choices as string[] | undefined;
-    if (choices && typeof value === "string") {
+    if (choices && typeof value === 'string') {
       return value; // Already human-readable in choices
     }
   }
-  
+
   if (Array.isArray(value)) {
-    if (value.length === 0) return "empty";
-    return value.join(", ");
+    if (value.length === 0) return 'empty';
+    return value.join(', ');
   }
-  
+
   if (value instanceof Date) {
     return value.toLocaleDateString();
   }
-  
-  if (typeof value === "object") {
+
+  if (typeof value === 'object') {
     return JSON.stringify(value);
   }
-  
+
   return String(value);
 }
 
 function getEventIcon(eventType: string) {
   switch (eventType) {
-    case "created":
+    case 'created':
       return <Plus className="h-3 w-3" />;
-    case "updated":
+    case 'updated':
       return <Pencil className="h-3 w-3" />;
-    case "duplicated":
+    case 'duplicated':
       return <Copy className="h-3 w-3" />;
-    case "deleted":
+    case 'deleted':
       return <Trash2 className="h-3 w-3" />;
     default:
       return <History className="h-3 w-3" />;
@@ -69,32 +69,36 @@ function getEventIcon(eventType: string) {
 
 function getEventColor(eventType: string): string {
   switch (eventType) {
-    case "created":
-      return "bg-success/20 text-success";
-    case "updated":
-      return "bg-info/20 text-info";
-    case "duplicated":
-      return "bg-warning/20 text-warning";
-    case "deleted":
-      return "bg-destructive/20 text-destructive";
+    case 'created':
+      return 'bg-success/20 text-success';
+    case 'updated':
+      return 'bg-info/20 text-info';
+    case 'duplicated':
+      return 'bg-warning/20 text-warning';
+    case 'deleted':
+      return 'bg-destructive/20 text-destructive';
     default:
-      return "bg-muted text-muted-foreground";
+      return 'bg-muted text-muted-foreground';
   }
 }
 
-export function TaskHistory({ taskId, dbTaskId, workspaceId }: TaskHistoryProps) {
+export function TaskHistory({
+  taskId,
+  dbTaskId,
+  workspaceId,
+}: TaskHistoryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // Only fetch events when expanded
   const { data: events, isLoading } = useTaskEvents(
-    isExpanded ? (dbTaskId || null) : null, 
-    20
+    isExpanded ? dbTaskId || null : null,
+    20,
   );
-  
+
   // Fetch field configs to get field names
   const { data: fieldsData } = useWorkspaceFields(workspaceId);
   const fieldConfigs = fieldsData?.fields || [];
-  
+
   // Build field lookup map
   const fieldMap = useMemo(() => {
     const map: Record<string, FieldConfig> = {};
@@ -103,7 +107,7 @@ export function TaskHistory({ taskId, dbTaskId, workspaceId }: TaskHistoryProps)
     });
     return map;
   }, [fieldConfigs]);
-  
+
   const getFieldLabel = (fieldKey: string): string => {
     return fieldMap[fieldKey]?.name || fieldKey;
   };
@@ -155,39 +159,57 @@ export function TaskHistory({ taskId, dbTaskId, workspaceId }: TaskHistoryProps)
               ))}
             </div>
           ) : recentEvents.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic">No activity recorded yet</p>
+            <p className="text-xs text-muted-foreground italic">
+              No activity recorded yet
+            </p>
           ) : (
             <div className="space-y-3">
               {recentEvents.map((event) => (
                 <div key={event.id} className="flex items-start gap-3">
-                  <div className={cn(
-                    "mt-0.5 h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0",
-                    getEventColor(event.eventType)
-                  )}>
+                  <div
+                    className={cn(
+                      'mt-0.5 h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0',
+                      getEventColor(event.eventType),
+                    )}
+                  >
                     {getEventIcon(event.eventType)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="text-sm font-medium text-foreground">
-                        {event.user?.name || "System"}
+                        {event.user?.name || 'System'}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(event.createdAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(event.createdAt), {
+                          addSuffix: true,
+                        })}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {event.eventType === "created" && "Created this task"}
-                      {event.eventType === "duplicated" && "Duplicated this task"}
-                      {event.eventType === "updated" && event.field && (
+                      {event.eventType === 'created' && 'Created this task'}
+                      {event.eventType === 'duplicated' &&
+                        'Duplicated this task'}
+                      {event.eventType === 'updated' && event.field && (
                         <>
-                          Changed <span className="font-medium text-foreground">{getFieldLabel(event.field)}</span>
-                          {" "}from{" "}
+                          Changed{' '}
+                          <span className="font-medium text-foreground">
+                            {getFieldLabel(event.field)}
+                          </span>{' '}
+                          from{' '}
                           <span className="text-muted-foreground/70 line-through">
-                            {formatValue(event.field, event.oldValue, fieldMap[event.field])}
-                          </span>
-                          {" "}to{" "}
+                            {formatValue(
+                              event.field,
+                              event.oldValue,
+                              fieldMap[event.field],
+                            )}
+                          </span>{' '}
+                          to{' '}
                           <span className="text-foreground font-medium">
-                            {formatValue(event.field, event.newValue, fieldMap[event.field])}
+                            {formatValue(
+                              event.field,
+                              event.newValue,
+                              fieldMap[event.field],
+                            )}
                           </span>
                         </>
                       )}

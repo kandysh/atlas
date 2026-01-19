@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { db, users, User } from "@/src/lib/db";
-import { eq } from "drizzle-orm";
-import { getUserInfo } from "@/src/lib/utils/user-info";
+import { db, users, User } from '@/src/lib/db';
+import { eq } from 'drizzle-orm';
+import { getUserInfo } from '@/src/lib/utils/user-info';
 
 /**
  * Initialize or get current user from USERINFO environment variable
@@ -14,7 +14,7 @@ export async function initUser(): Promise<
     const userInfo = getUserInfo();
 
     if (!userInfo) {
-      return { success: false, error: "User information not available" };
+      return { success: false, error: 'User information not available' };
     }
 
     // Check if user already exists
@@ -39,8 +39,8 @@ export async function initUser(): Promise<
 
     return { success: true, user };
   } catch (error) {
-    console.error("Error initializing user:", error);
-    return { success: false, error: "Failed to initialize user" };
+    console.error('Error initializing user:', error);
+    return { success: false, error: 'Failed to initialize user' };
   }
 }
 
@@ -53,7 +53,7 @@ export async function getCurrentUserId(): Promise<number | null> {
     const userInfo = getUserInfo();
     return userInfo?.id ?? null;
   } catch (error) {
-    console.error("Error getting current user ID:", error);
+    console.error('Error getting current user ID:', error);
     return null;
   }
 }

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Task as DbTask } from "@/src/lib/db";
-import { Task as UiTask } from "@/src/lib/types";
-import { queryKeys } from "@/src/lib/query/keys";
-import { dbTaskToUiTask } from "@/src/lib/utils";
+import { useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Task as DbTask } from '@/src/lib/db';
+import { Task as UiTask } from '@/src/lib/types';
+import { queryKeys } from '@/src/lib/query/keys';
+import { dbTaskToUiTask } from '@/src/lib/utils';
 
 /**
  * Hook to listen to task updates via SSE
@@ -22,21 +22,21 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
     eventSourceRef.current = eventSource;
 
     // Handle connection open
-    eventSource.addEventListener("open", () => {
-      console.log("SSE connection established");
+    eventSource.addEventListener('open', () => {
+      console.log('SSE connection established');
     });
 
     // Handle messages
-    eventSource.addEventListener("message", (event) => {
+    eventSource.addEventListener('message', (event) => {
       try {
         const data = JSON.parse(event.data);
 
         switch (data.type) {
-          case "connected":
-            console.log("SSE connected:", data.clientId);
+          case 'connected':
+            console.log('SSE connected:', data.clientId);
             break;
 
-          case "initial_state":
+          case 'initial_state':
             // Update query cache with initial state
             queryClient.setQueryData(
               queryKeys.tasks.paginated(workspaceId, page),
@@ -45,26 +45,26 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
                 page,
                 perPage: 50,
                 hasMore: data.tasks.length === 50,
-              }
+              },
             );
             break;
 
-          case "task_update":
+          case 'task_update':
             // Update the specific task in cache
             updateTaskInCache(data.task as DbTask);
             break;
 
           default:
-            console.log("Unknown SSE message type:", data.type);
+            console.log('Unknown SSE message type:', data.type);
         }
       } catch (error) {
-        console.error("Error parsing SSE message:", error);
+        console.error('Error parsing SSE message:', error);
       }
     });
 
     // Handle errors
-    eventSource.addEventListener("error", (error) => {
-      console.error("SSE connection error:", error);
+    eventSource.addEventListener('error', (error) => {
+      console.error('SSE connection error:', error);
 
       // EventSource will automatically reconnect
       // But we can add custom logic here if needed
@@ -72,7 +72,7 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
 
     // Cleanup on unmount
     return () => {
-      console.log("Closing SSE connection");
+      console.log('Closing SSE connection');
       eventSource.close();
       eventSourceRef.current = null;
     };
@@ -91,7 +91,7 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
 
         // Compare using displayId (UI's task.id)
         const taskExists = old.tasks.some(
-          (t: UiTask) => t.id === updatedTask.displayId
+          (t: UiTask) => t.id === updatedTask.displayId,
         );
 
         if (taskExists) {
@@ -100,11 +100,11 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
           return {
             ...old,
             tasks: old.tasks.map((task: UiTask) =>
-              task.id === updatedTask.displayId ? uiTask : task
+              task.id === updatedTask.displayId ? uiTask : task,
             ),
             // Also update dbTasks if present
             dbTasks: old.dbTasks?.map((t: DbTask) =>
-              t.id === updatedTask.id ? updatedTask : t
+              t.id === updatedTask.id ? updatedTask : t,
             ),
           };
         } else {
@@ -118,7 +118,7 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
               : [updatedTask],
           };
         }
-      }
+      },
     );
   };
 

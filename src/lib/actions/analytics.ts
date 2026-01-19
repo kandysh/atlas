@@ -1,12 +1,12 @@
-"use server";
+'use server';
 
-import { db } from "@/src/lib/db";
-import { sql, SQL } from "drizzle-orm";
+import { db } from '@/src/lib/db';
+import { sql, SQL } from 'drizzle-orm';
 import {
   DonutChartData,
   ThroughPutOverTimeData,
   ToolsUsed,
-} from "@/src/lib/types/analytics";
+} from '@/src/lib/types/analytics';
 
 // Types for analytics queries
 export interface RollingCycle {
@@ -112,11 +112,11 @@ type AnalyticsResult =
  */
 export async function getAnalytics(
   workspaceId: string,
-  filters: AnalyticsFilters = {}
+  filters: AnalyticsFilters = {},
 ): Promise<AnalyticsResult> {
   try {
     if (!workspaceId) {
-      return { success: false, error: "workspaceId is required" };
+      return { success: false, error: 'workspaceId is required' };
     }
 
     // Build parameterized filter conditions
@@ -190,17 +190,17 @@ export async function getAnalytics(
       },
     };
   } catch (error) {
-    console.error("Error fetching analytics:", error);
-    return { success: false, error: "Failed to fetch analytics" };
+    console.error('Error fetching analytics:', error);
+    return { success: false, error: 'Failed to fetch analytics' };
   }
 }
 
 function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
   const conditions: SQL[] = [];
 
-  if (filters.assetClass && filters.assetClass !== "All") {
+  if (filters.assetClass && filters.assetClass !== 'All') {
     conditions.push(
-      sql`LOWER(data->>'assetClass') = LOWER(${filters.assetClass})`
+      sql`LOWER(data->>'assetClass') = LOWER(${filters.assetClass})`,
     );
   }
   if (filters.status) {
@@ -224,13 +224,13 @@ function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
 
   if (conditions.length === 0) return null;
   if (conditions.length === 1) return conditions[0];
-  
+
   return sql.join(conditions, sql` AND `);
 }
 
 async function getStatusCounts(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<DonutChartData[]> {
   const whereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
@@ -246,12 +246,12 @@ async function getStatusCounts(
   `);
 
   const statusMap: Record<string, { label: string; fill: string }> = {
-    todo: { label: "To Do", fill: "var(--chart-1)" },
-    "in-progress": { label: "In Progress", fill: "var(--chart-2)" },
-    testing: { label: "Testing", fill: "var(--chart-3)" },
-    done: { label: "Done", fill: "var(--chart-4)" },
-    completed: { label: "Completed", fill: "var(--chart-5)" },
-    blocked: { label: "Blocked", fill: "hsl(var(--destructive))" },
+    todo: { label: 'To Do', fill: 'var(--chart-1)' },
+    'in-progress': { label: 'In Progress', fill: 'var(--chart-2)' },
+    testing: { label: 'Testing', fill: 'var(--chart-3)' },
+    done: { label: 'Done', fill: 'var(--chart-4)' },
+    completed: { label: 'Completed', fill: 'var(--chart-5)' },
+    blocked: { label: 'Blocked', fill: 'hsl(var(--destructive))' },
   };
 
   return (result.rows as { status: string; count: number }[])
@@ -259,13 +259,13 @@ async function getStatusCounts(
     .map((row) => ({
       status: statusMap[row.status]?.label || row.status,
       count: row.count,
-      fill: statusMap[row.status]?.fill || "var(--chart-1)",
+      fill: statusMap[row.status]?.fill || 'var(--chart-1)',
     }));
 }
 
 async function getThroughputOverTime(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<ThroughPutOverTimeData[]> {
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'status' = 'completed'
@@ -290,13 +290,13 @@ async function getThroughputOverTime(
       date: row.date,
       hours: row.hours,
       count: row.count,
-    })
+    }),
   );
 }
 
 async function getCycleTimeData(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<RollingCycle[]> {
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'status' = 'completed'
@@ -351,7 +351,7 @@ async function getCycleTimeData(
 
 async function getHoursSavedWorked(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<MonthlyHoursPoint[]> {
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'status' = 'completed'
@@ -374,7 +374,12 @@ async function getHoursSavedWorked(
   `);
 
   return (
-    result.rows as { month: string; worked: number; saved: number; net: number }[]
+    result.rows as {
+      month: string;
+      worked: number;
+      saved: number;
+      net: number;
+    }[]
   ).map((row) => ({
     month: row.month,
     worked: row.worked,
@@ -385,12 +390,12 @@ async function getHoursSavedWorked(
 
 async function getRemainingWorkTrend(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<RemainingWorkTrend[]> {
   const baseWhereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
     : sql`workspace_id = ${workspaceId}`;
-  
+
   const completedWhereClause = filterCondition
     ? sql`workspace_id = ${workspaceId}
         AND data->>'status' = 'completed'
@@ -452,7 +457,7 @@ async function getRemainingWorkTrend(
 
 async function getToolsUsed(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<ToolsUsed[]> {
   const whereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
@@ -485,7 +490,7 @@ async function getAssetClasses(workspaceId: string): Promise<string[]> {
   `);
 
   return (result.rows as { asset_class: string }[]).map(
-    (row) => row.asset_class
+    (row) => row.asset_class,
   );
 }
 
@@ -493,7 +498,7 @@ async function getAssetClasses(workspaceId: string): Promise<string[]> {
 
 async function getOwnerProductivity(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<OwnerProductivity[]> {
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'status' = 'completed'
@@ -520,12 +525,14 @@ async function getOwnerProductivity(
     LIMIT 5
   `);
 
-  return (result.rows as {
-    owner: string;
-    completed_tasks: number;
-    avg_cycle_days: number;
-    total_hours_saved: number;
-  }[]).map((row) => ({
+  return (
+    result.rows as {
+      owner: string;
+      completed_tasks: number;
+      avg_cycle_days: number;
+      total_hours_saved: number;
+    }[]
+  ).map((row) => ({
     owner: row.owner,
     completedTasks: row.completed_tasks,
     avgCycleDays: row.avg_cycle_days || 0,
@@ -535,7 +542,7 @@ async function getOwnerProductivity(
 
 async function getTeamsWorkload(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<TeamsWorkload[]> {
   const whereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
@@ -563,7 +570,7 @@ async function getTeamsWorkload(
 
 async function getAssetClassDistribution(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<AssetClassDistribution[]> {
   const whereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
@@ -580,11 +587,11 @@ async function getAssetClassDistribution(
   `);
 
   const colors = [
-    "var(--chart-1)",
-    "var(--chart-2)",
-    "var(--chart-3)",
-    "var(--chart-4)",
-    "var(--chart-5)",
+    'var(--chart-1)',
+    'var(--chart-2)',
+    'var(--chart-3)',
+    'var(--chart-4)',
+    'var(--chart-5)',
   ];
 
   return (result.rows as { asset_class: string; count: number }[]).map(
@@ -592,13 +599,13 @@ async function getAssetClassDistribution(
       assetClass: row.asset_class,
       count: row.count,
       fill: colors[index % colors.length],
-    })
+    }),
   );
 }
 
 async function getPriorityAging(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<PriorityAging[]> {
   // Only count open tasks (not completed/done)
   const baseCondition = sql`workspace_id = ${workspaceId}
@@ -629,13 +636,15 @@ async function getPriorityAging(
       END
   `);
 
-  return (result.rows as {
-    priority: string;
-    bucket_0_3: number;
-    bucket_3_7: number;
-    bucket_7_14: number;
-    bucket_14_plus: number;
-  }[]).map((row) => ({
+  return (
+    result.rows as {
+      priority: string;
+      bucket_0_3: number;
+      bucket_3_7: number;
+      bucket_7_14: number;
+      bucket_14_plus: number;
+    }[]
+  ).map((row) => ({
     priority: row.priority.charAt(0).toUpperCase() + row.priority.slice(1),
     bucket0to3: row.bucket_0_3,
     bucket3to7: row.bucket_3_7,
@@ -646,7 +655,7 @@ async function getPriorityAging(
 
 async function getHoursEfficiency(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<HoursEfficiency[]> {
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'completionDate' IS NOT NULL`;
@@ -671,12 +680,14 @@ async function getHoursEfficiency(
     ORDER BY month ASC
   `);
 
-  return (result.rows as {
-    month: string;
-    current_hrs: number;
-    worked_hrs: number;
-    efficiency: number;
-  }[]).map((row) => ({
+  return (
+    result.rows as {
+      month: string;
+      current_hrs: number;
+      worked_hrs: number;
+      efficiency: number;
+    }[]
+  ).map((row) => ({
     month: row.month,
     currentHrs: row.current_hrs || 0,
     workedHrs: row.worked_hrs || 0,
@@ -686,7 +697,7 @@ async function getHoursEfficiency(
 
 async function getKpiSummary(
   workspaceId: string,
-  filterCondition: SQL | null
+  filterCondition: SQL | null,
 ): Promise<KpiSummary> {
   const whereClause = filterCondition
     ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`

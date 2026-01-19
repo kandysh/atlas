@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 import {
   getAnalytics,
   AnalyticsFilters,
   AnalyticsData,
-} from "@/src/lib/actions/analytics";
-import { queryKeys } from "@/src/lib/query/keys";
+} from '@/src/lib/actions/analytics';
+import { queryKeys } from '@/src/lib/query/keys';
 
 /**
  * Hook to fetch server-computed analytics with React Query caching
@@ -14,7 +14,7 @@ import { queryKeys } from "@/src/lib/query/keys";
  */
 export function useServerAnalytics(
   workspaceId: string,
-  filters: AnalyticsFilters = {}
+  filters: AnalyticsFilters = {},
 ) {
   return useQuery<AnalyticsData>({
     queryKey: queryKeys.analytics.byWorkspace(workspaceId, filters),

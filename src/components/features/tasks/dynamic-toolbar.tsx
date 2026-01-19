@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { Table } from "@tanstack/react-table";
-import { Task, Status, Priority } from "@/src/lib/types";
-import { FieldConfig } from "@/src/lib/db";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { 
-  Search, 
+import { Table } from '@tanstack/react-table';
+import { Task, Status, Priority } from '@/src/lib/types';
+import { FieldConfig } from '@/src/lib/db';
+import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/ui/input';
+import {
+  Search,
   Trash2,
   ChevronDown,
   X,
@@ -14,7 +14,7 @@ import {
   Columns3,
   Eye,
   EyeOff,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,9 +22,9 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@/src/components/ui/dropdown-menu";
-import { cn } from "@/src/lib/utils";
-import { useMemo } from "react";
+} from '@/src/components/ui/dropdown-menu';
+import { cn } from '@/src/lib/utils';
+import { useMemo } from 'react';
 
 interface DynamicToolbarProps {
   table: Table<Task>;
@@ -36,23 +36,29 @@ interface DynamicToolbarProps {
 }
 
 const statusLabels: Record<Status, string> = {
-  "todo": "To Do",
-  "in-progress": "In Progress",
-  "testing": "Testing",
-  "done": "Done",
-  "completed": "Completed",
-  "blocked": "Blocked",
+  todo: 'To Do',
+  'in-progress': 'In Progress',
+  testing: 'Testing',
+  done: 'Done',
+  completed: 'Completed',
+  blocked: 'Blocked',
 };
 
 const priorityLabels: Record<Priority, string> = {
-  "low": "Low",
-  "medium": "Medium",
-  "high": "High",
-  "urgent": "Urgent",
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  urgent: 'Urgent',
 };
 
 // Field types that support filtering
-const FILTERABLE_TYPES = ["select", "status", "priority", "editable-owner", "editable-combobox"];
+const FILTERABLE_TYPES = [
+  'select',
+  'status',
+  'priority',
+  'editable-owner',
+  'editable-combobox',
+];
 
 export function DynamicToolbar({
   table,
@@ -63,33 +69,42 @@ export function DynamicToolbar({
   onToggleFieldVisibility,
 }: DynamicToolbarProps) {
   const selectedRowCount = Object.keys(table.getState().rowSelection).length;
-  const globalFilter = table.getState().globalFilter ?? "";
+  const globalFilter = table.getState().globalFilter ?? '';
 
   // Build dynamic filters from field configs
   const filterableFields = useMemo(() => {
     return fieldConfigs.filter(
-      (f) => f.visible && FILTERABLE_TYPES.includes(f.type)
+      (f) => f.visible && FILTERABLE_TYPES.includes(f.type),
     );
   }, [fieldConfigs]);
 
   // Extract unique values for each filterable field
   const fieldOptions = useMemo(() => {
     const options: Record<string, string[]> = {};
-    
+
     filterableFields.forEach((field) => {
-      if (field.type === "status") {
-        options[field.key] = ["todo", "in-progress", "testing", "done", "completed", "blocked"];
-      } else if (field.type === "priority") {
-        options[field.key] = ["low", "medium", "high", "urgent"];
+      if (field.type === 'status') {
+        options[field.key] = [
+          'todo',
+          'in-progress',
+          'testing',
+          'done',
+          'completed',
+          'blocked',
+        ];
+      } else if (field.type === 'priority') {
+        options[field.key] = ['low', 'medium', 'high', 'urgent'];
       } else {
         // Extract unique values from tasks
         const values = tasks
-          .map((task) => (task as unknown as Record<string, unknown>)[field.key])
-          .filter((v): v is string => typeof v === "string" && v.length > 0);
+          .map(
+            (task) => (task as unknown as Record<string, unknown>)[field.key],
+          )
+          .filter((v): v is string => typeof v === 'string' && v.length > 0);
         options[field.key] = Array.from(new Set(values)).sort();
       }
     });
-    
+
     return options;
   }, [filterableFields, tasks]);
 
@@ -116,7 +131,7 @@ export function DynamicToolbar({
   const handleFilterToggle = (fieldKey: string, value: string) => {
     const column = table.getColumn(fieldKey);
     if (!column) return;
-    
+
     const current = (column.getFilterValue() as string[]) ?? [];
     const updated = current.includes(value)
       ? current.filter((v) => v !== value)
@@ -132,20 +147,20 @@ export function DynamicToolbar({
   };
 
   const getDisplayLabel = (field: FieldConfig, value: string): string => {
-    if (field.type === "status") {
+    if (field.type === 'status') {
       return statusLabels[value as Status] || value;
     }
-    if (field.type === "priority") {
+    if (field.type === 'priority') {
       return priorityLabels[value as Priority] || value;
     }
     return value;
   };
 
   const getDotClass = (field: FieldConfig, value: string): string | null => {
-    if (field.type === "status") {
+    if (field.type === 'status') {
       return `status-dot status-${value}`;
     }
-    if (field.type === "priority") {
+    if (field.type === 'priority') {
       return `priority-dot priority-${value}`;
     }
     return null;
@@ -173,12 +188,12 @@ export function DynamicToolbar({
           {/* Filter button with count */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className={cn(
-                  "h-10 gap-2",
-                  totalFilters > 0 && "border-primary/50 bg-primary/5"
+                  'h-10 gap-2',
+                  totalFilters > 0 && 'border-primary/50 bg-primary/5',
                 )}
               >
                 <SlidersHorizontal className="h-4 w-4" />
@@ -193,14 +208,15 @@ export function DynamicToolbar({
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Filter by</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              
+
               {filterableFields.map((field) => {
                 const options = fieldOptions[field.key] || [];
                 const column = table.getColumn(field.key);
-                const filterValue = (column?.getFilterValue() as string[]) ?? [];
-                
+                const filterValue =
+                  (column?.getFilterValue() as string[]) ?? [];
+
                 if (options.length === 0) return null;
-                
+
                 return (
                   <DropdownMenu key={field.id}>
                     <DropdownMenuTrigger asChild>
@@ -208,20 +224,28 @@ export function DynamicToolbar({
                         <span>{field.name}</span>
                         <div className="flex items-center gap-1">
                           {filterValue.length > 0 && (
-                            <span className="text-xs text-primary">{filterValue.length}</span>
+                            <span className="text-xs text-primary">
+                              {filterValue.length}
+                            </span>
                           )}
                           <ChevronDown className="h-3.5 w-3.5 opacity-50" />
                         </div>
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent side="right" align="start" className="w-48 max-h-64 overflow-auto">
+                    <DropdownMenuContent
+                      side="right"
+                      align="start"
+                      className="w-48 max-h-64 overflow-auto"
+                    >
                       {options.map((value) => {
                         const dotClass = getDotClass(field, value);
                         return (
                           <DropdownMenuCheckboxItem
                             key={value}
                             checked={filterValue.includes(value)}
-                            onCheckedChange={() => handleFilterToggle(field.key, value)}
+                            onCheckedChange={() =>
+                              handleFilterToggle(field.key, value)
+                            }
                             className="gap-2"
                           >
                             {dotClass && <span className={dotClass} />}
@@ -233,7 +257,7 @@ export function DynamicToolbar({
                   </DropdownMenu>
                 );
               })}
-              
+
               {totalFilters > 0 && (
                 <>
                   <DropdownMenuSeparator />
@@ -257,11 +281,14 @@ export function DynamicToolbar({
                 <span className="hidden sm:inline">Columns</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-auto">
+            <DropdownMenuContent
+              align="end"
+              className="w-56 max-h-80 overflow-auto"
+            >
               <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {fieldConfigs
-                .filter((f) => f.key !== "title") // Don't allow hiding title
+                .filter((f) => f.key !== 'title') // Don't allow hiding title
                 .sort((a, b) => a.order - b.order)
                 .map((field) => (
                   <DropdownMenuCheckboxItem
@@ -292,15 +319,17 @@ export function DynamicToolbar({
               className="h-10 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
             >
               <Trash2 className="h-4 w-4 sm:mr-1.5" />
-              <span className="hidden sm:inline">Delete ({selectedRowCount})</span>
+              <span className="hidden sm:inline">
+                Delete ({selectedRowCount})
+              </span>
             </Button>
           )}
-          
+
           {/* Add Task */}
           {onAddTask && (
-            <Button 
-              onClick={onAddTask} 
-              size="sm" 
+            <Button
+              onClick={onAddTask}
+              size="sm"
               className="h-10 bg-primary hover:bg-primary/90 shadow-sm"
             >
               <span className="text-lg leading-none mr-1.5">+</span>
@@ -317,7 +346,7 @@ export function DynamicToolbar({
           {filterableFields.map((field) => {
             const column = table.getColumn(field.key);
             const filterValue = (column?.getFilterValue() as string[]) ?? [];
-            
+
             return filterValue.map((value) => (
               <button
                 key={`${field.key}-${value}`}
@@ -325,7 +354,9 @@ export function DynamicToolbar({
                 className="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
               >
                 {getDotClass(field, value) && (
-                  <span className={cn(getDotClass(field, value), "!w-1.5 !h-1.5")} />
+                  <span
+                    className={cn(getDotClass(field, value), '!w-1.5 !h-1.5')}
+                  />
                 )}
                 <span>{getDisplayLabel(field, value)}</span>
                 <X className="h-3 w-3" />

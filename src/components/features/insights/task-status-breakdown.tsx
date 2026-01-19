@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Label, Pie, PieChart } from "recharts";
+import { Label, Pie, PieChart } from 'recharts';
 
 import {
   Card,
@@ -9,33 +9,33 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
+} from '@/src/components/ui/chart';
 
-import { DonutChartData } from "@/src/lib/types";
+import { DonutChartData } from '@/src/lib/types';
 
-export const description = "A donut chart with an active sector";
+export const description = 'A donut chart with an active sector';
 
 const chartConfig = {
   count: {
-    label: "Count",
+    label: 'Count',
   },
   pending: {
-    label: "Pending",
-    color: "var(--chart-1)",
+    label: 'Pending',
+    color: 'var(--chart-1)',
   },
   completed: {
-    label: "Completed",
-    color: "var(--chart-2)",
+    label: 'Completed',
+    color: 'var(--chart-2)',
   },
   inprogress: {
-    label: "In Progress",
-    color: "var(--chart-3)",
+    label: 'In Progress',
+    color: 'var(--chart-3)',
   },
 } satisfies ChartConfig;
 
@@ -73,7 +73,7 @@ export function TasksStatusBreakdownDonut({
             >
               <Label
                 content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                     return (
                       <text
                         x={viewBox.cx}

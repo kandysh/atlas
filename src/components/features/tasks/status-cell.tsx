@@ -1,6 +1,13 @@
-"use client";
+'use client';
 
-import { Circle, CircleDot, PlayCircle, Ban, FlaskConical, CircleCheck } from "lucide-react";
+import {
+  Circle,
+  CircleDot,
+  PlayCircle,
+  Ban,
+  FlaskConical,
+  CircleCheck,
+} from 'lucide-react';
 import {
   Command,
   CommandEmpty,
@@ -8,16 +15,16 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/src/components/ui/command";
+} from '@/src/components/ui/command';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/src/components/ui/popover";
-import { Button } from "@/src/components/ui/button";
-import { cn } from "@/src/lib/utils";
-import { useState } from "react";
-import { Status } from "@/src/lib/types";
+} from '@/src/components/ui/popover';
+import { Button } from '@/src/components/ui/button';
+import { cn } from '@/src/lib/utils';
+import { useState } from 'react';
+import { Status } from '@/src/lib/types';
 
 type StatusCellProps = {
   value: Status;
@@ -26,40 +33,40 @@ type StatusCellProps = {
 
 const statusConfig = {
   todo: {
-    label: "To Do",
+    label: 'To Do',
     icon: Circle,
-    color: "text-status-todo",
-    bgColor: "bg-status-todo/10",
+    color: 'text-status-todo',
+    bgColor: 'bg-status-todo/10',
   },
-  "in-progress": {
-    label: "In Progress",
+  'in-progress': {
+    label: 'In Progress',
     icon: PlayCircle,
-    color: "text-status-in-progress",
-    bgColor: "bg-status-in-progress/10",
+    color: 'text-status-in-progress',
+    bgColor: 'bg-status-in-progress/10',
   },
   testing: {
-    label: "Testing",
+    label: 'Testing',
     icon: FlaskConical,
-    color: "text-status-testing",
-    bgColor: "bg-status-testing/10",
+    color: 'text-status-testing',
+    bgColor: 'bg-status-testing/10',
   },
   done: {
-    label: "Done",
+    label: 'Done',
     icon: CircleDot,
-    color: "text-status-done",
-    bgColor: "bg-status-done/10",
+    color: 'text-status-done',
+    bgColor: 'bg-status-done/10',
   },
   completed: {
-    label: "Completed",
+    label: 'Completed',
     icon: CircleCheck,
-    color: "text-status-completed",
-    bgColor: "bg-status-completed/10",
+    color: 'text-status-completed',
+    bgColor: 'bg-status-completed/10',
   },
   blocked: {
-    label: "Blocked",
+    label: 'Blocked',
     icon: Ban,
-    color: "text-status-blocked",
-    bgColor: "bg-status-blocked/10",
+    color: 'text-status-blocked',
+    bgColor: 'bg-status-blocked/10',
   },
 };
 
@@ -76,15 +83,15 @@ export function StatusCell({ value, onChange }: StatusCellProps) {
           size="sm"
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 hover:scale-105 hover:shadow-sm",
+            'h-8 justify-start gap-2 font-normal hover:bg-muted/50 transition-all duration-200 hover:scale-105 hover:shadow-sm',
             config.bgColor,
           )}
         >
           <Icon
             className={cn(
-              "h-3.5 w-3.5 transition-all duration-200",
+              'h-3.5 w-3.5 transition-all duration-200',
               config.color,
-              value === "in-progress" && "animate-spin",
+              value === 'in-progress' && 'animate-spin',
             )}
           />
           <span className="text-sm">{config.label}</span>
@@ -125,7 +132,7 @@ export function StatusCell({ value, onChange }: StatusCellProps) {
                   >
                     <ItemIcon
                       className={cn(
-                        "h-3.5 w-3.5 transition-all duration-200",
+                        'h-3.5 w-3.5 transition-all duration-200',
                         cfg.color,
                       )}
                     />

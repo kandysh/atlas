@@ -1,7 +1,7 @@
-import { db } from "@/src/lib/db";
-import { tasks, workspaces } from "@/src/lib/db/schema";
-import { eq, max } from "drizzle-orm";
-import { generateTaskDisplayId } from "@/src/lib/utils";
+import { db } from '@/src/lib/db';
+import { tasks, workspaces } from '@/src/lib/db/schema';
+import { eq, max } from 'drizzle-orm';
+import { generateTaskDisplayId } from '@/src/lib/utils';
 
 /**
  * Gets the next sequence number for a task in a workspace
@@ -9,7 +9,7 @@ import { generateTaskDisplayId } from "@/src/lib/utils";
  * @returns The next sequence number
  */
 export async function getNextTaskSequence(
-  workspaceId: string
+  workspaceId: string,
 ): Promise<number> {
   const result = await db
     .select({ maxSequence: max(tasks.sequenceNumber) })
@@ -26,7 +26,7 @@ export async function getNextTaskSequence(
  * @returns The generated display ID (e.g., "TSK-001-0001")
  */
 export async function generateDisplayIdForTask(
-  workspaceId: string
+  workspaceId: string,
 ): Promise<{ displayId: string; sequenceNumber: number }> {
   // Get workspace numeric ID
   const workspace = await db
@@ -55,11 +55,10 @@ export async function generateDisplayIdForTask(
  */
 export async function createTaskWithDisplayId(
   workspaceId: string,
-  data: Record<string, any>
+  data: Record<string, any>,
 ) {
-  const { displayId, sequenceNumber } = await generateDisplayIdForTask(
-    workspaceId
-  );
+  const { displayId, sequenceNumber } =
+    await generateDisplayIdForTask(workspaceId);
 
   const [newTask] = await db
     .insert(tasks)

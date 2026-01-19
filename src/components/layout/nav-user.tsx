@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu";
-import { Button } from "@/src/components/ui/button";
-import { useSidebar } from "@/src/components/ui/sidebar";
-import { useWorkspace } from "@/src/providers/workspace-provider";
+} from '@/src/components/ui/dropdown-menu';
+import { Button } from '@/src/components/ui/button';
+import { useSidebar } from '@/src/components/ui/sidebar';
+import { useWorkspace } from '@/src/providers/workspace-provider';
 
 export default function NavUser() {
   const { state } = useSidebar();
   const { user, isLoading } = useWorkspace();
-  const isCollapsed = state === "collapsed";
+  const isCollapsed = state === 'collapsed';
 
   // Show loading state
   if (isLoading || !user) {
     return (
-      <div className={isCollapsed ? "p-2" : "py-2 px-3"}>
+      <div className={isCollapsed ? 'p-2' : 'py-2 px-3'}>
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
           {!isCollapsed && (
@@ -36,9 +36,9 @@ export default function NavUser() {
 
   const getInitials = () => {
     return user.name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .slice(0, 2);
   };
@@ -68,7 +68,10 @@ export default function NavUser() {
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem className="cursor-pointer text-destructive" disabled>
+          <DropdownMenuItem
+            className="cursor-pointer text-destructive"
+            disabled
+          >
             <LogOut className="h-4 w-4 mr-2" />
             <span>Log out</span>
           </DropdownMenuItem>

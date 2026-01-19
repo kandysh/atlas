@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { X } from "lucide-react";
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
+import { X } from 'lucide-react';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/ui/select";
-import { AnalyticsFilters } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/select';
+import { AnalyticsFilters } from '@/src/lib/actions/analytics';
 
 interface FilterControlsProps {
   filters: AnalyticsFilters;
@@ -23,19 +23,19 @@ interface FilterControlsProps {
 }
 
 const statusLabels: Record<string, string> = {
-  todo: "To Do",
-  "in-progress": "In Progress",
-  testing: "Testing",
-  done: "Done",
-  completed: "Completed",
-  blocked: "Blocked",
+  todo: 'To Do',
+  'in-progress': 'In Progress',
+  testing: 'Testing',
+  done: 'Done',
+  completed: 'Completed',
+  blocked: 'Blocked',
 };
 
 const priorityLabels: Record<string, string> = {
-  low: "Low",
-  medium: "Medium",
-  high: "High",
-  urgent: "Urgent",
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  urgent: 'Urgent',
 };
 
 export function FilterControls({
@@ -52,7 +52,7 @@ export function FilterControls({
     filters.priority ||
     filters.assignee ||
     filters.team ||
-    (filters.assetClass && filters.assetClass !== "All");
+    (filters.assetClass && filters.assetClass !== 'All');
 
   const clearFilter = (key: keyof AnalyticsFilters) => {
     const newFilters = { ...filters };
@@ -69,11 +69,11 @@ export function FilterControls({
       {/* Filter Selects */}
       <div className="flex flex-wrap gap-2">
         <Select
-          value={filters.status || "all"}
+          value={filters.status || 'all'}
           onValueChange={(value) =>
             onFilterChange({
               ...filters,
-              status: value === "all" ? undefined : value,
+              status: value === 'all' ? undefined : value,
             })
           }
         >
@@ -91,11 +91,11 @@ export function FilterControls({
         </Select>
 
         <Select
-          value={filters.priority || "all"}
+          value={filters.priority || 'all'}
           onValueChange={(value) =>
             onFilterChange({
               ...filters,
-              priority: value === "all" ? undefined : value,
+              priority: value === 'all' ? undefined : value,
             })
           }
         >
@@ -113,11 +113,11 @@ export function FilterControls({
         </Select>
 
         <Select
-          value={filters.assignee || "all"}
+          value={filters.assignee || 'all'}
           onValueChange={(value) =>
             onFilterChange({
               ...filters,
-              assignee: value === "all" ? undefined : value,
+              assignee: value === 'all' ? undefined : value,
             })
           }
         >
@@ -135,11 +135,11 @@ export function FilterControls({
         </Select>
 
         <Select
-          value={filters.team || "all"}
+          value={filters.team || 'all'}
           onValueChange={(value) =>
             onFilterChange({
               ...filters,
-              team: value === "all" ? undefined : value,
+              team: value === 'all' ? undefined : value,
             })
           }
         >
@@ -157,11 +157,11 @@ export function FilterControls({
         </Select>
 
         <Select
-          value={filters.assetClass || "All"}
+          value={filters.assetClass || 'All'}
           onValueChange={(value) =>
             onFilterChange({
               ...filters,
-              assetClass: value === "All" ? undefined : value,
+              assetClass: value === 'All' ? undefined : value,
             })
           }
         >
@@ -183,12 +183,12 @@ export function FilterControls({
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">Active filters:</span>
-          
+
           {filters.status && (
             <Badge variant="secondary" className="gap-1">
               Status: {statusLabels[filters.status] || filters.status}
               <button
-                onClick={() => clearFilter("status")}
+                onClick={() => clearFilter('status')}
                 className="ml-1 hover:text-destructive"
                 aria-label="Remove status filter"
               >
@@ -196,12 +196,12 @@ export function FilterControls({
               </button>
             </Badge>
           )}
-          
+
           {filters.priority && (
             <Badge variant="secondary" className="gap-1">
               Priority: {priorityLabels[filters.priority] || filters.priority}
               <button
-                onClick={() => clearFilter("priority")}
+                onClick={() => clearFilter('priority')}
                 className="ml-1 hover:text-destructive"
                 aria-label="Remove priority filter"
               >
@@ -209,12 +209,12 @@ export function FilterControls({
               </button>
             </Badge>
           )}
-          
+
           {filters.assignee && (
             <Badge variant="secondary" className="gap-1">
               Owner: {filters.assignee}
               <button
-                onClick={() => clearFilter("assignee")}
+                onClick={() => clearFilter('assignee')}
                 className="ml-1 hover:text-destructive"
                 aria-label="Remove owner filter"
               >
@@ -222,12 +222,12 @@ export function FilterControls({
               </button>
             </Badge>
           )}
-          
+
           {filters.team && (
             <Badge variant="secondary" className="gap-1">
               Team: {filters.team}
               <button
-                onClick={() => clearFilter("team")}
+                onClick={() => clearFilter('team')}
                 className="ml-1 hover:text-destructive"
                 aria-label="Remove team filter"
               >
@@ -235,12 +235,12 @@ export function FilterControls({
               </button>
             </Badge>
           )}
-          
-          {filters.assetClass && filters.assetClass !== "All" && (
+
+          {filters.assetClass && filters.assetClass !== 'All' && (
             <Badge variant="secondary" className="gap-1">
               Asset: {filters.assetClass}
               <button
-                onClick={() => clearFilter("assetClass")}
+                onClick={() => clearFilter('assetClass')}
                 className="ml-1 hover:text-destructive"
                 aria-label="Remove asset class filter"
               >

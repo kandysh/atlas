@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { CartesianGrid, XAxis, YAxis, Area, AreaChart } from "recharts";
+import { CartesianGrid, XAxis, YAxis, Area, AreaChart } from 'recharts';
 
 import {
   Card,
@@ -9,7 +9,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
@@ -17,21 +17,21 @@ import {
   ChartLegend,
   ChartLegendContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { HoursEfficiency } from "@/src/lib/actions/analytics";
+} from '@/src/components/ui/chart';
+import { HoursEfficiency } from '@/src/lib/actions/analytics';
 
 const chartConfig = {
   currentHrs: {
-    label: "Estimated Hrs",
-    color: "var(--chart-1)",
+    label: 'Estimated Hrs',
+    color: 'var(--chart-1)',
   },
   workedHrs: {
-    label: "Worked Hrs",
-    color: "var(--chart-2)",
+    label: 'Worked Hrs',
+    color: 'var(--chart-2)',
   },
   efficiency: {
-    label: "Efficiency %",
-    color: "var(--chart-3)",
+    label: 'Efficiency %',
+    color: 'var(--chart-3)',
   },
 } satisfies ChartConfig;
 
@@ -39,9 +39,7 @@ interface HoursEfficiencyChartProps {
   chartData: HoursEfficiency[];
 }
 
-export function HoursEfficiencyChart({
-  chartData,
-}: HoursEfficiencyChartProps) {
+export function HoursEfficiencyChart({ chartData }: HoursEfficiencyChartProps) {
   // Calculate average efficiency
   const avgEfficiency =
     chartData.length > 0
@@ -71,8 +69,8 @@ export function HoursEfficiencyChart({
               axisLine={false}
               tickMargin={8}
               tickFormatter={(value) =>
-                new Date(value + "-01").toLocaleDateString("en-US", {
-                  month: "short",
+                new Date(value + '-01').toLocaleDateString('en-US', {
+                  month: 'short',
                 })
               }
             />
@@ -82,13 +80,13 @@ export function HoursEfficiencyChart({
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) =>
-                    new Date(value + "-01").toLocaleDateString("en-US", {
-                      month: "long",
-                      year: "numeric",
+                    new Date(value + '-01').toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric',
                     })
                   }
                   formatter={(value, name) => {
-                    if (name === "efficiency") {
+                    if (name === 'efficiency') {
                       return `${Number(value).toFixed(1)}%`;
                     }
                     return `${Number(value).toFixed(1)}h`;
@@ -119,11 +117,15 @@ export function HoursEfficiencyChart({
       <CardFooter className="text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <span>Avg efficiency:</span>
-          <span className={avgEfficiency <= 100 ? "text-green-600" : "text-amber-600"}>
+          <span
+            className={
+              avgEfficiency <= 100 ? 'text-green-600' : 'text-amber-600'
+            }
+          >
             {avgEfficiency.toFixed(1)}%
           </span>
           <span className="text-xs">
-            ({avgEfficiency <= 100 ? "under budget" : "over budget"})
+            ({avgEfficiency <= 100 ? 'under budget' : 'over budget'})
           </span>
         </div>
       </CardFooter>

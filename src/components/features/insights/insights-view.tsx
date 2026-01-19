@@ -1,85 +1,135 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { CheckCircle2, Clock, AlertCircle } from "lucide-react"
-import { Task } from "@/src/lib/types"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Task } from '@/src/lib/types';
 
 interface InsightsViewProps {
-  tasks: Task[]
+  tasks: Task[];
 }
 
 export function InsightsView({ tasks }: InsightsViewProps) {
   // Use dynamic field access for status and priority
-  const completedTasks = tasks.filter((t) => (t.status as string) === "done" || (t.status as string) === "completed").length
-  const inProgressTasks = tasks.filter((t) => (t.status as string) === "in-progress").length
-  const todoTasks = tasks.filter((t) => (t.status as string) === "todo").length
-  const blockedTasks = tasks.filter((t) => (t.status as string) === "blocked").length
+  const completedTasks = tasks.filter(
+    (t) =>
+      (t.status as string) === 'done' || (t.status as string) === 'completed',
+  ).length;
+  const inProgressTasks = tasks.filter(
+    (t) => (t.status as string) === 'in-progress',
+  ).length;
+  const todoTasks = tasks.filter((t) => (t.status as string) === 'todo').length;
+  const blockedTasks = tasks.filter(
+    (t) => (t.status as string) === 'blocked',
+  ).length;
 
-  const urgentTasks = tasks.filter((t) => (t.priority as string) === "urgent").length
-  const highTasks = tasks.filter((t) => (t.priority as string) === "high").length
+  const urgentTasks = tasks.filter(
+    (t) => (t.priority as string) === 'urgent',
+  ).length;
+  const highTasks = tasks.filter(
+    (t) => (t.priority as string) === 'high',
+  ).length;
 
   const overdueTasks = tasks.filter((t) => {
     const dueDate = t.dueDate || t.completionDate;
-    if (!dueDate) return false
-    const date = dueDate instanceof Date ? dueDate : new Date(dueDate as string);
-    return date < new Date() && (t.status as string) !== "done" && (t.status as string) !== "completed"
-  }).length
+    if (!dueDate) return false;
+    const date =
+      dueDate instanceof Date ? dueDate : new Date(dueDate as string);
+    return (
+      date < new Date() &&
+      (t.status as string) !== 'done' &&
+      (t.status as string) !== 'completed'
+    );
+  }).length;
 
-  const completionRate = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0
+  const completionRate =
+    tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">Insights</h1>
-        <p className="text-sm text-muted-foreground mt-1">Analytics and performance metrics</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-balance">
+          Insights
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Analytics and performance metrics
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-card border-border hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Tasks
+            </CardTitle>
             <ListIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{tasks.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">{completionRate}% completion rate</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card border-border hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{completedTasks}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {tasks.length}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0}% of total
+              {completionRate}% completion rate
             </p>
           </CardContent>
         </Card>
 
         <Card className="bg-card border-border hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
-            <Clock className="h-4 w-4 text-info" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Completed
+            </CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-info">{inProgressTasks}</div>
-            <p className="text-xs text-muted-foreground mt-1">{todoTasks} in backlog</p>
+            <div className="text-2xl font-bold text-success">
+              {completedTasks}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {tasks.length > 0
+                ? Math.round((completedTasks / tasks.length) * 100)
+                : 0}
+              % of total
+            </p>
           </CardContent>
         </Card>
 
         <Card className="bg-card border-border hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              In Progress
+            </CardTitle>
+            <Clock className="h-4 w-4 text-info" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-info">
+              {inProgressTasks}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {todoTasks} in backlog
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border hover:shadow-lg transition-shadow duration-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Overdue
+            </CardTitle>
             <AlertCircle className="h-4 w-4 text-error" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-error">{overdueTasks}</div>
-            <p className="text-xs text-muted-foreground mt-1">{urgentTasks} urgent tasks</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {urgentTasks} urgent tasks
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -88,33 +138,73 @@ export function InsightsView({ tasks }: InsightsViewProps) {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-foreground">Status Breakdown</CardTitle>
-            <CardDescription className="text-muted-foreground">Task distribution by status</CardDescription>
+            <CardDescription className="text-muted-foreground">
+              Task distribution by status
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <StatusBar label="Done" count={completedTasks} total={tasks.length} color="bg-success" />
-            <StatusBar label="In Progress" count={inProgressTasks} total={tasks.length} color="bg-info" />
-            <StatusBar label="To Do" count={todoTasks} total={tasks.length} color="bg-warning" />
-            <StatusBar label="Blocked" count={blockedTasks} total={tasks.length} color="bg-error" />
+            <StatusBar
+              label="Done"
+              count={completedTasks}
+              total={tasks.length}
+              color="bg-success"
+            />
+            <StatusBar
+              label="In Progress"
+              count={inProgressTasks}
+              total={tasks.length}
+              color="bg-info"
+            />
+            <StatusBar
+              label="To Do"
+              count={todoTasks}
+              total={tasks.length}
+              color="bg-warning"
+            />
+            <StatusBar
+              label="Blocked"
+              count={blockedTasks}
+              total={tasks.length}
+              color="bg-error"
+            />
           </CardContent>
         </Card>
 
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-foreground">Priority Distribution</CardTitle>
-            <CardDescription className="text-muted-foreground">Tasks by priority level</CardDescription>
+            <CardTitle className="text-foreground">
+              Priority Distribution
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Tasks by priority level
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <StatusBar label="Urgent" count={urgentTasks} total={tasks.length} color="bg-priority-urgent" />
-            <StatusBar label="High" count={highTasks} total={tasks.length} color="bg-priority-high" />
+            <StatusBar
+              label="Urgent"
+              count={urgentTasks}
+              total={tasks.length}
+              color="bg-priority-urgent"
+            />
+            <StatusBar
+              label="High"
+              count={highTasks}
+              total={tasks.length}
+              color="bg-priority-high"
+            />
             <StatusBar
               label="Medium"
-              count={tasks.filter((t) => (t.priority as string) === "medium").length}
+              count={
+                tasks.filter((t) => (t.priority as string) === 'medium').length
+              }
               total={tasks.length}
               color="bg-priority-medium"
             />
             <StatusBar
               label="Low"
-              count={tasks.filter((t) => (t.priority as string) === "low").length}
+              count={
+                tasks.filter((t) => (t.priority as string) === 'low').length
+              }
               total={tasks.length}
               color="bg-priority-low"
             />
@@ -122,11 +212,21 @@ export function InsightsView({ tasks }: InsightsViewProps) {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
-function StatusBar({ label, count, total, color }: { label: string; count: number; total: number; color: string }) {
-  const percentage = total > 0 ? (count / total) * 100 : 0
+function StatusBar({
+  label,
+  count,
+  total,
+  color,
+}: {
+  label: string;
+  count: number;
+  total: number;
+  color: string;
+}) {
+  const percentage = total > 0 ? (count / total) * 100 : 0;
 
   return (
     <div className="space-y-2">
@@ -141,17 +241,23 @@ function StatusBar({ label, count, total, color }: { label: string; count: numbe
         />
       </div>
     </div>
-  )
+  );
 }
 
 function ListIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg
+      {...props}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
       />
     </svg>
-  )
+  );
 }

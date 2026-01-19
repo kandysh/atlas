@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { Task, Status, Priority } from "@/src/lib/types";
-import { FieldConfig } from "@/src/lib/db/schema";
-import { StatusCell } from "@/src/components/features/tasks/status-cell";
-import { PriorityCell } from "@/src/components/features/tasks/priority-cell";
+import { ColumnDef } from '@tanstack/react-table';
+import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
+import { Task, Status, Priority } from '@/src/lib/types';
+import { FieldConfig } from '@/src/lib/db/schema';
+import { StatusCell } from '@/src/components/features/tasks/status-cell';
+import { PriorityCell } from '@/src/components/features/tasks/priority-cell';
 import {
   EditableTextCell,
   EditableNumberCell,
@@ -15,33 +15,33 @@ import {
   EditableDateCell,
   EditableCheckboxCell,
   EditableMultiselectCell,
-} from "@/src/components/features/tasks/editable-cells";
-import { Button } from "@/src/components/ui/button";
+} from '@/src/components/features/tasks/editable-cells';
+import { Button } from '@/src/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu";
-import { Badge } from "@/src/components/ui/badge";
+} from '@/src/components/ui/dropdown-menu';
+import { Badge } from '@/src/components/ui/badge';
 
 export type CellType =
-  | "text"
-  | "select"
-  | "multiselect"
-  | "date"
-  | "checkbox"
-  | "number"
-  | "editable-text"
-  | "editable-number"
-  | "editable-date"
-  | "editable-tags"
-  | "editable-combobox"
-  | "editable-owner"
-  | "status"
-  | "priority"
-  | "badge-list";
+  | 'text'
+  | 'select'
+  | 'multiselect'
+  | 'date'
+  | 'checkbox'
+  | 'number'
+  | 'editable-text'
+  | 'editable-number'
+  | 'editable-date'
+  | 'editable-tags'
+  | 'editable-combobox'
+  | 'editable-owner'
+  | 'status'
+  | 'priority'
+  | 'badge-list';
 
 type UniqueValuesMap = Record<string, string[]>;
 
@@ -56,15 +56,15 @@ export function extractUniqueFieldValues(
 
   const selectFields = fieldConfigs.filter(
     (config) =>
-      config.type === "select" ||
-      config.type === "editable-owner" ||
-      config.type === "editable-combobox",
+      config.type === 'select' ||
+      config.type === 'editable-owner' ||
+      config.type === 'editable-combobox',
   );
 
   selectFields.forEach((field) => {
     const values = tasks
       .map((task) => (task as Record<string, any>)[field.key])
-      .filter((value) => value != null && value !== "")
+      .filter((value) => value != null && value !== '')
       .map((value) => String(value)); // Ensure all values are strings
 
     uniqueValues[field.key] = Array.from(new Set(values)).sort();
@@ -114,7 +114,7 @@ function createColumnFromFieldConfig(
     header: ({ column }) => (
       <Button
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         className="-ml-4"
       >
         {name}
@@ -125,7 +125,7 @@ function createColumnFromFieldConfig(
       renderCell(row.original, fieldConfig, onUpdate, uniqueValues),
   };
 
-  if (type === "select" || type === "multiselect") {
+  if (type === 'select' || type === 'multiselect') {
     column.filterFn = (row, id, value) => value.includes(row.getValue(id));
   }
 
@@ -141,7 +141,7 @@ function createActionsColumn(
   onDuplicate?: (taskId: string) => void,
 ): ColumnDef<Task> {
   return {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -158,7 +158,7 @@ function createActionsColumn(
             Duplicate
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem 
+          <DropdownMenuItem
             className="text-destructive"
             onClick={() => onDelete?.(row.original.id)}
           >
@@ -188,33 +188,41 @@ function renderCell(
   };
 
   switch (type) {
-    case "status":
+    case 'status':
       return renderStatusCell(value, handleChange);
-    case "priority":
+    case 'priority':
       return renderPriorityCell(value, handleChange);
-    case "editable-owner":
+    case 'editable-owner':
       return renderEditableOwnerCell(value, handleChange, fieldOptions);
-    case "editable-combobox":
+    case 'editable-combobox':
       return renderEditableComboboxCell(
         value,
         handleChange,
         fieldOptions,
         options,
       );
-    case "editable-text":
+    case 'editable-text':
       return renderEditableTextCell(value, handleChange, key);
-    case "editable-number":
+    case 'editable-number':
       return renderEditableNumberCell(value, handleChange, options);
-    case "editable-date":
+    case 'editable-date':
       return <EditableDateCell value={value} onChange={handleChange} />;
-    case "editable-tags":
+    case 'editable-tags':
       return renderEditableTagsCell(value, handleChange, fieldConfig.name);
-    case "badge-list":
+    case 'badge-list':
       return renderBadgeList(value);
-    case "checkbox":
-      return <EditableCheckboxCell value={value || false} onChange={handleChange} />;
-    case "multiselect":
-      return renderEditableMultiselectCell(value, handleChange, fieldOptions, options, fieldConfig.name);
+    case 'checkbox':
+      return (
+        <EditableCheckboxCell value={value || false} onChange={handleChange} />
+      );
+    case 'multiselect':
+      return renderEditableMultiselectCell(
+        value,
+        handleChange,
+        fieldOptions,
+        options,
+        fieldConfig.name,
+      );
     default:
       return renderFallbackCell(value, type, handleChange);
   }
@@ -241,7 +249,7 @@ function renderEditableOwnerCell(
 ): React.ReactNode {
   return (
     <EditableOwnerCell
-      value={value || ""}
+      value={value || ''}
       onChange={handleChange}
       options={options}
       onAddOption={handleChange}
@@ -259,7 +267,7 @@ function renderEditableComboboxCell(
     fieldOptions.length > 0
       ? fieldOptions
       : (configOptions?.choices as string[]) || [];
-  
+
   // Ensure all options are strings and filter out null/undefined
   const options = rawOptions
     .filter((opt) => opt != null)
@@ -267,7 +275,7 @@ function renderEditableComboboxCell(
 
   return (
     <EditableComboboxCell
-      value={value || ""}
+      value={value || ''}
       onChange={handleChange}
       options={options}
       onAddOption={handleChange}
@@ -280,13 +288,13 @@ function renderEditableTextCell(
   handleChange: (value: string) => void,
   key: string,
 ): React.ReactNode {
-  const isTitle = key === "title";
+  const isTitle = key === 'title';
   return (
     <EditableTextCell
-      value={value || ""}
+      value={value || ''}
       onChange={handleChange}
       multiline={!isTitle}
-      className={isTitle ? "font-medium" : undefined}
+      className={isTitle ? 'font-medium' : undefined}
     />
   );
 }
@@ -296,7 +304,7 @@ function renderEditableNumberCell(
   handleChange: (value: number) => void,
   options?: any,
 ): React.ReactNode {
-  const suffix = (options?.suffix as string) || "";
+  const suffix = (options?.suffix as string) || '';
   return (
     <EditableNumberCell
       value={value || 0}
@@ -356,7 +364,7 @@ function renderEditableMultiselectCell(
       value={value || []}
       onChange={handleChange}
       options={options}
-      placeholder={`Select ${fieldName?.toLowerCase() || "items"}...`}
+      placeholder={`Select ${fieldName?.toLowerCase() || 'items'}...`}
     />
   );
 }
@@ -367,13 +375,13 @@ function renderFallbackCell(
   handleChange: (value: any) => void,
 ): React.ReactNode {
   switch (type) {
-    case "text":
-      return <EditableTextCell value={value || ""} onChange={handleChange} />;
-    case "number":
+    case 'text':
+      return <EditableTextCell value={value || ''} onChange={handleChange} />;
+    case 'number':
       return <EditableNumberCell value={value || 0} onChange={handleChange} />;
-    case "date":
+    case 'date':
       return <EditableDateCell value={value} onChange={handleChange} />;
-    case "multiselect": {
+    case 'multiselect': {
       const items = value || [];
       if (items.length === 0) {
         return <span className="text-muted-foreground">-</span>;
@@ -388,8 +396,8 @@ function renderFallbackCell(
         </div>
       );
     }
-    case "select":
-      return <span>{value || "-"}</span>;
+    case 'select':
+      return <span>{value || '-'}</span>;
     default:
       return <span className="text-muted-foreground">-</span>;
   }

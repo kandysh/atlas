@@ -1,5 +1,11 @@
-export type Status = "todo" | "in-progress" | "testing" | "done" | "completed" | "blocked";
-export type Priority = "low" | "medium" | "high" | "urgent";
+export type Status =
+  | 'todo'
+  | 'in-progress'
+  | 'testing'
+  | 'done'
+  | 'completed'
+  | 'blocked';
+export type Priority = 'low' | 'medium' | 'high' | 'urgent';
 
 /**
  * Dynamic task type - fields are driven by workspace field configurations

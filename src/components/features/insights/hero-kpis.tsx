@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/src/components/ui/card";
-import { KpiSummary } from "@/src/lib/actions/analytics";
-import { CheckCircle2, Clock, Target, DollarSign } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/src/components/ui/card';
+import { KpiSummary } from '@/src/lib/actions/analytics';
+import { CheckCircle2, Clock, Target, DollarSign } from 'lucide-react';
 
 interface HeroKpisProps {
   data: KpiSummary;
@@ -14,8 +14,8 @@ function AnimatedCounter({
   value,
   duration = 500,
   decimals = 0,
-  prefix = "",
-  suffix = "",
+  prefix = '',
+  suffix = '',
 }: {
   value: number;
   duration?: number;
@@ -46,9 +46,10 @@ function AnimatedCounter({
     requestAnimationFrame(animate);
   }, [value, duration]);
 
-  const formatted = decimals > 0
-    ? displayValue.toFixed(decimals)
-    : Math.round(displayValue).toLocaleString();
+  const formatted =
+    decimals > 0
+      ? displayValue.toFixed(decimals)
+      : Math.round(displayValue).toLocaleString();
 
   return (
     <span>
@@ -62,35 +63,35 @@ function AnimatedCounter({
 export function HeroKpis({ data, isLoading }: HeroKpisProps) {
   const kpis = [
     {
-      label: "Total Tasks",
+      label: 'Total Tasks',
       value: data.totalTasks,
       icon: Target,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10',
     },
     {
-      label: "Open Tasks",
+      label: 'Open Tasks',
       value: data.openTasks,
       icon: Clock,
-      color: "text-amber-500",
-      bgColor: "bg-amber-500/10",
+      color: 'text-amber-500',
+      bgColor: 'bg-amber-500/10',
     },
     {
-      label: "Avg Cycle Time",
+      label: 'Avg Cycle Time',
       value: data.avgCycleDays,
       icon: CheckCircle2,
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
-      suffix: "d",
+      color: 'text-green-500',
+      bgColor: 'bg-green-500/10',
+      suffix: 'd',
       decimals: 1,
     },
     {
-      label: "Hours Saved",
+      label: 'Hours Saved',
       value: data.totalHoursSaved,
       icon: DollarSign,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-      suffix: "h",
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/10',
+      suffix: 'h',
       decimals: 0,
     },
   ];

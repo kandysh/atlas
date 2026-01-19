@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import * as React from 'react';
+import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 
 import {
   Card,
@@ -9,29 +9,29 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
+} from '@/src/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/components/ui/chart";
-import { ThroughPutOverTimeData } from "@/src/lib/types";
+} from '@/src/components/ui/chart';
+import { ThroughPutOverTimeData } from '@/src/lib/types';
 
 export const description =
-  "An interactive line chart showing completed tasks and hours saved over time.";
+  'An interactive line chart showing completed tasks and hours saved over time.';
 
 const chartConfig = {
   throughput: {
-    label: "Throughput",
+    label: 'Throughput',
   },
   hours: {
-    label: "Hours Saved",
-    color: "var(--chart-1)",
+    label: 'Hours Saved',
+    color: 'var(--chart-1)',
   },
   count: {
-    label: "Completed",
-    color: "var(--chart-2)",
+    label: 'Completed',
+    color: 'var(--chart-2)',
   },
 } satisfies ChartConfig;
 
@@ -41,7 +41,7 @@ export function ChartLineInteractive({
   chartData: ThroughPutOverTimeData[];
 }) {
   const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("hours");
+    React.useState<keyof typeof chartConfig>('hours');
 
   const total = React.useMemo(
     () => ({
@@ -61,7 +61,7 @@ export function ChartLineInteractive({
           </CardDescription>
         </div>
         <div className="flex">
-          {["hours", "count"].map((key) => {
+          {['hours', 'count'].map((key) => {
             const chart = key as keyof typeof chartConfig;
             return (
               <button
@@ -103,8 +103,8 @@ export function ChartLineInteractive({
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "long",
+                return date.toLocaleDateString('en-US', {
+                  month: 'long',
                 });
               }}
             />
@@ -114,8 +114,8 @@ export function ChartLineInteractive({
                   className="w-37.5"
                   nameKey="hours"
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "long",
+                    return new Date(value).toLocaleDateString('en-US', {
+                      month: 'long',
                     });
                   }}
                 />
