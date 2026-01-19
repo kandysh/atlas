@@ -55,7 +55,7 @@ export async function GET(
         unregisterSseClient(clientId);
         try {
           controller.close();
-        } catch (error) {
+        } catch {
           // Controller might already be closed
         }
       });

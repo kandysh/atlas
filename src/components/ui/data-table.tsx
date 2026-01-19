@@ -14,7 +14,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from '@tanstack/react-table';
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect, useCallback } from 'react';
 import { Button } from '@/src/components/ui/button';
 import {
   ChevronLeft,
@@ -33,6 +33,14 @@ interface DataTableProps<TData, TValue> {
   emptyStateMessage?: string;
   toolbar?: (table: ReturnType<typeof useReactTable<TData>>) => ReactNode;
   className?: string;
+  /** Initial column filters (synced with URL) */
+  initialColumnFilters?: ColumnFiltersState;
+  /** Callback when column filters change (for URL sync) */
+  onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
+  /** Initial global filter value */
+  initialGlobalFilter?: string;
+  /** Callback when global filter changes */
+  onGlobalFilterChange?: (value: string) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -41,16 +49,54 @@ export function DataTable<TData, TValue>({
   onRowClick,
   pageSize = 20,
   enableRowSelection = true,
-  enableDragHandle = false, // Disabled by default - TODO: implement drag-and-drop reordering
+  enableDragHandle: _enableDragHandle = false,
   emptyStateMessage = 'No results found.',
   toolbar,
   className,
+  initialColumnFilters = [],
+  onColumnFiltersChange: onColumnFiltersChangeProp,
+  initialGlobalFilter = '',
+  onGlobalFilterChange: onGlobalFilterChangeProp,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [columnFilters, setColumnFiltersState] =
+    useState<ColumnFiltersState>(initialColumnFilters);
+  const [globalFilter, setGlobalFilterState] = useState(initialGlobalFilter);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState({});
+
+  // Sync with external initial values when they change
+  useEffect(() => {
+    setColumnFiltersState(initialColumnFilters);
+  }, [initialColumnFilters]);
+
+  useEffect(() => {
+    setGlobalFilterState(initialGlobalFilter);
+  }, [initialGlobalFilter]);
+
+  const handleColumnFiltersChange = useCallback(
+    (updaterOrValue: ColumnFiltersState | ((old: ColumnFiltersState) => ColumnFiltersState)) => {
+      setColumnFiltersState((prev) => {
+        const newValue =
+          typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue;
+        onColumnFiltersChangeProp?.(newValue);
+        return newValue;
+      });
+    },
+    [onColumnFiltersChangeProp],
+  );
+
+  const handleGlobalFilterChange = useCallback(
+    (updaterOrValue: string | ((old: string) => string)) => {
+      setGlobalFilterState((prev) => {
+        const newValue =
+          typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue;
+        onGlobalFilterChangeProp?.(newValue);
+        return newValue;
+      });
+    },
+    [onGlobalFilterChangeProp],
+  );
 
   const table = useReactTable({
     data,
@@ -62,8 +108,8 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
+    onColumnFiltersChange: handleColumnFiltersChange,
+    onGlobalFilterChange: handleGlobalFilterChange,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
     state: {

@@ -5,14 +5,6 @@ import { ReactNode, useState } from 'react';
 import { Loader2, AlertTriangle, Plus } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/components/ui/dialog';
 
 interface WorkspaceLoaderProps {
   children: ReactNode;
@@ -25,11 +17,10 @@ export function WorkspaceLoader({ children, fallback }: WorkspaceLoaderProps) {
     error,
     refetch,
     workspaces,
+    user,
     createWorkspace,
     isCreatingWorkspace,
-    user,
   } = useWorkspace();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [workspaceName, setWorkspaceName] = useState('');
 
   const handleCreateWorkspace = async () => {
@@ -37,10 +28,9 @@ export function WorkspaceLoader({ children, fallback }: WorkspaceLoaderProps) {
 
     try {
       await createWorkspace(workspaceName.trim());
-      setShowCreateDialog(false);
       setWorkspaceName('');
-    } catch (error) {
-      console.error('Failed to create workspace:', error);
+    } catch {
+      console.error('Failed to create workspace');
     }
   };
 

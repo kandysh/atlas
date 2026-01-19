@@ -16,7 +16,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { FieldConfig } from '@/src/lib/db';
 
 interface TaskHistoryProps {
-  taskId: string | null;
   dbTaskId?: string | null;
   workspaceId: string;
 }
@@ -83,7 +82,6 @@ function getEventColor(eventType: string): string {
 }
 
 export function TaskHistory({
-  taskId,
   dbTaskId,
   workspaceId,
 }: TaskHistoryProps) {

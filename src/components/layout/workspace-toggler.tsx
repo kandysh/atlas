@@ -56,7 +56,7 @@ export function WorkspaceToggler() {
       setDialogOpen(false);
       setNewWorkspaceName('');
       setOpen(false);
-    } catch (error) {
+    } catch {
       toast.error('Failed to create workspace');
     }
   };

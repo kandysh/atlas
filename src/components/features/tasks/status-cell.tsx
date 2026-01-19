@@ -123,7 +123,7 @@ export function StatusCell({ value, onChange }: StatusCellProps) {
                   <CommandItem
                     key={key}
                     value={cfg.label}
-                    onSelect={(e) => {
+                    onSelect={() => {
                       onChange(key);
                       setOpen(false);
                     }}

@@ -15,7 +15,6 @@ export * from './separator';
 export * from './sheet';
 export * from './sidebar';
 export * from './skeleton';
-export * from './skeleton-card';
 export * from './spinner';
 export * from './textarea';
 export * from './tooltip';

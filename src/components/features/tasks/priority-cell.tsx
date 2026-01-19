@@ -104,7 +104,7 @@ export function PriorityCell({ value, onChange }: PriorityCellProps) {
                   <CommandItem
                     key={key}
                     value={cfg.label}
-                    onSelect={(e) => {
+                    onSelect={() => {
                       onChange(key);
                       setOpen(false);
                     }}

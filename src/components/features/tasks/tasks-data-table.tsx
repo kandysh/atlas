@@ -16,7 +16,10 @@ import {
   useUpdateFieldVisibility,
 } from '@/src/lib/query/hooks';
 import { useWorkspace } from '@/src/providers';
+import { useTableUrlFilters } from '@/src/hooks';
 import { buildColumnsFromFieldConfigs } from '@/src/lib/utils';
+
+const TABLE_FILTER_KEYS = ['status', 'priority', 'owner', 'team', 'assetClass'];
 
 interface TasksDataTableProps {
   columns?: ColumnDef<Task, unknown>[];
@@ -34,6 +37,10 @@ export function TasksDataTable({
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { currentWorkspace } = useWorkspace();
+
+  // URL filter sync
+  const { columnFilters, globalFilter, setColumnFilters, setGlobalFilter } =
+    useTableUrlFilters({ keys: TABLE_FILTER_KEYS });
 
   const activeWorkspaceId = workspaceId || currentWorkspace?.id || '1';
 
@@ -196,6 +203,10 @@ export function TasksDataTable({
         data={data}
         onRowClick={handleRowClick}
         emptyStateMessage="No tasks found."
+        initialColumnFilters={columnFilters}
+        onColumnFiltersChange={setColumnFilters}
+        initialGlobalFilter={globalFilter}
+        onGlobalFilterChange={setGlobalFilter}
         toolbar={(table) => (
           <DynamicToolbar
             table={table}

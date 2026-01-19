@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import {
   CumulativeFlowChart,
   CycleTimeChart,
@@ -20,11 +20,16 @@ import {
   DonutChartSkeleton,
 } from '@/src/components/features/insights';
 import { useServerAnalytics, AnalyticsFilters } from '@/src/hooks/analytics';
+import { useUrlFilters } from '@/src/hooks';
 import { useWorkspace } from '@/src/providers';
 import { Skeleton } from '@/src/components/ui/skeleton';
 
+const FILTER_KEYS = ['status', 'priority', 'assignee', 'team', 'assetClass'];
+
 export default function InsightsPage() {
-  const [filters, setFilters] = useState<AnalyticsFilters>({});
+  const { filters, setFilters } = useUrlFilters<AnalyticsFilters>({
+    keys: FILTER_KEYS,
+  });
   const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();
 
   // Fetch analytics from server with filters
@@ -34,26 +39,41 @@ export default function InsightsPage() {
     error,
   } = useServerAnalytics(currentWorkspace?.id || '', filters);
 
-  const handleFilterChange = useCallback((newFilters: AnalyticsFilters) => {
-    setFilters(newFilters);
-  }, []);
+  const handleFilterChange = useCallback(
+    (newFilters: AnalyticsFilters) => {
+      setFilters(newFilters);
+    },
+    [setFilters],
+  );
 
   // Chart click handlers for cross-filtering
-  const handleOwnerClick = useCallback((owner: string) => {
-    setFilters((prev) => ({ ...prev, assignee: owner }));
-  }, []);
+  const handleOwnerClick = useCallback(
+    (owner: string) => {
+      setFilters({ ...filters, assignee: owner });
+    },
+    [filters, setFilters],
+  );
 
-  const handleTeamClick = useCallback((team: string) => {
-    setFilters((prev) => ({ ...prev, team }));
-  }, []);
+  const handleTeamClick = useCallback(
+    (team: string) => {
+      setFilters({ ...filters, team });
+    },
+    [filters, setFilters],
+  );
 
-  const handleAssetClassClick = useCallback((assetClass: string) => {
-    setFilters((prev) => ({ ...prev, assetClass }));
-  }, []);
+  const handleAssetClassClick = useCallback(
+    (assetClass: string) => {
+      setFilters({ ...filters, assetClass });
+    },
+    [filters, setFilters],
+  );
 
-  const handlePriorityClick = useCallback((priority: string) => {
-    setFilters((prev) => ({ ...prev, priority }));
-  }, []);
+  const handlePriorityClick = useCallback(
+    (priority: string) => {
+      setFilters({ ...filters, priority });
+    },
+    [filters, setFilters],
+  );
 
   if (workspaceLoading) {
     return (

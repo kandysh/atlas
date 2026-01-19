@@ -493,11 +493,7 @@ export function TaskDetailDrawer({
             </div>
 
             {/* Recent Activity / History */}
-            <TaskHistory
-              taskId={task.id}
-              dbTaskId={dbTaskId}
-              workspaceId={workspaceId}
-            />
+            <TaskHistory dbTaskId={dbTaskId} workspaceId={workspaceId} />
           </div>
         </div>
       </div>
