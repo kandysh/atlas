@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import type { ColumnFiltersState } from '@tanstack/react-table';
 
 interface UseTableUrlFiltersOptions {
@@ -9,6 +9,23 @@ interface UseTableUrlFiltersOptions {
   keys?: string[];
   /** Key for global search filter */
   searchKey?: string;
+}
+
+// Helper to compare column filters
+function areFiltersEqual(
+  a: ColumnFiltersState,
+  b: ColumnFiltersState,
+): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((filterA) => {
+    const filterB = b.find((f) => f.id === filterA.id);
+    if (!filterB) return false;
+    const valuesA = filterA.value as string[];
+    const valuesB = filterB.value as string[];
+    if (!Array.isArray(valuesA) || !Array.isArray(valuesB)) return false;
+    if (valuesA.length !== valuesB.length) return false;
+    return valuesA.every((v) => valuesB.includes(v));
+  });
 }
 
 /**
@@ -20,6 +37,8 @@ export function useTableUrlFilters(options: UseTableUrlFiltersOptions = {}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const lastFiltersRef = useRef<ColumnFiltersState>([]);
+  const lastGlobalFilterRef = useRef<string>('');
 
   // Parse column filters from URL
   const columnFilters = useMemo((): ColumnFiltersState => {
@@ -46,6 +65,12 @@ export function useTableUrlFilters(options: UseTableUrlFiltersOptions = {}) {
   // Update URL with new column filters
   const setColumnFilters = useCallback(
     (filters: ColumnFiltersState) => {
+      // Skip if filters haven't changed (prevents infinite loops)
+      if (areFiltersEqual(filters, lastFiltersRef.current)) {
+        return;
+      }
+      lastFiltersRef.current = filters;
+
       const params = new URLSearchParams();
 
       // Preserve search key if present
@@ -83,6 +108,12 @@ export function useTableUrlFilters(options: UseTableUrlFiltersOptions = {}) {
   // Update URL with new global filter
   const setGlobalFilter = useCallback(
     (value: string) => {
+      // Skip if value hasn't changed
+      if (value === lastGlobalFilterRef.current) {
+        return;
+      }
+      lastGlobalFilterRef.current = value;
+
       const params = new URLSearchParams(searchParams.toString());
 
       if (value) {

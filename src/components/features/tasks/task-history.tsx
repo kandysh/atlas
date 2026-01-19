@@ -81,10 +81,7 @@ function getEventColor(eventType: string): string {
   }
 }
 
-export function TaskHistory({
-  dbTaskId,
-  workspaceId,
-}: TaskHistoryProps) {
+export function TaskHistory({ dbTaskId, workspaceId }: TaskHistoryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Only fetch events when expanded

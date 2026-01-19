@@ -74,28 +74,39 @@ export function DataTable<TData, TValue>({
     setGlobalFilterState(initialGlobalFilter);
   }, [initialGlobalFilter]);
 
+  // Sync filter changes to URL (debounced via useEffect to avoid setState during render)
+  useEffect(() => {
+    onColumnFiltersChangeProp?.(columnFilters);
+  }, [columnFilters, onColumnFiltersChangeProp]);
+
+  useEffect(() => {
+    onGlobalFilterChangeProp?.(globalFilter);
+  }, [globalFilter, onGlobalFilterChangeProp]);
+
   const handleColumnFiltersChange = useCallback(
-    (updaterOrValue: ColumnFiltersState | ((old: ColumnFiltersState) => ColumnFiltersState)) => {
-      setColumnFiltersState((prev) => {
-        const newValue =
-          typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue;
-        onColumnFiltersChangeProp?.(newValue);
-        return newValue;
-      });
+    (
+      updaterOrValue:
+        | ColumnFiltersState
+        | ((old: ColumnFiltersState) => ColumnFiltersState),
+    ) => {
+      setColumnFiltersState((prev) =>
+        typeof updaterOrValue === 'function'
+          ? updaterOrValue(prev)
+          : updaterOrValue,
+      );
     },
-    [onColumnFiltersChangeProp],
+    [],
   );
 
   const handleGlobalFilterChange = useCallback(
     (updaterOrValue: string | ((old: string) => string)) => {
-      setGlobalFilterState((prev) => {
-        const newValue =
-          typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue;
-        onGlobalFilterChangeProp?.(newValue);
-        return newValue;
-      });
+      setGlobalFilterState((prev) =>
+        typeof updaterOrValue === 'function'
+          ? updaterOrValue(prev)
+          : updaterOrValue,
+      );
     },
-    [onGlobalFilterChangeProp],
+    [],
   );
 
   const table = useReactTable({

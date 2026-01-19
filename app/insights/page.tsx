@@ -39,6 +39,26 @@ export default function InsightsPage() {
     error,
   } = useServerAnalytics(currentWorkspace?.id || '', filters);
 
+  // Helper to toggle a value in a filter array
+  const toggleFilterValue = useCallback(
+    (key: keyof AnalyticsFilters, value: string) => {
+      const current = filters[key];
+      const currentArray = Array.isArray(current)
+        ? current
+        : current
+          ? [current]
+          : [];
+      const newArray = currentArray.includes(value)
+        ? currentArray.filter((v) => v !== value)
+        : [...currentArray, value];
+      setFilters({
+        ...filters,
+        [key]: newArray.length > 0 ? newArray : undefined,
+      });
+    },
+    [filters, setFilters],
+  );
+
   const handleFilterChange = useCallback(
     (newFilters: AnalyticsFilters) => {
       setFilters(newFilters);
@@ -46,33 +66,33 @@ export default function InsightsPage() {
     [setFilters],
   );
 
-  // Chart click handlers for cross-filtering
+  // Chart click handlers for cross-filtering (toggle behavior)
   const handleOwnerClick = useCallback(
     (owner: string) => {
-      setFilters({ ...filters, assignee: owner });
+      toggleFilterValue('assignee', owner);
     },
-    [filters, setFilters],
+    [toggleFilterValue],
   );
 
   const handleTeamClick = useCallback(
     (team: string) => {
-      setFilters({ ...filters, team });
+      toggleFilterValue('team', team);
     },
-    [filters, setFilters],
+    [toggleFilterValue],
   );
 
   const handleAssetClassClick = useCallback(
     (assetClass: string) => {
-      setFilters({ ...filters, assetClass });
+      toggleFilterValue('assetClass', assetClass);
     },
-    [filters, setFilters],
+    [toggleFilterValue],
   );
 
   const handlePriorityClick = useCallback(
     (priority: string) => {
-      setFilters({ ...filters, priority });
+      toggleFilterValue('priority', priority);
     },
-    [filters, setFilters],
+    [toggleFilterValue],
   );
 
   if (workspaceLoading) {
@@ -186,11 +206,7 @@ export default function InsightsPage() {
       </nav>
 
       {/* Hero KPIs */}
-      <HeroKpis
-        data={analyticsData.kpiSummary}
-        isLoading={analyticsLoading}
-        onFilterChange={handleFilterChange}
-      />
+      <HeroKpis data={analyticsData.kpiSummary} isLoading={analyticsLoading} />
 
       {/* Actionable Insights */}
       {!analyticsLoading && data && (

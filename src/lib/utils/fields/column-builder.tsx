@@ -135,8 +135,20 @@ function createColumnFromFieldConfig(
       renderCell(row.original, fieldConfig, onUpdate, uniqueValues),
   };
 
-  if (type === 'select' || type === 'multiselect') {
-    column.filterFn = (row, id, value) => value.includes(row.getValue(id));
+  // Set array-based filter function for filterable field types
+  if (
+    type === 'select' ||
+    type === 'multiselect' ||
+    type === 'status' ||
+    type === 'priority' ||
+    type === 'editable-owner' ||
+    type === 'editable-combobox'
+  ) {
+    column.filterFn = (row, id, value) => {
+      if (!value || !Array.isArray(value) || value.length === 0) return true;
+      const rowValue = row.getValue(id);
+      return value.includes(rowValue);
+    };
   }
 
   return column;

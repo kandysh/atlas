@@ -71,11 +71,11 @@ export interface KpiSummary {
 }
 
 export type AnalyticsFilters = {
-  assetClass?: string;
-  status?: string;
-  priority?: string;
-  assignee?: string;
-  team?: string;
+  assetClass?: string | string[];
+  status?: string | string[];
+  priority?: string | string[];
+  assignee?: string | string[];
+  team?: string | string[];
   dateFrom?: string;
   dateTo?: string;
 };
@@ -198,23 +198,75 @@ export async function getAnalytics(
 function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
   const conditions: SQL[] = [];
 
-  if (filters.assetClass && filters.assetClass !== 'All') {
-    conditions.push(
-      sql`LOWER(data->>'assetClass') = LOWER(${filters.assetClass})`,
-    );
+  // Helper to build IN clause for array or single value
+  const buildInCondition = (
+    field: string,
+    value: string | string[] | undefined,
+    jsonPath: string,
+  ): SQL | null => {
+    if (!value || (Array.isArray(value) && value.length === 0)) return null;
+    const values = Array.isArray(value) ? value : [value];
+    if (values.length === 1) {
+      return sql`${sql.raw(jsonPath)} = ${values[0]}`;
+    }
+    const valueList = values.map((v) => sql`${v}`);
+    return sql`${sql.raw(jsonPath)} IN (${sql.join(valueList, sql`, `)})`;
+  };
+
+  if (filters.assetClass) {
+    const values = Array.isArray(filters.assetClass)
+      ? filters.assetClass.filter((v) => v !== 'All')
+      : filters.assetClass !== 'All'
+        ? [filters.assetClass]
+        : [];
+    if (values.length > 0) {
+      if (values.length === 1) {
+        conditions.push(sql`LOWER(data->>'assetClass') = LOWER(${values[0]})`);
+      } else {
+        const lowerValues = values.map((v) => sql`LOWER(${v})`);
+        conditions.push(
+          sql`LOWER(data->>'assetClass') IN (${sql.join(lowerValues, sql`, `)})`,
+        );
+      }
+    }
   }
-  if (filters.status) {
-    conditions.push(sql`data->>'status' = ${filters.status}`);
-  }
-  if (filters.priority) {
-    conditions.push(sql`data->>'priority' = ${filters.priority}`);
-  }
-  if (filters.assignee) {
-    conditions.push(sql`data->>'owner' = ${filters.assignee}`);
-  }
+
+  const statusCond = buildInCondition(
+    'status',
+    filters.status,
+    "data->>'status'",
+  );
+  if (statusCond) conditions.push(statusCond);
+
+  const priorityCond = buildInCondition(
+    'priority',
+    filters.priority,
+    "data->>'priority'",
+  );
+  if (priorityCond) conditions.push(priorityCond);
+
+  const assigneeCond = buildInCondition(
+    'assignee',
+    filters.assignee,
+    "data->>'owner'",
+  );
+  if (assigneeCond) conditions.push(assigneeCond);
+
   if (filters.team) {
-    conditions.push(sql`data->'teamsInvolved' ? ${filters.team}`);
+    const teamValues = Array.isArray(filters.team)
+      ? filters.team
+      : [filters.team];
+    if (teamValues.length === 1) {
+      conditions.push(sql`data->'teamsInvolved' ? ${teamValues[0]}`);
+    } else {
+      // Match any of the teams
+      const teamConditions = teamValues.map(
+        (t) => sql`data->'teamsInvolved' ? ${t}`,
+      );
+      conditions.push(sql`(${sql.join(teamConditions, sql` OR `)})`);
+    }
   }
+
   if (filters.dateFrom) {
     conditions.push(sql`created_at >= ${filters.dateFrom}::timestamp`);
   }

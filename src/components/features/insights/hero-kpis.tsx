@@ -11,6 +11,7 @@ interface HeroKpisProps {
   data: KpiSummary;
   isLoading?: boolean;
   onFilterChange?: (filters: AnalyticsFilters) => void;
+  onStatusClick?: (status: string) => void;
 }
 
 function AnimatedCounter({
@@ -63,7 +64,7 @@ function AnimatedCounter({
   );
 }
 
-export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
+export function HeroKpis({ data, isLoading }: HeroKpisProps) {
   const router = useRouter();
 
   // Compute derived insights
@@ -99,7 +100,7 @@ export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
       bgColor: 'bg-primary/10',
       borderColor: 'border-l-primary',
       onClick: () => router.push('/'),
-      tooltip: 'View all tasks',
+      tooltip: 'View all active tasks',
       subtitle: `${insights.completionRate.toFixed(0)}% complete`,
       subtitleColor:
         insights.completionRate >= 70
@@ -131,9 +132,12 @@ export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
             ? 'border-l-amber-500'
             : 'border-l-red-500',
       onClick: () => {
-        onFilterChange?.({ status: 'todo' });
+        // Navigate to active dashboard with status filter
+        router.push(
+          '/?status=todo&status=in-progress&status=testing&status=blocked',
+        );
       },
-      tooltip: 'Filter to open tasks',
+      tooltip: 'View open tasks',
       subtitle:
         insights.backlogHealth === 'healthy'
           ? 'Backlog healthy'

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Label, Pie, PieChart, Sector } from 'recharts';
 import { TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
@@ -166,12 +167,39 @@ const renderSectorShape = (props: SectorShapeProps) => {
 
 type TasksStatusBreakdownDonutProps = {
   chartData: DonutChartData[];
+  onStatusClick?: (status: string) => void;
+};
+
+// Map display status to URL status
+const statusUrlMap: Record<string, string> = {
+  'To Do': 'todo',
+  'In Progress': 'in-progress',
+  Testing: 'testing',
+  Done: 'done',
+  Completed: 'completed',
+  Blocked: 'blocked',
 };
 
 export function TasksStatusBreakdownDonut({
   chartData,
+  onStatusClick,
 }: TasksStatusBreakdownDonutProps) {
+  const router = useRouter();
   const totalTasks = chartData.reduce((acc, curr) => acc + curr.count, 0);
+
+  const handleStatusClick = (data: DonutChartData) => {
+    const status = data.status as string;
+    const urlStatus = statusUrlMap[status];
+    if (urlStatus) {
+      // Navigate to completed page for completed status, otherwise active dashboard
+      if (urlStatus === 'completed') {
+        router.push('/completed');
+      } else {
+        router.push(`/?status=${urlStatus}`);
+      }
+      onStatusClick?.(urlStatus);
+    }
+  };
 
   // Compute health metrics
   const metrics = useMemo(() => {
@@ -256,6 +284,8 @@ export function TasksStatusBreakdownDonut({
               outerRadius={80}
               strokeWidth={2}
               stroke="var(--background)"
+              onClick={(data) => handleStatusClick(data as DonutChartData)}
+              style={{ cursor: 'pointer' }}
               shape={(props: unknown) =>
                 renderSectorShape(props as SectorShapeProps)
               }

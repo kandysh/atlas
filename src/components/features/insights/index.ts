@@ -14,6 +14,7 @@ export { HoursEfficiencyChart } from './hours-efficiency';
 // Dashboard components
 export { HeroKpis } from './hero-kpis';
 export { FilterControls } from './filter-controls';
+export { MultiSelectFilter, ActiveFilterBadges } from './multi-select-filter';
 export { InsightsCards } from './insights-cards';
 // Skeleton components
 export {
