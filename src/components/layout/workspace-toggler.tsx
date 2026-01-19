@@ -139,7 +139,7 @@ export function WorkspaceToggler() {
         </DropdownMenu>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-106.25">
             <DialogHeader>
               <DialogTitle>Create New Workspace</DialogTitle>
               <DialogDescription>
@@ -193,7 +193,7 @@ export function WorkspaceToggler() {
             className="w-full justify-between h-auto py-3 px-3 hover:bg-accent"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                 <span className="text-sm font-semibold text-primary">
                   {currentWorkspace.name.charAt(0)}
                 </span>
@@ -207,7 +207,7 @@ export function WorkspaceToggler() {
                 </p>
               </div>
             </div>
-            <ChevronsUpDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <ChevronsUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
           </Button>
         </DropdownMenuTrigger>
 
@@ -217,7 +217,7 @@ export function WorkspaceToggler() {
       </DropdownMenu>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Create New Workspace</DialogTitle>
             <DialogDescription>

@@ -159,7 +159,7 @@ export function DataTable<TData, TValue>({
       {/* Table with responsive horizontal scroll */}
       <div className="rounded-lg border border-border bg-card overflow-hidden transition-all duration-200 hover:border-border/80">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
+          <table className="w-full min-w-200">
             <thead className="border-b border-border bg-muted/30">
               <tr>
                 {/* TODO: Implement drag-and-drop reordering

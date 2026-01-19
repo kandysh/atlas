@@ -83,7 +83,7 @@ function StatusTooltip({
     data.status === 'In Progress' || data.status === 'Testing';
 
   return (
-    <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-[180px]">
+    <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-45">
       <div className="flex items-center gap-2 mb-2">
         <div
           className="w-3 h-3 rounded-full"

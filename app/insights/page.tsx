@@ -191,7 +191,7 @@ export default function InsightsPage() {
 
       {/* Filter Controls */}
       <nav
-        className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 -my-2"
+        className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 py-2 -my-2"
         aria-label="Dashboard filters"
       >
         <FilterControls
