@@ -78,10 +78,9 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* Navigation Content */}
-      <SidebarContent className={cn(
-        "flex-1 p-4",
-        state === "collapsed" ? "px-2" : "px-3"
-      )}>
+      <SidebarContent
+        className={cn('flex-1 p-4', state === 'collapsed' ? 'px-2' : 'px-3')}
+      >
         <SidebarMenu className="space-y-1">
           {navigation.map((item) => {
             const isActive = currentPath === item.href;
@@ -92,14 +91,14 @@ export function AppSidebar() {
                     href={item.href}
                     className={cn(
                       'w-full flex items-center gap-3 py-2.5 text-sm rounded-lg transition-all duration-200',
-                      state === "collapsed" ? "justify-center px-0" : "px-3",
+                      state === 'collapsed' ? 'justify-center px-0' : 'px-3',
                       isActive
                         ? 'bg-primary/10 text-primary font-medium'
                         : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                     )}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
-                    {state !== "collapsed" && <span>{item.name}</span>}
+                    {state !== 'collapsed' && <span>{item.name}</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

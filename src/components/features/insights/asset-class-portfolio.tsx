@@ -26,28 +26,38 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 // Custom tooltip for asset class
-function AssetClassTooltip({ active, payload, totalTasks, metrics }: { 
-  active?: boolean; 
-  payload?: Array<{ payload: AssetClassDistribution }>; 
+function AssetClassTooltip({
+  active,
+  payload,
+  totalTasks,
+  metrics,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: AssetClassDistribution }>;
   totalTasks: number;
   metrics: { topAsset: string; topCount: number } | null;
 }) {
   if (!active || !payload?.length) return null;
-  
+
   const data = payload[0].payload;
-  const percentage = totalTasks > 0 ? (data.count / totalTasks * 100).toFixed(1) : 0;
+  const percentage =
+    totalTasks > 0 ? ((data.count / totalTasks) * 100).toFixed(1) : 0;
   const isTopAsset = metrics && data.assetClass === metrics.topAsset;
 
   return (
     <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-[180px]">
       <div className="flex items-center gap-2 mb-2">
-        <div 
-          className="w-3 h-3 rounded-full" 
+        <div
+          className="w-3 h-3 rounded-full"
           style={{ backgroundColor: data.fill }}
         />
-        <span className="font-semibold text-sm capitalize">{data.assetClass}</span>
+        <span className="font-semibold text-sm capitalize">
+          {data.assetClass}
+        </span>
         {isTopAsset && (
-          <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Top</span>
+          <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+            Top
+          </span>
         )}
       </div>
       <div className="space-y-1 text-xs">
@@ -81,13 +91,23 @@ interface SectorShapeProps {
 }
 
 const renderSectorShape = (props: SectorShapeProps, topAsset: string) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, isActive, payload } = props;
+  const {
+    cx,
+    cy,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    isActive,
+    payload,
+  } = props;
   const isTopAssetClass = payload?.assetClass === topAsset;
-  
+
   // Expand sector on hover
   const hoverOffset = isActive ? 8 : 0;
   const topAssetOffset = isTopAssetClass && !isActive ? 2 : 0;
-  
+
   return (
     <g>
       <Sector
@@ -101,7 +121,9 @@ const renderSectorShape = (props: SectorShapeProps, topAsset: string) => {
         stroke="var(--background)"
         strokeWidth={isActive ? 0 : 2}
         style={{
-          filter: isActive ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' : undefined,
+          filter: isActive
+            ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
+            : undefined,
           transition: 'all 0.2s ease-out',
           cursor: 'pointer',
         }}
@@ -124,12 +146,18 @@ export function AssetClassPortfolioChart({
   const metrics = useMemo(() => {
     const sorted = [...chartData].sort((a, b) => b.count - a.count);
     const topAsset = sorted[0];
-    const topPercentage = totalTasks > 0 ? (topAsset?.count || 0) / totalTasks * 100 : 0;
+    const topPercentage =
+      totalTasks > 0 ? ((topAsset?.count || 0) / totalTasks) * 100 : 0;
     const diversityScore = chartData.length;
-    
+
     // Concentration risk: if top asset > 60%, it's high concentration
-    const concentrationRisk = topPercentage > 60 ? 'high' : topPercentage > 40 ? 'moderate' : 'balanced';
-    
+    const concentrationRisk =
+      topPercentage > 60
+        ? 'high'
+        : topPercentage > 40
+          ? 'moderate'
+          : 'balanced';
+
     return {
       topAsset: topAsset?.assetClass || 'N/A',
       topCount: topAsset?.count || 0,
@@ -153,7 +181,8 @@ export function AssetClassPortfolioChart({
           Asset Class Portfolio
         </CardTitle>
         <CardDescription>
-          {metrics.diversityScore} asset class{metrics.diversityScore !== 1 ? 'es' : ''} in portfolio
+          {metrics.diversityScore} asset class
+          {metrics.diversityScore !== 1 ? 'es' : ''} in portfolio
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
@@ -164,7 +193,9 @@ export function AssetClassPortfolioChart({
           <PieChart>
             <ChartTooltip
               cursor={false}
-              content={<AssetClassTooltip totalTasks={totalTasks} metrics={metrics} />}
+              content={
+                <AssetClassTooltip totalTasks={totalTasks} metrics={metrics} />
+              }
             />
             <Pie
               data={chartData}
@@ -175,7 +206,9 @@ export function AssetClassPortfolioChart({
               strokeWidth={2}
               stroke="var(--background)"
               onClick={handlePieClick}
-              shape={(props: unknown) => renderSectorShape(props as SectorShapeProps, metrics.topAsset)}
+              shape={(props: unknown) =>
+                renderSectorShape(props as SectorShapeProps, metrics.topAsset)
+              }
             >
               <Label
                 content={({ viewBox }) => {
@@ -213,15 +246,21 @@ export function AssetClassPortfolioChart({
       <CardFooter className="flex-col gap-1.5 text-sm pt-0">
         <div className="flex items-center justify-between w-full">
           <span className="text-muted-foreground text-xs">Top asset:</span>
-          <span className="font-medium text-xs capitalize">{metrics.topAsset}</span>
+          <span className="font-medium text-xs capitalize">
+            {metrics.topAsset}
+          </span>
         </div>
         <div className="flex items-center justify-between w-full">
           <span className="text-muted-foreground text-xs">Concentration:</span>
-          <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
-            metrics.concentrationRisk === 'high' ? 'bg-amber-500/10 text-amber-600' :
-            metrics.concentrationRisk === 'moderate' ? 'bg-blue-500/10 text-blue-600' :
-            'bg-emerald-500/10 text-emerald-600'
-          }`}>
+          <span
+            className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+              metrics.concentrationRisk === 'high'
+                ? 'bg-amber-500/10 text-amber-600'
+                : metrics.concentrationRisk === 'moderate'
+                  ? 'bg-blue-500/10 text-blue-600'
+                  : 'bg-emerald-500/10 text-emerald-600'
+            }`}
+          >
             {metrics.topPercentage.toFixed(0)}% in top asset
           </span>
         </div>

@@ -199,10 +199,16 @@ export default function InsightsPage() {
         <div className="space-y-8">
           {/* Section: Overview */}
           <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">Overview</h2>
+            <h2 className="text-lg font-medium text-muted-foreground mb-4">
+              Overview
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <TasksStatusBreakdownDonut chartData={analyticsData.statusCounts} />
-              <CumulativeFlowChart chartData={analyticsData.remainingWorkTrend} />
+              <TasksStatusBreakdownDonut
+                chartData={analyticsData.statusCounts}
+              />
+              <CumulativeFlowChart
+                chartData={analyticsData.remainingWorkTrend}
+              />
               <PriorityAgingChart
                 chartData={analyticsData.priorityAging}
                 onPriorityClick={handlePriorityClick}
@@ -212,9 +218,13 @@ export default function InsightsPage() {
 
           {/* Section: Performance */}
           <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">Performance</h2>
+            <h2 className="text-lg font-medium text-muted-foreground mb-4">
+              Performance
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <ChartLineInteractive chartData={analyticsData.throughputOverTime} />
+              <ChartLineInteractive
+                chartData={analyticsData.throughputOverTime}
+              />
               <CycleTimeChart chartData={analyticsData.cycleTime} />
               <HoursEfficiencyChart chartData={analyticsData.hoursEfficiency} />
             </div>
@@ -222,7 +232,9 @@ export default function InsightsPage() {
 
           {/* Section: Team & Resources */}
           <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">Team & Resources</h2>
+            <h2 className="text-lg font-medium text-muted-foreground mb-4">
+              Team & Resources
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               <OwnerProductivityChart
                 chartData={analyticsData.ownerProductivity}
@@ -232,13 +244,17 @@ export default function InsightsPage() {
                 chartData={analyticsData.teamsWorkload}
                 onTeamClick={handleTeamClick}
               />
-              <HoursSavedWorkedChart chartData={analyticsData.hoursSavedWorked} />
+              <HoursSavedWorkedChart
+                chartData={analyticsData.hoursSavedWorked}
+              />
             </div>
           </section>
 
           {/* Section: Portfolio */}
           <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">Portfolio & Tools</h2>
+            <h2 className="text-lg font-medium text-muted-foreground mb-4">
+              Portfolio & Tools
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <AssetClassPortfolioChart
                 chartData={analyticsData.assetClassDistribution}

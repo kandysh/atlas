@@ -45,7 +45,14 @@ export type CellType =
 
 type UniqueValuesMap = Record<string, string[]>;
 
-type FieldValue = string | number | boolean | string[] | Date | null | undefined;
+type FieldValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | Date
+  | null
+  | undefined;
 type FieldOptions = { choices?: string[]; suffix?: string } | null | undefined;
 
 /**
@@ -209,7 +216,12 @@ function renderCell(
     case 'editable-number':
       return renderEditableNumberCell(value, handleChange, options);
     case 'editable-date':
-      return <EditableDateCell value={(value as Date | null) ?? null} onChange={handleChange} />;
+      return (
+        <EditableDateCell
+          value={(value as Date | null) ?? null}
+          onChange={handleChange}
+        />
+      );
     case 'editable-tags':
       return renderEditableTagsCell(value, handleChange, fieldConfig.name);
     case 'badge-list':
@@ -379,11 +391,26 @@ function renderFallbackCell(
 ): React.ReactNode {
   switch (type) {
     case 'text':
-      return <EditableTextCell value={(value as string) || ''} onChange={handleChange} />;
+      return (
+        <EditableTextCell
+          value={(value as string) || ''}
+          onChange={handleChange}
+        />
+      );
     case 'number':
-      return <EditableNumberCell value={(value as number) || 0} onChange={handleChange} />;
+      return (
+        <EditableNumberCell
+          value={(value as number) || 0}
+          onChange={handleChange}
+        />
+      );
     case 'date':
-      return <EditableDateCell value={value as Date | null} onChange={handleChange} />;
+      return (
+        <EditableDateCell
+          value={value as Date | null}
+          onChange={handleChange}
+        />
+      );
     case 'multiselect': {
       const items = (value as string[]) || [];
       if (items.length === 0) {

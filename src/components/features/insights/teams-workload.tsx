@@ -38,20 +38,23 @@ export function TeamsWorkloadChart({
 }: TeamsWorkloadChartProps) {
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
-    
+
     const totalTasks = chartData.reduce((acc, d) => acc + d.count, 0);
     const avgLoad = totalTasks / chartData.length;
-    const maxLoad = Math.max(...chartData.map(d => d.count));
-    const minLoad = Math.min(...chartData.map(d => d.count));
-    
+    const maxLoad = Math.max(...chartData.map((d) => d.count));
+    const minLoad = Math.min(...chartData.map((d) => d.count));
+
     // Identify overloaded teams (>150% of average)
-    const overloadedTeams = chartData.filter(d => d.count > avgLoad * 1.5);
-    
+    const overloadedTeams = chartData.filter((d) => d.count > avgLoad * 1.5);
+
     // Calculate load balance score (lower variance = better balance)
-    const variance = chartData.reduce((acc, d) => acc + Math.pow(d.count - avgLoad, 2), 0) / chartData.length;
+    const variance =
+      chartData.reduce((acc, d) => acc + Math.pow(d.count - avgLoad, 2), 0) /
+      chartData.length;
     const stdDev = Math.sqrt(variance);
-    const balanceScore = avgLoad > 0 ? Math.max(0, 100 - (stdDev / avgLoad) * 100) : 100;
-    
+    const balanceScore =
+      avgLoad > 0 ? Math.max(0, 100 - (stdDev / avgLoad) * 100) : 100;
+
     return {
       totalTasks,
       avgLoad,
@@ -103,7 +106,9 @@ export function TeamsWorkloadChart({
           )}
         </div>
         <CardDescription>
-          {metrics ? `${metrics.teamCount} teams • ${metrics.totalTasks} total tasks` : 'Task distribution across teams'}
+          {metrics
+            ? `${metrics.teamCount} teams • ${metrics.totalTasks} total tasks`
+            : 'Task distribution across teams'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -127,23 +132,30 @@ export function TeamsWorkloadChart({
               }
             />
             <XAxis type="number" hide />
-            <ChartTooltip 
-              cursor={false} 
+            <ChartTooltip
+              cursor={false}
               content={
-                <ChartTooltipContent 
+                <ChartTooltipContent
                   formatter={(value) => {
                     if (!metrics) return `${value} tasks`;
                     const ratio = (value as number) / metrics.avgLoad;
-                    const label = ratio > 1.5 ? '⚠️ High load' : ratio < 0.5 ? '📉 Low load' : '✓ Balanced';
+                    const label =
+                      ratio > 1.5
+                        ? '⚠️ High load'
+                        : ratio < 0.5
+                          ? '📉 Low load'
+                          : '✓ Balanced';
                     return (
                       <div className="flex flex-col gap-0.5">
                         <span>{value} tasks</span>
-                        <span className="text-xs text-muted-foreground">{label}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {label}
+                        </span>
                       </div>
                     );
                   }}
                 />
-              } 
+              }
             />
             <Bar
               dataKey="count"
@@ -162,10 +174,15 @@ export function TeamsWorkloadChart({
         <CardFooter className="text-xs text-muted-foreground pt-0">
           <div className="flex items-center justify-between w-full">
             <span>Avg: {metrics.avgLoad.toFixed(0)} tasks/team</span>
-            <span className={`font-medium ${
-              metrics.balanceScore >= 70 ? 'text-emerald-600' : 
-              metrics.balanceScore >= 40 ? 'text-amber-600' : 'text-red-600'
-            }`}>
+            <span
+              className={`font-medium ${
+                metrics.balanceScore >= 70
+                  ? 'text-emerald-600'
+                  : metrics.balanceScore >= 40
+                    ? 'text-amber-600'
+                    : 'text-red-600'
+              }`}
+            >
               Balance: {metrics.balanceScore.toFixed(0)}%
             </span>
           </div>

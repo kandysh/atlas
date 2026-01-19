@@ -7,7 +7,7 @@ import { useWorkspaceTasks } from '@/src/lib/query/hooks';
 
 export default function Page() {
   const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();
-  
+
   // Always call hooks before any early returns
   const workspaceId = currentWorkspace?.id || '';
   const { data, isLoading, error } = useWorkspaceTasks(workspaceId, 0);

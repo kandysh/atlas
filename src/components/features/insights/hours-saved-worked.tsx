@@ -20,7 +20,8 @@ import {
 } from '@/src/components/ui/chart';
 import { MonthlyHoursPoint } from '@/src/lib/actions/analytics';
 
-export const description = 'A multiple line chart showing hours worked and saved';
+export const description =
+  'A multiple line chart showing hours worked and saved';
 
 const chartConfig = {
   worked: {
@@ -44,21 +45,27 @@ export default function HoursSavedWorkedChart({
 }) {
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
-    
+
     const totalWorked = chartData.reduce((acc, d) => acc + d.worked, 0);
     const totalSaved = chartData.reduce((acc, d) => acc + d.saved, 0);
     const totalNet = totalSaved - totalWorked;
-    
+
     // Trend: compare recent 3 months net vs previous 3
     const recent = chartData.slice(-3);
     const older = chartData.slice(-6, -3);
-    
+
     const recentNet = recent.reduce((acc, d) => acc + d.net, 0);
-    const olderNet = older.length > 0 ? older.reduce((acc, d) => acc + d.net, 0) : recentNet;
-    
-    const trend = recentNet > olderNet ? 'improving' : recentNet < olderNet ? 'declining' : 'stable';
-    const roi = totalWorked > 0 ? (totalSaved / totalWorked * 100) : 0;
-    
+    const olderNet =
+      older.length > 0 ? older.reduce((acc, d) => acc + d.net, 0) : recentNet;
+
+    const trend =
+      recentNet > olderNet
+        ? 'improving'
+        : recentNet < olderNet
+          ? 'declining'
+          : 'stable';
+    const roi = totalWorked > 0 ? (totalSaved / totalWorked) * 100 : 0;
+
     return {
       totalWorked,
       totalSaved,
@@ -68,8 +75,12 @@ export default function HoursSavedWorkedChart({
     };
   }, [chartData]);
 
-  const TrendIcon = metrics?.trend === 'improving' ? TrendingUp : 
-                   metrics?.trend === 'declining' ? TrendingDown : Minus;
+  const TrendIcon =
+    metrics?.trend === 'improving'
+      ? TrendingUp
+      : metrics?.trend === 'declining'
+        ? TrendingDown
+        : Minus;
 
   return (
     <Card>
@@ -80,17 +91,21 @@ export default function HoursSavedWorkedChart({
             Hours Analysis
           </CardTitle>
           {metrics && (
-            <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
-              metrics.roi >= 100 ? 'bg-emerald-500/10 text-emerald-600' :
-              metrics.roi >= 50 ? 'bg-blue-500/10 text-blue-600' :
-              'bg-amber-500/10 text-amber-600'
-            }`}>
+            <span
+              className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                metrics.roi >= 100
+                  ? 'bg-emerald-500/10 text-emerald-600'
+                  : metrics.roi >= 50
+                    ? 'bg-blue-500/10 text-blue-600'
+                    : 'bg-amber-500/10 text-amber-600'
+              }`}
+            >
               {metrics.roi.toFixed(0)}% ROI
             </span>
           )}
         </div>
         <CardDescription>
-          {metrics 
+          {metrics
             ? `${metrics.totalSaved.toFixed(0)}h saved vs ${metrics.totalWorked.toFixed(0)}h worked`
             : 'Cumulative hours worked and saved over time'}
         </CardDescription>
@@ -117,7 +132,12 @@ export default function HoursSavedWorkedChart({
                 })
               }
             />
-            <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeDasharray="5 5" strokeOpacity={0.3} />
+            <ReferenceLine
+              y={0}
+              stroke="var(--muted-foreground)"
+              strokeDasharray="5 5"
+              strokeOpacity={0.3}
+            />
             <ChartTooltip
               cursor={false}
               content={
@@ -130,7 +150,12 @@ export default function HoursSavedWorkedChart({
                   }
                   formatter={(value, name) => {
                     const hours = Number(value).toFixed(1);
-                    const label = name === 'worked' ? 'Worked' : name === 'saved' ? 'Saved' : 'Net';
+                    const label =
+                      name === 'worked'
+                        ? 'Worked'
+                        : name === 'saved'
+                          ? 'Saved'
+                          : 'Net';
                     return `${hours}h ${label.toLowerCase()}`;
                   }}
                 />
@@ -166,25 +191,42 @@ export default function HoursSavedWorkedChart({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: chartConfig.saved.color }} />
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: chartConfig.saved.color }}
+                />
                 Saved
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: chartConfig.worked.color }} />
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: chartConfig.worked.color }}
+                />
                 Worked
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: chartConfig.net.color }} />
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: chartConfig.net.color }}
+                />
                 Net
               </span>
             </div>
-            <span className={`inline-flex items-center gap-1 ${
-              metrics.trend === 'improving' ? 'text-emerald-600' :
-              metrics.trend === 'declining' ? 'text-amber-600' : ''
-            }`}>
+            <span
+              className={`inline-flex items-center gap-1 ${
+                metrics.trend === 'improving'
+                  ? 'text-emerald-600'
+                  : metrics.trend === 'declining'
+                    ? 'text-amber-600'
+                    : ''
+              }`}
+            >
               <TrendIcon className="h-3 w-3" />
-              {metrics.trend === 'improving' ? 'Savings growing' :
-               metrics.trend === 'declining' ? 'Watch trend' : ''}
+              {metrics.trend === 'improving'
+                ? 'Savings growing'
+                : metrics.trend === 'declining'
+                  ? 'Watch trend'
+                  : ''}
             </span>
           </div>
         </CardFooter>

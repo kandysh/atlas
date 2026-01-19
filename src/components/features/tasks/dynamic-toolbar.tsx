@@ -77,7 +77,9 @@ export function DynamicToolbar({
 }: DynamicToolbarProps) {
   const selectedRowCount = Object.keys(table.getState().rowSelection).length;
   const globalFilter = table.getState().globalFilter ?? '';
-  const [activeFilterField, setActiveFilterField] = useState<string | null>(null);
+  const [activeFilterField, setActiveFilterField] = useState<string | null>(
+    null,
+  );
 
   // Build dynamic filters from field configs
   const filterableFields = useMemo(() => {
@@ -221,7 +223,11 @@ export function DynamicToolbar({
           {/* Column visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-9 px-2.5 text-muted-foreground hover:text-foreground">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 px-2.5 text-muted-foreground hover:text-foreground"
+              >
                 <Columns3 className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -229,7 +235,9 @@ export function DynamicToolbar({
               align="end"
               className="w-56 max-h-80 overflow-auto"
             >
-              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">Toggle columns</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+                Toggle columns
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {fieldConfigs
                 .filter((f) => f.key !== 'title') // Don't allow hiding title
@@ -295,10 +303,12 @@ export function DynamicToolbar({
           if (options.length === 0) return null;
 
           return (
-            <Popover 
-              key={field.id} 
+            <Popover
+              key={field.id}
               open={activeFilterField === field.key}
-              onOpenChange={(open) => setActiveFilterField(open ? field.key : null)}
+              onOpenChange={(open) =>
+                setActiveFilterField(open ? field.key : null)
+              }
             >
               <PopoverTrigger asChild>
                 <Button
@@ -306,13 +316,17 @@ export function DynamicToolbar({
                   size="sm"
                   className={cn(
                     'h-8 rounded-full border-dashed gap-1.5 text-xs font-normal',
-                    hasFilter && 'border-solid border-primary/50 bg-primary/5 text-primary hover:bg-primary/10'
+                    hasFilter &&
+                      'border-solid border-primary/50 bg-primary/5 text-primary hover:bg-primary/10',
                   )}
                 >
                   {hasFilter ? (
                     <>
                       <span>{field.name}</span>
-                      <Badge variant="secondary" className="h-5 px-1.5 rounded-full text-[10px] font-medium bg-primary/20 text-primary">
+                      <Badge
+                        variant="secondary"
+                        className="h-5 px-1.5 rounded-full text-[10px] font-medium bg-primary/20 text-primary"
+                      >
                         {filterValue.length}
                       </Badge>
                     </>
@@ -327,7 +341,9 @@ export function DynamicToolbar({
               <PopoverContent align="start" className="w-52 p-2">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-1">
-                    <span className="text-xs font-medium text-muted-foreground">{field.name}</span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {field.name}
+                    </span>
                     {hasFilter && (
                       <button
                         onClick={() => clearFieldFilter(field.key)}
@@ -342,33 +358,43 @@ export function DynamicToolbar({
                       const isSelected = filterValue.includes(value);
                       const isStatus = field.type === 'status';
                       const isPriority = field.type === 'priority';
-                      
+
                       return (
                         <button
                           key={value}
                           onClick={() => handleFilterToggle(field.key, value)}
                           className={cn(
                             'w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors',
-                            isSelected 
-                              ? 'bg-primary/10 text-primary' 
-                              : 'hover:bg-muted text-foreground'
+                            isSelected
+                              ? 'bg-primary/10 text-primary'
+                              : 'hover:bg-muted text-foreground',
                           )}
                         >
-                          <div className={cn(
-                            'h-4 w-4 rounded border flex items-center justify-center transition-colors',
-                            isSelected 
-                              ? 'bg-primary border-primary' 
-                              : 'border-border'
-                          )}>
-                            {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                          <div
+                            className={cn(
+                              'h-4 w-4 rounded border flex items-center justify-center transition-colors',
+                              isSelected
+                                ? 'bg-primary border-primary'
+                                : 'border-border',
+                            )}
+                          >
+                            {isSelected && (
+                              <Check className="h-3 w-3 text-primary-foreground" />
+                            )}
                           </div>
                           {(isStatus || isPriority) && (
-                            <span className={cn(
-                              'h-2 w-2 rounded-full',
-                              isStatus ? getStatusColor(value) : getPriorityColor(value)
-                            )} />
+                            <span
+                              className={cn(
+                                'h-2 w-2 rounded-full',
+                                isStatus
+                                  ? getStatusColor(value)
+                                  : getPriorityColor(value),
+                              )}
+                            />
                           )}
-                          <span className="flex-1 text-left">{getDisplayLabel(field, value)}</span>
+                          <span className="flex-1 text-left">
+                            {getDisplayLabel(field, value)}
+                          </span>
                         </button>
                       );
                     })}

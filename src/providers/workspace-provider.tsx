@@ -117,13 +117,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Derive current workspace: use selected if valid, otherwise fallback to first
   const currentWorkspace = useMemo(() => {
     if (workspaces.length === 0) return null;
-    
+
     // If we have a selected workspace, check if it still exists
     if (selectedWorkspaceId) {
       const selected = workspaces.find((w) => w.id === selectedWorkspaceId);
       if (selected) return selected;
     }
-    
+
     // Fallback to first workspace
     return workspaces[0];
   }, [workspaces, selectedWorkspaceId]);

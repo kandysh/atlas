@@ -68,17 +68,25 @@ export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
 
   // Compute derived insights
   const insights = useMemo(() => {
-    const completionRate = data.totalTasks > 0 
-      ? ((data.totalTasks - data.openTasks) / data.totalTasks) * 100 
-      : 0;
-    
+    const completionRate =
+      data.totalTasks > 0
+        ? ((data.totalTasks - data.openTasks) / data.totalTasks) * 100
+        : 0;
+
     // Cycle time health: < 5 days is good, > 14 is concerning
-    const cycleHealth = data.avgCycleDays <= 5 ? 'good' : data.avgCycleDays <= 14 ? 'moderate' : 'slow';
-    
+    const cycleHealth =
+      data.avgCycleDays <= 5
+        ? 'good'
+        : data.avgCycleDays <= 14
+          ? 'moderate'
+          : 'slow';
+
     // Open tasks ratio health
-    const openRatio = data.totalTasks > 0 ? data.openTasks / data.totalTasks : 0;
-    const backlogHealth = openRatio < 0.3 ? 'healthy' : openRatio < 0.6 ? 'growing' : 'critical';
-    
+    const openRatio =
+      data.totalTasks > 0 ? data.openTasks / data.totalTasks : 0;
+    const backlogHealth =
+      openRatio < 0.3 ? 'healthy' : openRatio < 0.6 ? 'growing' : 'critical';
+
     return { completionRate, cycleHealth, backlogHealth, openRatio };
   }, [data]);
 
@@ -93,34 +101,89 @@ export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
       onClick: () => router.push('/'),
       tooltip: 'View all tasks',
       subtitle: `${insights.completionRate.toFixed(0)}% complete`,
-      subtitleColor: insights.completionRate >= 70 ? 'text-emerald-600' : insights.completionRate >= 40 ? 'text-amber-600' : 'text-muted-foreground',
+      subtitleColor:
+        insights.completionRate >= 70
+          ? 'text-emerald-600'
+          : insights.completionRate >= 40
+            ? 'text-amber-600'
+            : 'text-muted-foreground',
     },
     {
       label: 'Open Tasks',
       value: data.openTasks,
       icon: Clock,
-      color: insights.backlogHealth === 'healthy' ? 'text-emerald-500' : insights.backlogHealth === 'growing' ? 'text-amber-500' : 'text-red-500',
-      bgColor: insights.backlogHealth === 'healthy' ? 'bg-emerald-500/10' : insights.backlogHealth === 'growing' ? 'bg-amber-500/10' : 'bg-red-500/10',
-      borderColor: insights.backlogHealth === 'healthy' ? 'border-l-emerald-500' : insights.backlogHealth === 'growing' ? 'border-l-amber-500' : 'border-l-red-500',
+      color:
+        insights.backlogHealth === 'healthy'
+          ? 'text-emerald-500'
+          : insights.backlogHealth === 'growing'
+            ? 'text-amber-500'
+            : 'text-red-500',
+      bgColor:
+        insights.backlogHealth === 'healthy'
+          ? 'bg-emerald-500/10'
+          : insights.backlogHealth === 'growing'
+            ? 'bg-amber-500/10'
+            : 'bg-red-500/10',
+      borderColor:
+        insights.backlogHealth === 'healthy'
+          ? 'border-l-emerald-500'
+          : insights.backlogHealth === 'growing'
+            ? 'border-l-amber-500'
+            : 'border-l-red-500',
       onClick: () => {
         onFilterChange?.({ status: 'todo' });
       },
       tooltip: 'Filter to open tasks',
-      subtitle: insights.backlogHealth === 'healthy' ? 'Backlog healthy' : insights.backlogHealth === 'growing' ? 'Backlog growing' : 'High backlog',
-      subtitleColor: insights.backlogHealth === 'healthy' ? 'text-emerald-600' : insights.backlogHealth === 'growing' ? 'text-amber-600' : 'text-red-600',
+      subtitle:
+        insights.backlogHealth === 'healthy'
+          ? 'Backlog healthy'
+          : insights.backlogHealth === 'growing'
+            ? 'Backlog growing'
+            : 'High backlog',
+      subtitleColor:
+        insights.backlogHealth === 'healthy'
+          ? 'text-emerald-600'
+          : insights.backlogHealth === 'growing'
+            ? 'text-amber-600'
+            : 'text-red-600',
     },
     {
       label: 'Avg Cycle Time',
       value: data.avgCycleDays,
       icon: CheckCircle2,
-      color: insights.cycleHealth === 'good' ? 'text-emerald-500' : insights.cycleHealth === 'moderate' ? 'text-amber-500' : 'text-red-500',
-      bgColor: insights.cycleHealth === 'good' ? 'bg-emerald-500/10' : insights.cycleHealth === 'moderate' ? 'bg-amber-500/10' : 'bg-red-500/10',
-      borderColor: insights.cycleHealth === 'good' ? 'border-l-emerald-500' : insights.cycleHealth === 'moderate' ? 'border-l-amber-500' : 'border-l-red-500',
+      color:
+        insights.cycleHealth === 'good'
+          ? 'text-emerald-500'
+          : insights.cycleHealth === 'moderate'
+            ? 'text-amber-500'
+            : 'text-red-500',
+      bgColor:
+        insights.cycleHealth === 'good'
+          ? 'bg-emerald-500/10'
+          : insights.cycleHealth === 'moderate'
+            ? 'bg-amber-500/10'
+            : 'bg-red-500/10',
+      borderColor:
+        insights.cycleHealth === 'good'
+          ? 'border-l-emerald-500'
+          : insights.cycleHealth === 'moderate'
+            ? 'border-l-amber-500'
+            : 'border-l-red-500',
       suffix: ' days',
       decimals: 1,
       tooltip: 'Average time to complete tasks',
-      subtitle: insights.cycleHealth === 'good' ? 'Fast delivery' : insights.cycleHealth === 'moderate' ? 'Moderate pace' : 'Needs improvement',
-      subtitleColor: insights.cycleHealth === 'good' ? 'text-emerald-600' : insights.cycleHealth === 'moderate' ? 'text-amber-600' : 'text-red-600',
+      subtitle:
+        insights.cycleHealth === 'good'
+          ? 'Fast delivery'
+          : insights.cycleHealth === 'moderate'
+            ? 'Moderate pace'
+            : 'Needs improvement',
+      subtitleColor:
+        insights.cycleHealth === 'good'
+          ? 'text-emerald-600'
+          : insights.cycleHealth === 'moderate'
+            ? 'text-amber-600'
+            : 'text-red-600',
     },
     {
       label: 'Hours Saved',
@@ -132,8 +195,12 @@ export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
       suffix: ' hrs',
       decimals: 0,
       tooltip: 'Total hours saved through automation',
-      subtitle: data.totalHoursSaved > 0 ? `≈ ${(data.totalHoursSaved / 8).toFixed(0)} work days` : 'Track savings',
-      subtitleColor: data.totalHoursSaved > 0 ? 'text-purple-600' : 'text-muted-foreground',
+      subtitle:
+        data.totalHoursSaved > 0
+          ? `≈ ${(data.totalHoursSaved / 8).toFixed(0)} work days`
+          : 'Track savings',
+      subtitleColor:
+        data.totalHoursSaved > 0 ? 'text-purple-600' : 'text-muted-foreground',
     },
   ];
 
@@ -162,13 +229,13 @@ export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
         const isClickable = !!kpi.onClick;
-        
+
         return (
           <Card
             key={kpi.label}
             className={`bg-background/80 backdrop-blur-sm border-border/50 border-l-4 ${kpi.borderColor} transition-all duration-200 group ${
-              isClickable 
-                ? 'hover:shadow-lg hover:border-primary/30 cursor-pointer' 
+              isClickable
+                ? 'hover:shadow-lg hover:border-primary/30 cursor-pointer'
                 : ''
             }`}
             onClick={kpi.onClick}
@@ -177,7 +244,9 @@ export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{kpi.label}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    {kpi.label}
+                  </p>
                   <p className="text-2xl font-bold tracking-tight">
                     <AnimatedCounter
                       value={kpi.value}

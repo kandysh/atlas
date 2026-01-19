@@ -3,7 +3,14 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
-import { AlertCircle, TrendingUp, Timer, Clock, Zap, AlertTriangle } from 'lucide-react';
+import {
+  AlertCircle,
+  TrendingUp,
+  Timer,
+  Clock,
+  Zap,
+  AlertTriangle,
+} from 'lucide-react';
 import { AnalyticsData, AnalyticsFilters } from '@/src/lib/actions/analytics';
 
 interface InsightsCardsProps {
@@ -32,9 +39,13 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
     const highAging = data.priorityAging.find(
       (p) => p.priority.toLowerCase() === 'high',
     );
-    
-    const urgentStuck = urgentAging ? urgentAging.bucket7to14 + urgentAging.bucket14plus : 0;
-    const highStuck = highAging ? highAging.bucket7to14 + highAging.bucket14plus : 0;
+
+    const urgentStuck = urgentAging
+      ? urgentAging.bucket7to14 + urgentAging.bucket14plus
+      : 0;
+    const highStuck = highAging
+      ? highAging.bucket7to14 + highAging.bucket14plus
+      : 0;
 
     if (urgentStuck > 0) {
       result.push({
@@ -98,7 +109,8 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
 
     // Hours efficiency insight
     if (data.hoursEfficiency.length > 0) {
-      const recentEfficiency = data.hoursEfficiency[data.hoursEfficiency.length - 1];
+      const recentEfficiency =
+        data.hoursEfficiency[data.hoursEfficiency.length - 1];
       if (recentEfficiency && recentEfficiency.efficiency > 120) {
         result.push({
           id: 'over-budget',
@@ -108,7 +120,11 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
           action: 'Details',
           priority: 4,
         });
-      } else if (recentEfficiency && recentEfficiency.efficiency < 80 && recentEfficiency.efficiency > 0) {
+      } else if (
+        recentEfficiency &&
+        recentEfficiency.efficiency < 80 &&
+        recentEfficiency.efficiency > 0
+      ) {
         result.push({
           id: 'under-budget',
           type: 'success',

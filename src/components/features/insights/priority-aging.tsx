@@ -51,21 +51,38 @@ export function PriorityAgingChart({
   onPriorityClick,
 }: PriorityAgingChartProps) {
   const metrics = useMemo(() => {
-    const totalAging = chartData.reduce((acc, d) => 
-      acc + d.bucket7to14 + d.bucket14plus, 0);
+    const totalAging = chartData.reduce(
+      (acc, d) => acc + d.bucket7to14 + d.bucket14plus,
+      0,
+    );
     const criticalAging = chartData
-      .filter(d => d.priority.toLowerCase() === 'urgent' || d.priority.toLowerCase() === 'high')
+      .filter(
+        (d) =>
+          d.priority.toLowerCase() === 'urgent' ||
+          d.priority.toLowerCase() === 'high',
+      )
       .reduce((acc, d) => acc + d.bucket7to14 + d.bucket14plus, 0);
-    const totalTasks = chartData.reduce((acc, d) => 
-      acc + d.bucket0to3 + d.bucket3to7 + d.bucket7to14 + d.bucket14plus, 0);
+    const totalTasks = chartData.reduce(
+      (acc, d) =>
+        acc + d.bucket0to3 + d.bucket3to7 + d.bucket7to14 + d.bucket14plus,
+      0,
+    );
     const freshTasks = chartData.reduce((acc, d) => acc + d.bucket0to3, 0);
     const freshRate = totalTasks > 0 ? (freshTasks / totalTasks) * 100 : 0;
-    
+
     // Health: good if <10% aging, warning if 10-25%, critical if >25%
     const agingRate = totalTasks > 0 ? (totalAging / totalTasks) * 100 : 0;
-    const health = agingRate < 10 ? 'good' : agingRate < 25 ? 'warning' : 'critical';
-    
-    return { totalAging, criticalAging, totalTasks, freshRate, agingRate, health };
+    const health =
+      agingRate < 10 ? 'good' : agingRate < 25 ? 'warning' : 'critical';
+
+    return {
+      totalAging,
+      criticalAging,
+      totalTasks,
+      freshRate,
+      agingRate,
+      health,
+    };
   }, [chartData]);
 
   const handleBarClick = (
@@ -90,17 +107,21 @@ export function PriorityAgingChart({
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle>Priority Aging</CardTitle>
-          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
-            metrics.health === 'good' ? 'bg-emerald-500/10 text-emerald-600' :
-            metrics.health === 'warning' ? 'bg-amber-500/10 text-amber-600' :
-            'bg-red-500/10 text-red-600'
-          }`}>
+          <span
+            className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+              metrics.health === 'good'
+                ? 'bg-emerald-500/10 text-emerald-600'
+                : metrics.health === 'warning'
+                  ? 'bg-amber-500/10 text-amber-600'
+                  : 'bg-red-500/10 text-red-600'
+            }`}
+          >
             <HealthIcon className="h-3 w-3" />
             {metrics.agingRate.toFixed(0)}% aging
           </span>
         </div>
         <CardDescription>
-          {metrics.criticalAging > 0 
+          {metrics.criticalAging > 0
             ? `⚠️ ${metrics.criticalAging} high/urgent tasks aging >7 days`
             : `${metrics.freshRate.toFixed(0)}% of tasks are fresh (<3 days)`}
         </CardDescription>
@@ -120,16 +141,18 @@ export function PriorityAgingChart({
               tickMargin={8}
             />
             <YAxis tickLine={false} axisLine={false} />
-            <ChartTooltip 
-              cursor={false} 
+            <ChartTooltip
+              cursor={false}
               content={
-                <ChartTooltipContent 
+                <ChartTooltipContent
                   formatter={(value, name) => {
-                    const label = chartConfig[name as keyof typeof chartConfig]?.label || name;
+                    const label =
+                      chartConfig[name as keyof typeof chartConfig]?.label ||
+                      name;
                     return `${value} tasks (${label})`;
                   }}
                 />
-              } 
+              }
             />
             <ChartLegend content={<ChartLegendContent />} />
             <Bar

@@ -103,10 +103,7 @@ export const tasks = pgTable(
       .references(() => workspaces.id, { onDelete: 'cascade' }),
     displayId: text('display_id').notNull().unique(),
     sequenceNumber: integer('sequence_number').notNull(),
-    data: jsonb('data')
-      .notNull()
-      .$type<Record<string, unknown>>()
-      .default({}),
+    data: jsonb('data').notNull().$type<Record<string, unknown>>().default({}),
     subtasks: jsonb('subtasks')
       .$type<
         Array<{

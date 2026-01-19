@@ -42,12 +42,18 @@ export function OwnerProductivityChart({
 }: OwnerProductivityChartProps) {
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
-    
-    const totalCompleted = chartData.reduce((acc, d) => acc + d.completedTasks, 0);
+
+    const totalCompleted = chartData.reduce(
+      (acc, d) => acc + d.completedTasks,
+      0,
+    );
     const avgCompleted = totalCompleted / chartData.length;
     const topPerformer = chartData[0];
-    const totalHoursSaved = chartData.reduce((acc, d) => acc + d.totalHoursSaved, 0);
-    
+    const totalHoursSaved = chartData.reduce(
+      (acc, d) => acc + d.totalHoursSaved,
+      0,
+    );
+
     return {
       topPerformer: topPerformer?.owner || 'N/A',
       topCount: topPerformer?.completedTasks || 0,
@@ -88,7 +94,9 @@ export function OwnerProductivityChart({
           )}
         </div>
         <CardDescription>
-          {metrics ? `${metrics.teamSize} contributors • ${metrics.totalHoursSaved.toFixed(0)}hrs saved total` : 'Loading...'}
+          {metrics
+            ? `${metrics.teamSize} contributors • ${metrics.totalHoursSaved.toFixed(0)}hrs saved total`
+            : 'Loading...'}
         </CardDescription>
       </CardHeader>
       <CardContent>

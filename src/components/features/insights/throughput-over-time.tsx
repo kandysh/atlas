@@ -56,19 +56,21 @@ export function ChartLineInteractive({
 
   const trend = useMemo(() => {
     if (chartData.length < 4) return null;
-    
+
     const recent = chartData.slice(-3);
     const older = chartData.slice(-6, -3);
-    
+
     const key = activeChart as 'hours' | 'count';
     const recentSum = recent.reduce((acc, d) => acc + d[key], 0);
-    const olderSum = older.length > 0 ? older.reduce((acc, d) => acc + d[key], 0) : recentSum;
-    
+    const olderSum =
+      older.length > 0 ? older.reduce((acc, d) => acc + d[key], 0) : recentSum;
+
     const change = recentSum - olderSum;
     const percentChange = olderSum > 0 ? (change / olderSum) * 100 : 0;
-    
+
     return {
-      direction: percentChange > 5 ? 'up' : percentChange < -5 ? 'down' : 'stable',
+      direction:
+        percentChange > 5 ? 'up' : percentChange < -5 ? 'down' : 'stable',
       percentChange,
     };
   }, [chartData, activeChart]);
@@ -156,9 +158,9 @@ export function ChartLineInteractive({
                 />
               }
             />
-            <Bar 
-              dataKey={activeChart} 
-              fill={`var(--color-${activeChart})`} 
+            <Bar
+              dataKey={activeChart}
+              fill={`var(--color-${activeChart})`}
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
@@ -166,16 +168,19 @@ export function ChartLineInteractive({
       </CardContent>
       {trend && trend.direction !== 'stable' && (
         <CardFooter className="text-xs text-muted-foreground border-t px-6 py-3">
-          <div className={`flex items-center gap-1 ${
-            trend.direction === 'up' ? 'text-emerald-600' : 'text-amber-600'
-          }`}>
+          <div
+            className={`flex items-center gap-1 ${
+              trend.direction === 'up' ? 'text-emerald-600' : 'text-amber-600'
+            }`}
+          >
             {trend.direction === 'up' ? (
               <TrendingUp className="h-3 w-3" />
             ) : (
               <TrendingDown className="h-3 w-3" />
             )}
             <span>
-              {trend.direction === 'up' ? '+' : ''}{trend.percentChange.toFixed(0)}% vs previous period
+              {trend.direction === 'up' ? '+' : ''}
+              {trend.percentChange.toFixed(0)}% vs previous period
             </span>
           </div>
         </CardFooter>
