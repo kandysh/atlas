@@ -31,6 +31,7 @@ const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+const SIDEBAR_COLLAPSE_BREAKPOINT = 1024;
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed";
@@ -72,6 +73,7 @@ function SidebarProvider({
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen);
+  const [autoCollapsed, setAutoCollapsed] = React.useState(false);
   const open = openProp ?? _open;
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
@@ -108,6 +110,24 @@ function SidebarProvider({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toggleSidebar]);
+
+  // Auto-collapse sidebar based on screen width
+  React.useEffect(() => {
+    const handleResize = () => {
+      const shouldCollapse = window.innerWidth < SIDEBAR_COLLAPSE_BREAKPOINT;
+      if (shouldCollapse && !autoCollapsed && open) {
+        setAutoCollapsed(true);
+        setOpen(false);
+      } else if (!shouldCollapse && autoCollapsed) {
+        setAutoCollapsed(false);
+        setOpen(true);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [autoCollapsed, open, setOpen]);
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
