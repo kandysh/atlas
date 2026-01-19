@@ -1,11 +1,14 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Trophy, TrendingUp } from 'lucide-react';
 
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
@@ -37,12 +40,28 @@ export function OwnerProductivityChart({
   chartData,
   onOwnerClick,
 }: OwnerProductivityChartProps) {
+  const metrics = useMemo(() => {
+    if (chartData.length === 0) return null;
+    
+    const totalCompleted = chartData.reduce((acc, d) => acc + d.completedTasks, 0);
+    const avgCompleted = totalCompleted / chartData.length;
+    const topPerformer = chartData[0];
+    const totalHoursSaved = chartData.reduce((acc, d) => acc + d.totalHoursSaved, 0);
+    
+    return {
+      topPerformer: topPerformer?.owner || 'N/A',
+      topCount: topPerformer?.completedTasks || 0,
+      avgCompleted,
+      totalHoursSaved,
+      teamSize: chartData.length,
+    };
+  }, [chartData]);
+
   const handleBarClick = (
     _data: unknown,
     _index: number,
     event: React.MouseEvent,
   ) => {
-    // Get owner from the chart data based on the clicked bar
     const target = event.target as SVGElement;
     const barIndex = target.getAttribute('data-index');
     if (barIndex !== null && onOwnerClick) {
@@ -55,9 +74,22 @@ export function OwnerProductivityChart({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Owner Productivity</CardTitle>
-        <CardDescription>Top 5 performers by completed tasks</CardDescription>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-amber-500" />
+            Top Performers
+          </CardTitle>
+          {metrics && metrics.topCount > metrics.avgCompleted * 1.3 && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
+              <TrendingUp className="h-3 w-3" />
+              Standout
+            </span>
+          )}
+        </div>
+        <CardDescription>
+          {metrics ? `${metrics.teamSize} contributors • ${metrics.totalHoursSaved.toFixed(0)}hrs saved total` : 'Loading...'}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -67,7 +99,7 @@ export function OwnerProductivityChart({
             layout="vertical"
             margin={{ left: 12, right: 12 }}
           >
-            <CartesianGrid horizontal={false} />
+            <CartesianGrid horizontal={false} strokeDasharray="3 3" />
             <YAxis
               dataKey="owner"
               type="category"
@@ -84,9 +116,20 @@ export function OwnerProductivityChart({
               cursor={false}
               content={
                 <ChartTooltipContent
-                  formatter={(value, name) => {
+                  formatter={(value, name, item) => {
                     if (name === 'avgCycleDays') {
                       return `${Number(value).toFixed(1)} days`;
+                    }
+                    const owner = item?.payload as OwnerProductivity;
+                    if (owner) {
+                      return (
+                        <div className="flex flex-col gap-1">
+                          <span>{value} tasks completed</span>
+                          <span className="text-xs text-muted-foreground">
+                            {owner.totalHoursSaved.toFixed(1)}hrs saved
+                          </span>
+                        </div>
+                      );
                     }
                     return value;
                   }}
@@ -103,6 +146,11 @@ export function OwnerProductivityChart({
           </BarChart>
         </ChartContainer>
       </CardContent>
+      {metrics && metrics.topPerformer !== 'N/A' && (
+        <CardFooter className="text-xs text-muted-foreground pt-0">
+          🏆 {metrics.topPerformer} leads with {metrics.topCount} completions
+        </CardFooter>
+      )}
     </Card>
   );
 }
