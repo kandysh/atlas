@@ -33,9 +33,14 @@ export function TeamsWorkloadChart({
   chartData,
   onTeamClick,
 }: TeamsWorkloadChartProps) {
-  const handleBarClick = (data: { team: string }) => {
-    if (onTeamClick && data?.team) {
-      onTeamClick(data.team);
+  const handleBarClick = (_data: unknown, _index: number, event: React.MouseEvent) => {
+    const target = event.target as SVGElement;
+    const barIndex = target.getAttribute("data-index");
+    if (barIndex !== null && onTeamClick) {
+      const dataItem = chartData[parseInt(barIndex, 10)];
+      if (dataItem?.team) {
+        onTeamClick(dataItem.team);
+      }
     }
   };
 

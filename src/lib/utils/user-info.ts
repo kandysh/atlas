@@ -1,6 +1,7 @@
 /**
  * Get user information from environment variable
- * Format: {"email": "user@example.com", "name": "User Name"}
+ * Format: {"id": 1, "details": {"email": "user@example.com", "name": "User Name"}}
+ * or: {"id": 1, "email": "user@example.com", "name": "User Name"}
  */
 export function getUserInfo(): {
   id: number;
@@ -15,7 +16,11 @@ export function getUserInfo(): {
 
     const userInfo = JSON.parse(userInfoEnv);
 
-    if (!userInfo.details.email || !userInfo.details.name) {
+    // Support both nested and flat structure
+    const email = userInfo.details?.email || userInfo.email;
+    const name = userInfo.details?.name || userInfo.name;
+
+    if (!email || !name) {
       console.error("USERINFO must contain email and name");
       return null;
     }
@@ -23,8 +28,8 @@ export function getUserInfo(): {
     return {
       id: userInfo.id,
       details: {
-        email: userInfo.email,
-        name: userInfo.name,
+        email,
+        name,
       },
     };
   } catch (error) {

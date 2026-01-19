@@ -44,6 +44,7 @@ export interface AssetClassDistribution {
   assetClass: string;
   count: number;
   fill: string;
+  [key: string]: string | number;
 }
 
 export interface PriorityAging {

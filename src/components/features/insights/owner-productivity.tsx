@@ -37,9 +37,15 @@ export function OwnerProductivityChart({
   chartData,
   onOwnerClick,
 }: OwnerProductivityChartProps) {
-  const handleBarClick = (data: { owner: string }) => {
-    if (onOwnerClick && data?.owner) {
-      onOwnerClick(data.owner);
+  const handleBarClick = (_data: unknown, _index: number, event: React.MouseEvent) => {
+    // Get owner from the chart data based on the clicked bar
+    const target = event.target as SVGElement;
+    const barIndex = target.getAttribute("data-index");
+    if (barIndex !== null && onOwnerClick) {
+      const dataItem = chartData[parseInt(barIndex, 10)];
+      if (dataItem?.owner) {
+        onOwnerClick(dataItem.owner);
+      }
     }
   };
 

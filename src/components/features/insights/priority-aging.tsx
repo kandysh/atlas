@@ -48,9 +48,14 @@ export function PriorityAgingChart({
   chartData,
   onPriorityClick,
 }: PriorityAgingChartProps) {
-  const handleBarClick = (data: { priority: string }) => {
-    if (onPriorityClick && data?.priority) {
-      onPriorityClick(data.priority.toLowerCase());
+  const handleBarClick = (_data: unknown, _index: number, event: React.MouseEvent) => {
+    const target = event.target as SVGElement;
+    const barIndex = target.getAttribute("data-index");
+    if (barIndex !== null && onPriorityClick) {
+      const dataItem = chartData[parseInt(barIndex, 10)];
+      if (dataItem?.priority) {
+        onPriorityClick(dataItem.priority.toLowerCase());
+      }
     }
   };
 
