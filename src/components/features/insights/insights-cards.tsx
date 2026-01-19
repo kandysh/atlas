@@ -3,17 +3,12 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
-import { AlertCircle, TrendingUp, DollarSign, Clock } from 'lucide-react';
+import { AlertCircle, TrendingUp, Timer, Clock } from 'lucide-react';
 import { AnalyticsData, AnalyticsFilters } from '@/src/lib/actions/analytics';
-
-// Default hourly rate for savings calculation
-// TODO: Make this configurable per workspace/organization
-const DEFAULT_HOURLY_RATE = 50;
 
 interface InsightsCardsProps {
   data: AnalyticsData;
   onFilterChange: (filters: AnalyticsFilters) => void;
-  hourlyRate?: number;
 }
 
 interface Insight {
@@ -29,7 +24,6 @@ interface Insight {
 export function InsightsCards({
   data,
   onFilterChange,
-  hourlyRate = DEFAULT_HOURLY_RATE,
 }: InsightsCardsProps) {
   const insights = useMemo<Insight[]>(() => {
     const result: Insight[] = [];
@@ -77,15 +71,15 @@ export function InsightsCards({
       }
     }
 
-    // Calculate savings value using configurable hourly rate
-    const savedValue = data.kpiSummary.totalHoursSaved * hourlyRate;
-    if (savedValue > 0) {
+    // Hours saved insight
+    const hoursSaved = data.kpiSummary.totalHoursSaved;
+    if (hoursSaved > 0) {
       result.push({
         id: 'savings',
-        icon: DollarSign,
+        icon: Timer,
         iconColor: 'text-purple-500',
         bgColor: 'bg-purple-500/10',
-        message: `$${savedValue.toLocaleString()} saved via automation`,
+        message: `${hoursSaved.toLocaleString()} hours saved through automation`,
         action: 'Details',
       });
     }
@@ -106,7 +100,7 @@ export function InsightsCards({
     }
 
     return result;
-  }, [data, hourlyRate]);
+  }, [data]);
 
   if (insights.length === 0) {
     return null;

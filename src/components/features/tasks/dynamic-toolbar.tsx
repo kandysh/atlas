@@ -8,12 +8,13 @@ import { Input } from '@/src/components/ui/input';
 import {
   Search,
   Trash2,
-  ChevronDown,
   X,
-  SlidersHorizontal,
+  Filter,
   Columns3,
   Eye,
   EyeOff,
+  Plus,
+  Check,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -23,8 +24,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/src/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/src/components/ui/popover';
+import { Badge } from '@/src/components/ui/badge';
 import { cn } from '@/src/lib/utils';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 interface DynamicToolbarProps {
   table: Table<Task>;
@@ -70,6 +77,7 @@ export function DynamicToolbar({
 }: DynamicToolbarProps) {
   const selectedRowCount = Object.keys(table.getState().rowSelection).length;
   const globalFilter = table.getState().globalFilter ?? '';
+  const [activeFilterField, setActiveFilterField] = useState<string | null>(null);
 
   // Build dynamic filters from field configs
   const filterableFields = useMemo(() => {
@@ -146,6 +154,11 @@ export function DynamicToolbar({
     });
   };
 
+  const clearFieldFilter = (fieldKey: string) => {
+    const column = table.getColumn(fieldKey);
+    column?.setFilterValue(undefined);
+  };
+
   const getDisplayLabel = (field: FieldConfig, value: string): string => {
     if (field.type === 'status') {
       return statusLabels[value as Status] || value;
@@ -156,136 +169,67 @@ export function DynamicToolbar({
     return value;
   };
 
-  const getDotClass = (field: FieldConfig, value: string): string | null => {
-    if (field.type === 'status') {
-      return `status-dot status-${value}`;
-    }
-    if (field.type === 'priority') {
-      return `priority-dot priority-${value}`;
-    }
-    return null;
+  const getStatusColor = (value: string): string => {
+    const colors: Record<string, string> = {
+      todo: 'bg-slate-500',
+      'in-progress': 'bg-blue-500',
+      testing: 'bg-amber-500',
+      done: 'bg-emerald-500',
+      completed: 'bg-emerald-600',
+      blocked: 'bg-red-500',
+    };
+    return colors[value] || 'bg-slate-400';
+  };
+
+  const getPriorityColor = (value: string): string => {
+    const colors: Record<string, string> = {
+      low: 'bg-slate-400',
+      medium: 'bg-amber-500',
+      high: 'bg-orange-500',
+      urgent: 'bg-red-500',
+    };
+    return colors[value] || 'bg-slate-400';
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Main toolbar row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Left: Search */}
-        <div className="flex flex-1 items-center gap-2">
-          <div className="relative w-full sm:w-72">
+        <div className="flex flex-1 items-center gap-3">
+          <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               placeholder="Search tasks..."
               value={globalFilter}
               onChange={(e) => table.setGlobalFilter(e.target.value)}
-              className="h-10 pl-9 text-sm bg-muted/30 border-0 focus-visible:ring-1"
+              className="h-9 pl-9 text-sm bg-background border border-border/60 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50"
             />
+            {globalFilter && (
+              <button
+                onClick={() => table.setGlobalFilter('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
-          {/* Filter button with count */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(
-                  'h-10 gap-2',
-                  totalFilters > 0 && 'border-primary/50 bg-primary/5',
-                )}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                <span className="hidden sm:inline">Filters</span>
-                {totalFilters > 0 && (
-                  <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
-                    {totalFilters}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-
-              {filterableFields.map((field) => {
-                const options = fieldOptions[field.key] || [];
-                const column = table.getColumn(field.key);
-                const filterValue =
-                  (column?.getFilterValue() as string[]) ?? [];
-
-                if (options.length === 0) return null;
-
-                return (
-                  <DropdownMenu key={field.id}>
-                    <DropdownMenuTrigger asChild>
-                      <button className="w-full flex items-center justify-between px-2 py-1.5 text-sm hover:bg-accent rounded-sm">
-                        <span>{field.name}</span>
-                        <div className="flex items-center gap-1">
-                          {filterValue.length > 0 && (
-                            <span className="text-xs text-primary">
-                              {filterValue.length}
-                            </span>
-                          )}
-                          <ChevronDown className="h-3.5 w-3.5 opacity-50" />
-                        </div>
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      side="right"
-                      align="start"
-                      className="w-48 max-h-64 overflow-auto"
-                    >
-                      {options.map((value) => {
-                        const dotClass = getDotClass(field, value);
-                        return (
-                          <DropdownMenuCheckboxItem
-                            key={value}
-                            checked={filterValue.includes(value)}
-                            onCheckedChange={() =>
-                              handleFilterToggle(field.key, value)
-                            }
-                            className="gap-2"
-                          >
-                            {dotClass && <span className={dotClass} />}
-                            {getDisplayLabel(field, value)}
-                          </DropdownMenuCheckboxItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                );
-              })}
-
-              {totalFilters > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <button
-                    onClick={clearAllFilters}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                    Clear all filters
-                  </button>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Column visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10 gap-2">
+              <Button variant="ghost" size="sm" className="h-9 px-2.5 text-muted-foreground hover:text-foreground">
                 <Columns3 className="h-4 w-4" />
-                <span className="hidden sm:inline">Columns</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
               className="w-56 max-h-80 overflow-auto"
             >
-              <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">Toggle columns</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {fieldConfigs
                 .filter((f) => f.key !== 'title') // Don't allow hiding title
@@ -313,10 +257,10 @@ export function DynamicToolbar({
           {/* Delete selected */}
           {selectedRowCount > 0 && onDeleteSelected && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleDeleteSelected}
-              className="h-10 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+              className="h-9 text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="h-4 w-4 sm:mr-1.5" />
               <span className="hidden sm:inline">
@@ -330,47 +274,132 @@ export function DynamicToolbar({
             <Button
               onClick={onAddTask}
               size="sm"
-              className="h-10 bg-primary hover:bg-primary/90 shadow-sm"
+              className="h-9 gap-1.5 bg-primary hover:bg-primary/90 shadow-sm rounded-lg"
             >
-              <span className="text-lg leading-none mr-1.5">+</span>
-              <span>New Task</span>
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">New Task</span>
             </Button>
           )}
         </div>
       </div>
 
-      {/* Active filter pills */}
-      {totalFilters > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted-foreground">Active filters:</span>
-          {filterableFields.map((field) => {
-            const column = table.getColumn(field.key);
-            const filterValue = (column?.getFilterValue() as string[]) ?? [];
+      {/* Filter chips row */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Filter dropdown buttons for each field */}
+        {filterableFields.map((field) => {
+          const options = fieldOptions[field.key] || [];
+          const column = table.getColumn(field.key);
+          const filterValue = (column?.getFilterValue() as string[]) ?? [];
+          const hasFilter = filterValue.length > 0;
 
-            return filterValue.map((value) => (
-              <button
-                key={`${field.key}-${value}`}
-                onClick={() => handleFilterToggle(field.key, value)}
-                className="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              >
-                {getDotClass(field, value) && (
-                  <span
-                    className={cn(getDotClass(field, value), '!w-1.5 !h-1.5')}
-                  />
-                )}
-                <span>{getDisplayLabel(field, value)}</span>
-                <X className="h-3 w-3" />
-              </button>
-            ));
-          })}
-          <button
+          if (options.length === 0) return null;
+
+          return (
+            <Popover 
+              key={field.id} 
+              open={activeFilterField === field.key}
+              onOpenChange={(open) => setActiveFilterField(open ? field.key : null)}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    'h-8 rounded-full border-dashed gap-1.5 text-xs font-normal',
+                    hasFilter && 'border-solid border-primary/50 bg-primary/5 text-primary hover:bg-primary/10'
+                  )}
+                >
+                  {hasFilter ? (
+                    <>
+                      <span>{field.name}</span>
+                      <Badge variant="secondary" className="h-5 px-1.5 rounded-full text-[10px] font-medium bg-primary/20 text-primary">
+                        {filterValue.length}
+                      </Badge>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-3 w-3" />
+                      <span>{field.name}</span>
+                    </>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-52 p-2">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-medium text-muted-foreground">{field.name}</span>
+                    {hasFilter && (
+                      <button
+                        onClick={() => clearFieldFilter(field.key)}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    {options.map((value) => {
+                      const isSelected = filterValue.includes(value);
+                      const isStatus = field.type === 'status';
+                      const isPriority = field.type === 'priority';
+                      
+                      return (
+                        <button
+                          key={value}
+                          onClick={() => handleFilterToggle(field.key, value)}
+                          className={cn(
+                            'w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors',
+                            isSelected 
+                              ? 'bg-primary/10 text-primary' 
+                              : 'hover:bg-muted text-foreground'
+                          )}
+                        >
+                          <div className={cn(
+                            'h-4 w-4 rounded border flex items-center justify-center transition-colors',
+                            isSelected 
+                              ? 'bg-primary border-primary' 
+                              : 'border-border'
+                          )}>
+                            {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                          </div>
+                          {(isStatus || isPriority) && (
+                            <span className={cn(
+                              'h-2 w-2 rounded-full',
+                              isStatus ? getStatusColor(value) : getPriorityColor(value)
+                            )} />
+                          )}
+                          <span className="flex-1 text-left">{getDisplayLabel(field, value)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          );
+        })}
+
+        {/* Clear all filters button */}
+        {totalFilters > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={clearAllFilters}
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            Clear all
-          </button>
-        </div>
-      )}
+            <X className="h-3 w-3 mr-1" />
+            Clear filters
+          </Button>
+        )}
+
+        {/* Show filter icon if no filters active */}
+        {totalFilters === 0 && filterableFields.length > 0 && (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Filter className="h-3.5 w-3.5" />
+            <span>Click to add filters</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

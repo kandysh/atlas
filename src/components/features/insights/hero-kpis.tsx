@@ -1,13 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { KpiSummary } from '@/src/lib/actions/analytics';
-import { CheckCircle2, Clock, Target, DollarSign } from 'lucide-react';
+import { CheckCircle2, Clock, Target, Timer } from 'lucide-react';
+import { AnalyticsFilters } from '@/src/lib/actions/analytics';
 
 interface HeroKpisProps {
   data: KpiSummary;
   isLoading?: boolean;
+  onFilterChange?: (filters: AnalyticsFilters) => void;
 }
 
 function AnimatedCounter({
@@ -60,7 +63,9 @@ function AnimatedCounter({
   );
 }
 
-export function HeroKpis({ data, isLoading }: HeroKpisProps) {
+export function HeroKpis({ data, isLoading, onFilterChange }: HeroKpisProps) {
+  const router = useRouter();
+
   const kpis = [
     {
       label: 'Total Tasks',
@@ -68,6 +73,8 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
       icon: Target,
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/10',
+      onClick: () => router.push('/'),
+      tooltip: 'View all tasks',
     },
     {
       label: 'Open Tasks',
@@ -75,6 +82,11 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
       icon: Clock,
       color: 'text-amber-500',
       bgColor: 'bg-amber-500/10',
+      onClick: () => {
+        // Filter to show open tasks (non-completed)
+        onFilterChange?.({ status: 'todo' });
+      },
+      tooltip: 'Filter to open tasks',
     },
     {
       label: 'Avg Cycle Time',
@@ -82,17 +94,19 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
       icon: CheckCircle2,
       color: 'text-green-500',
       bgColor: 'bg-green-500/10',
-      suffix: 'd',
+      suffix: ' days',
       decimals: 1,
+      tooltip: 'Average time to complete tasks',
     },
     {
       label: 'Hours Saved',
       value: data.totalHoursSaved,
-      icon: DollarSign,
+      icon: Timer,
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/10',
-      suffix: 'h',
+      suffix: ' hrs',
       decimals: 0,
+      tooltip: 'Total hours saved through automation',
     },
   ];
 
@@ -120,10 +134,18 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
+        const isClickable = !!kpi.onClick;
+        
         return (
           <Card
             key={kpi.label}
-            className="bg-background/80 backdrop-blur-sm border-border/50 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+            className={`bg-background/80 backdrop-blur-sm border-border/50 transition-all duration-200 group ${
+              isClickable 
+                ? 'hover:shadow-lg hover:border-primary/30 cursor-pointer' 
+                : ''
+            }`}
+            onClick={kpi.onClick}
+            title={kpi.tooltip}
           >
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
@@ -138,7 +160,7 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
                   </p>
                 </div>
                 <div
-                  className={`p-2 rounded-lg ${kpi.bgColor} group-hover:scale-110 transition-transform`}
+                  className={`p-2 rounded-lg ${kpi.bgColor} ${isClickable ? 'group-hover:scale-110' : ''} transition-transform`}
                 >
                   <Icon className={`h-5 w-5 ${kpi.color}`} />
                 </div>

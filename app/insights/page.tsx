@@ -166,7 +166,11 @@ export default function InsightsPage() {
       </nav>
 
       {/* Hero KPIs */}
-      <HeroKpis data={analyticsData.kpiSummary} isLoading={analyticsLoading} />
+      <HeroKpis 
+        data={analyticsData.kpiSummary} 
+        isLoading={analyticsLoading} 
+        onFilterChange={handleFilterChange}
+      />
 
       {/* Insights Cards */}
       {!analyticsLoading && data && (
