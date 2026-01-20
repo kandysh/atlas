@@ -283,13 +283,11 @@ function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
       ? filters.team
       : [filters.team];
     if (teamValues.length === 1) {
-      conditions.push(sql`data->'teamsInvolved' ? ${teamValues[0]}`);
+      conditions.push(sql`data->>'teamName' = ${teamValues[0]}`);
     } else {
       // Match any of the teams
-      const teamConditions = teamValues.map(
-        (t) => sql`data->'teamsInvolved' ? ${t}`,
-      );
-      conditions.push(sql`(${sql.join(teamConditions, sql` OR `)})`);
+      const teamValuesList = teamValues.map((t) => sql`${t}`);
+      conditions.push(sql`data->>'teamName' IN (${sql.join(teamValuesList, sql`, `)})`);
     }
   }
 
@@ -631,14 +629,13 @@ async function getTeamsWorkload(
 
   const result = await db.execute(sql`
     SELECT 
-      LOWER(team) as team,
+      LOWER(data->>'teamName') as team,
       COUNT(*)::int as count
-    FROM ${tasksTable},
-      jsonb_array_elements_text(COALESCE(data->'teamsInvolved', '[]'::jsonb)) as team
+    FROM ${tasksTable}
     WHERE ${whereClause}
-      AND team IS NOT NULL
-      AND team != ''
-    GROUP BY LOWER(team)
+      AND data->>'teamName' IS NOT NULL
+      AND data->>'teamName' != ''
+    GROUP BY LOWER(data->>'teamName')
     ORDER BY count DESC
     LIMIT 10
   `);
@@ -835,12 +832,11 @@ async function getOwners(workspaceId: string, ownerCellKey: string = 'owner'): P
 
 async function getTeams(workspaceId: string): Promise<string[]> {
   const result = await db.execute(sql`
-    SELECT DISTINCT LOWER(team) as team
-    FROM ${tasksTable},
-      jsonb_array_elements_text(COALESCE(data->'teamsInvolved', '[]'::jsonb)) as team
+    SELECT DISTINCT LOWER(data->>'teamName') as team
+    FROM ${tasksTable}
     WHERE workspace_id = ${workspaceId}
-      AND team IS NOT NULL
-      AND team != ''
+      AND data->>'teamName' IS NOT NULL
+      AND data->>'teamName' != ''
     ORDER BY team ASC
   `);
 
