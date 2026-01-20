@@ -173,24 +173,24 @@ export function DynamicToolbar({
 
   const getStatusColor = (value: string): string => {
     const colors: Record<string, string> = {
-      todo: 'bg-slate-500',
-      'in-progress': 'bg-blue-500',
-      testing: 'bg-amber-500',
-      done: 'bg-emerald-500',
-      completed: 'bg-emerald-600',
-      blocked: 'bg-red-500',
+      todo: 'var(--status-todo)',
+      'in-progress': 'var(--status-in-progress)',
+      testing: 'var(--status-testing)',
+      done: 'var(--status-done)',
+      completed: 'var(--status-completed)',
+      blocked: 'var(--status-blocked)',
     };
-    return colors[value] || 'bg-slate-400';
+    return colors[value] || 'var(--muted-foreground)';
   };
 
   const getPriorityColor = (value: string): string => {
     const colors: Record<string, string> = {
-      low: 'bg-slate-400',
-      medium: 'bg-amber-500',
-      high: 'bg-orange-500',
-      urgent: 'bg-red-500',
+      low: 'var(--priority-low)',
+      medium: 'var(--priority-medium)',
+      high: 'var(--priority-high)',
+      urgent: 'var(--priority-urgent)',
     };
-    return colors[value] || 'bg-slate-400';
+    return colors[value] || 'var(--muted-foreground)';
   };
 
   return (
@@ -384,12 +384,12 @@ export function DynamicToolbar({
                           </div>
                           {(isStatus || isPriority) && (
                             <span
-                              className={cn(
-                                'h-2 w-2 rounded-full',
-                                isStatus
+                              className="h-2 w-2 rounded-full"
+                              style={{
+                                backgroundColor: isStatus
                                   ? getStatusColor(value)
                                   : getPriorityColor(value),
-                              )}
+                              }}
                             />
                           )}
                           <span className="flex-1 text-left">

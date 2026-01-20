@@ -24,12 +24,12 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  todo: '#64748b',
-  'in-progress': '#3b82f6',
-  testing: '#f59e0b',
-  done: '#22c55e',
-  completed: '#16a34a',
-  blocked: '#ef4444',
+  todo: 'var(--status-todo)',
+  'in-progress': 'var(--status-in-progress)',
+  testing: 'var(--status-testing)',
+  done: 'var(--status-done)',
+  completed: 'var(--status-completed)',
+  blocked: 'var(--status-blocked)',
 };
 
 const priorityLabels: Record<string, string> = {
@@ -40,10 +40,10 @@ const priorityLabels: Record<string, string> = {
 };
 
 const priorityColors: Record<string, string> = {
-  low: '#94a3b8',
-  medium: '#f59e0b',
-  high: '#f97316',
-  urgent: '#ef4444',
+  low: 'var(--priority-low)',
+  medium: 'var(--priority-medium)',
+  high: 'var(--priority-high)',
+  urgent: 'var(--priority-urgent)',
 };
 
 // Helper to normalize filter value to array
