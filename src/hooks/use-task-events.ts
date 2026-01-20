@@ -6,6 +6,7 @@ import { Task as DbTask } from '@/src/lib/db';
 import { Task as UiTask } from '@/src/lib/types';
 import { queryKeys } from '@/src/lib/query/keys';
 import { dbTaskToUiTask } from '@/src/lib/utils';
+import { logger } from '@/src/lib/logger';
 
 /**
  * Hook to listen to task updates via SSE
@@ -70,7 +71,7 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
 
     // Handle connection open
     eventSource.addEventListener('open', () => {
-      console.log('SSE connection established');
+      logger.info({ workspaceId }, 'SSE connection established');
     });
 
     // Handle messages
@@ -80,7 +81,7 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
 
         switch (data.type) {
           case 'connected':
-            console.log('SSE connected:', data.clientId);
+            logger.info({ workspaceId, clientId: data.clientId }, 'SSE connected');
             break;
 
           case 'initial_state':
@@ -102,16 +103,16 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
             break;
 
           default:
-            console.log('Unknown SSE message type:', data.type);
+            logger.warn({ workspaceId, messageType: data.type }, 'Unknown SSE message type');
         }
       } catch (error) {
-        console.error('Error parsing SSE message:', error);
+        logger.error({ workspaceId, error }, 'Error parsing SSE message');
       }
     });
 
     // Handle errors
     eventSource.addEventListener('error', (error) => {
-      console.error('SSE connection error:', error);
+      logger.error({ workspaceId, error }, 'SSE connection error');
 
       // EventSource will automatically reconnect
       // But we can add custom logic here if needed
@@ -119,7 +120,7 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
 
     // Cleanup on unmount
     return () => {
-      console.log('Closing SSE connection');
+      logger.info({ workspaceId }, 'Closing SSE connection');
       eventSource.close();
       eventSourceRef.current = null;
     };

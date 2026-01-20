@@ -8,6 +8,7 @@ import {
   ThroughPutOverTimeData,
   ToolsUsed,
 } from '@/src/lib/types/analytics';
+import { logger } from '@/src/lib/logger';
 
 // Get the actual table name from the schema (handles env-specific table naming and schema prefix)
 const tableConfig = getTableConfig(tasks);
@@ -215,7 +216,7 @@ export async function getAnalytics(
       },
     };
   } catch (error) {
-    console.error('Error fetching analytics:', error);
+    logger.error({ workspaceId, filters, error }, 'Error fetching analytics');
     return { success: false, error: 'Failed to fetch analytics' };
   }
 }

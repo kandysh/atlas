@@ -1,4 +1,5 @@
 import { Task } from '@/src/lib/db';
+import { logger } from '@/src/lib/logger';
 
 // Store active SSE connections
 // In production, use Redis or another shared store for multi-instance deployments
@@ -14,7 +15,7 @@ export function broadcastTaskUpdate(task: Task) {
     try {
       controller.enqueue(new TextEncoder().encode(message));
     } catch (error) {
-      console.error(`Failed to send to client ${clientId}:`, error);
+      logger.error({ clientId, error }, 'Failed to send to SSE client');
       // Remove dead clients
       sseClients.delete(clientId);
     }
@@ -29,8 +30,9 @@ export function registerSseClient(
   controller: ReadableStreamDefaultController,
 ) {
   sseClients.set(clientId, controller);
-  console.log(
-    `SSE client registered: ${clientId}. Total clients: ${sseClients.size}`,
+  logger.info(
+    { clientId, totalClients: sseClients.size },
+    'SSE client registered',
   );
 }
 
@@ -39,8 +41,9 @@ export function registerSseClient(
  */
 export function unregisterSseClient(clientId: string) {
   sseClients.delete(clientId);
-  console.log(
-    `SSE client unregistered: ${clientId}. Total clients: ${sseClients.size}`,
+  logger.info(
+    { clientId, totalClients: sseClients.size },
+    'SSE client unregistered',
   );
 }
 

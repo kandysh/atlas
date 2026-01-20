@@ -5,6 +5,7 @@ import { ReactNode, useState } from 'react';
 import { Loader2, AlertTriangle, Plus } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
+import { logger } from '@/src/lib/logger';
 
 interface WorkspaceLoaderProps {
   children: ReactNode;
@@ -29,8 +30,8 @@ export function WorkspaceLoader({ children, fallback }: WorkspaceLoaderProps) {
     try {
       await createWorkspace(workspaceName.trim());
       setWorkspaceName('');
-    } catch {
-      console.error('Failed to create workspace');
+    } catch (error) {
+      logger.error({ workspaceName, error }, 'Failed to create workspace');
     }
   };
 
