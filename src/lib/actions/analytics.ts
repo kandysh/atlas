@@ -324,12 +324,12 @@ async function getStatusCounts(
   `);
 
   const statusMap: Record<string, { label: string; fill: string }> = {
-    todo: { label: 'To Do', fill: 'var(--chart-1)' },
-    'in-progress': { label: 'In Progress', fill: 'var(--chart-2)' },
-    testing: { label: 'Testing', fill: 'var(--chart-3)' },
-    done: { label: 'Done', fill: 'var(--chart-4)' },
-    completed: { label: 'Completed', fill: 'var(--chart-5)' },
-    blocked: { label: 'Blocked', fill: 'hsl(var(--destructive))' },
+    todo: { label: 'To Do', fill: 'var(--status-todo)' },
+    'in-progress': { label: 'In Progress', fill: 'var(--status-in-progress)' },
+    testing: { label: 'Testing', fill: 'var(--status-testing)' },
+    done: { label: 'Done', fill: 'var(--status-done)' },
+    completed: { label: 'Completed', fill: 'var(--status-completed)' },
+    blocked: { label: 'Blocked', fill: 'var(--status-blocked)' },
   };
 
   return (result.rows as { status: string; count: number }[])
