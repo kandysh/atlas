@@ -308,7 +308,7 @@ export function useDuplicateTask(workspaceId: string) {
       });
       toast.success('Task duplicated');
     },
-    onError: (error) => {
+    onError: (error, taskId) => {
       logger.error({ workspaceId, taskId, error }, 'Failed to duplicate task');
       toast.error('Failed to duplicate task');
     },
