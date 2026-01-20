@@ -85,6 +85,7 @@ export type AnalyticsFilters = {
   team?: string | string[];
   dateFrom?: string;
   dateTo?: string;
+  ownerCellKey?: string; // Configurable owner cell key for analytics
 };
 
 export type AnalyticsData = {
@@ -116,6 +117,20 @@ type AnalyticsResult =
 
 /**
  * Get all analytics data for a workspace with server-side aggregation
+ * 
+ * @param workspaceId - The workspace ID to fetch analytics for
+ * @param filters - Optional filters to apply to the analytics data
+ * @param filters.ownerCellKey - The JSONB key to use for owner/assignee data (defaults to 'owner')
+ *                                This allows analytics to be generated for any owner-like field in your data
+ * @returns Promise resolving to analytics data or error
+ * 
+ * @example
+ * // Use default 'owner' field
+ * getAnalytics('workspace-123', { status: 'completed' })
+ * 
+ * @example
+ * // Use custom 'assignedTo' field for owner charts
+ * getAnalytics('workspace-123', { ownerCellKey: 'assignedTo' })
  */
 export async function getAnalytics(
   workspaceId: string,
@@ -128,6 +143,9 @@ export async function getAnalytics(
 
     // Build parameterized filter conditions
     const filterCondition = buildFilterCondition(filters);
+    
+    // Use configured owner cell key or default to 'owner'
+    const ownerCellKey = filters.ownerCellKey || 'owner';
 
     // Execute all queries in parallel
     const [
@@ -159,14 +177,14 @@ export async function getAnalytics(
       getToolsUsed(workspaceId, filterCondition),
       getAssetClasses(workspaceId),
       // New queries
-      getOwnerProductivity(workspaceId, filterCondition),
+      getOwnerProductivity(workspaceId, filterCondition, ownerCellKey),
       getTeamsWorkload(workspaceId, filterCondition),
       getAssetClassDistribution(workspaceId, filterCondition),
       getPriorityAging(workspaceId, filterCondition),
       getHoursEfficiency(workspaceId, filterCondition),
       getKpiSummary(workspaceId, filterCondition),
       // Filter options
-      getOwners(workspaceId),
+      getOwners(workspaceId, ownerCellKey),
       getTeams(workspaceId),
       getPriorities(workspaceId),
       getStatuses(workspaceId),
@@ -204,6 +222,7 @@ export async function getAnalytics(
 
 function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
   const conditions: SQL[] = [];
+  const ownerCellKey = filters.ownerCellKey || 'owner';
 
   // Helper to build IN clause for array or single value
   const buildInCondition = (
@@ -255,7 +274,7 @@ function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
   const assigneeCond = buildInCondition(
     'assignee',
     filters.assignee,
-    "data->>'owner'",
+    `data->>'${ownerCellKey}'`,
   );
   if (assigneeCond) conditions.push(assigneeCond);
 
@@ -558,18 +577,19 @@ async function getAssetClasses(workspaceId: string): Promise<string[]> {
 async function getOwnerProductivity(
   workspaceId: string,
   filterCondition: SQL | null,
+  ownerCellKey: string = 'owner',
 ): Promise<OwnerProductivity[]> {
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'status' = 'completed'
-    AND data->>'owner' IS NOT NULL
-    AND data->>'owner' != ''`;
+    AND data->>${ownerCellKey} IS NOT NULL
+    AND data->>${ownerCellKey} != ''`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
     : baseCondition;
 
   const result = await db.execute(sql`
     SELECT 
-      data->>'owner' as owner,
+      data->>${ownerCellKey} as owner,
       COUNT(*)::int as completed_tasks,
       AVG(
         EXTRACT(EPOCH FROM (
@@ -579,7 +599,7 @@ async function getOwnerProductivity(
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as total_hours_saved
     FROM ${tasksTable}
     WHERE ${whereClause}
-    GROUP BY data->>'owner'
+    GROUP BY data->>${ownerCellKey}
     ORDER BY completed_tasks DESC
     LIMIT 5
   `);
@@ -796,13 +816,13 @@ async function getKpiSummary(
 
 // Filter option helpers
 
-async function getOwners(workspaceId: string): Promise<string[]> {
+async function getOwners(workspaceId: string, ownerCellKey: string = 'owner'): Promise<string[]> {
   const result = await db.execute(sql`
-    SELECT DISTINCT data->>'owner' as owner
+    SELECT DISTINCT data->>${ownerCellKey} as owner
     FROM ${tasksTable}
     WHERE workspace_id = ${workspaceId}
-      AND data->>'owner' IS NOT NULL
-      AND data->>'owner' != ''
+      AND data->>${ownerCellKey} IS NOT NULL
+      AND data->>${ownerCellKey} != ''
     ORDER BY owner ASC
   `);
 
