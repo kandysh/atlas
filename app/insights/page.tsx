@@ -32,12 +32,15 @@ export default function InsightsPage() {
   });
   const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();
 
-  // Fetch analytics from server with filters
+  // Fetch analytics from server with filters (using assignee field)
   const {
     data,
     isLoading: analyticsLoading,
     error,
-  } = useServerAnalytics(currentWorkspace?.id || '', filters);
+  } = useServerAnalytics(currentWorkspace?.id || '', {
+    ...filters,
+    ownerCellKey: 'assignee', // Use assignee field for owner analytics
+  });
 
   // Helper to toggle a value in a filter array
   const toggleFilterValue = useCallback(

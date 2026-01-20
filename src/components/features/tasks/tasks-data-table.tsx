@@ -19,7 +19,14 @@ import { useWorkspace } from '@/src/providers';
 import { useTableUrlFilters } from '@/src/hooks';
 import { buildColumnsFromFieldConfigs } from '@/src/lib/utils';
 
-const TABLE_FILTER_KEYS = ['status', 'priority', 'owner', 'team', 'assetClass'];
+const TABLE_FILTER_KEYS = [
+  'status',
+  'priority',
+  'owner',
+  'assignee',
+  'team',
+  'assetClass',
+];
 
 interface TasksDataTableProps {
   columns?: ColumnDef<Task, unknown>[];

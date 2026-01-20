@@ -11,19 +11,18 @@ async function seed() {
 
   try {
     // Get or create default user
-    const userEmail = process.env.USERINFO || 'demo@example.com';
-    const userName = userEmail.split('@')[0];
+    const userData = JSON.parse(process.env.USERINFO!);
 
     let user = await db.query.users.findFirst({
-      where: eq(users.email, userEmail),
+      where: eq(users.email, userData.details.email),
     });
 
     if (!user) {
       const [newUser] = await db
         .insert(users)
         .values({
-          name: userName,
-          email: userEmail,
+          name: userData.details.name,
+          email: userData.details.email,
         })
         .returning();
       user = newUser;
@@ -79,6 +78,7 @@ async function seed() {
           status: 'completed',
           priority: 'high',
           owner: 'Sarah Chen',
+          assignee: 'David Kim',
           assetClass: 'Fixed Income',
           theme: 'Automation',
           teamsInvolved: ['Operations', 'Technology'],
@@ -97,6 +97,7 @@ async function seed() {
           status: 'in-progress',
           priority: 'urgent',
           owner: 'Michael Rodriguez',
+          assignee: 'Emily Johnson',
           assetClass: 'Equities',
           theme: 'Reporting',
           teamsInvolved: ['Technology', 'Portfolio Management'],
@@ -115,6 +116,7 @@ async function seed() {
           status: 'testing',
           priority: 'high',
           owner: 'Emily Johnson',
+          assignee: 'James Wilson',
           assetClass: 'Derivatives',
           theme: 'Risk Management',
           teamsInvolved: ['Risk', 'Technology'],
@@ -133,6 +135,7 @@ async function seed() {
           status: 'todo',
           priority: 'medium',
           owner: 'David Kim',
+          assignee: 'Jennifer Martinez',
           assetClass: 'Multi-Asset',
           theme: 'Process Improvement',
           teamsInvolved: ['Accounting', 'Operations'],
@@ -151,6 +154,7 @@ async function seed() {
           status: 'in-progress',
           priority: 'high',
           owner: 'Sarah Chen',
+          assignee: 'Michael Rodriguez',
           assetClass: 'Equities',
           theme: 'Data Integration',
           teamsInvolved: ['Technology', 'Research'],
@@ -169,6 +173,7 @@ async function seed() {
           status: 'done',
           priority: 'medium',
           owner: 'James Wilson',
+          assignee: 'Emily Johnson',
           assetClass: 'Fixed Income',
           theme: 'Performance',
           teamsInvolved: ['Risk', 'Technology'],
@@ -187,6 +192,7 @@ async function seed() {
           status: 'todo',
           priority: 'low',
           owner: 'Jennifer Martinez',
+          assignee: 'Sarah Chen',
           assetClass: 'Multi-Asset',
           theme: 'Automation',
           teamsInvolved: ['Client Services', 'Technology'],
@@ -205,6 +211,7 @@ async function seed() {
           status: 'in-progress',
           priority: 'medium',
           owner: 'Michael Rodriguez',
+          assignee: 'David Kim',
           assetClass: 'Equities',
           theme: 'Analytics',
           teamsInvolved: ['Trading', 'Technology'],
@@ -223,6 +230,7 @@ async function seed() {
           status: 'blocked',
           priority: 'urgent',
           owner: 'Amanda Lee',
+          assignee: 'James Wilson',
           assetClass: 'Multi-Asset',
           theme: 'Compliance',
           teamsInvolved: ['Compliance', 'Technology'],
@@ -241,6 +249,7 @@ async function seed() {
           status: 'testing',
           priority: 'high',
           owner: 'David Kim',
+          assignee: 'Michael Rodriguez',
           assetClass: 'Fixed Income',
           theme: 'Portfolio Management',
           teamsInvolved: ['Portfolio Management', 'Technology'],
@@ -259,6 +268,7 @@ async function seed() {
           status: 'completed',
           priority: 'urgent',
           owner: 'Emily Johnson',
+          assignee: 'Amanda Lee',
           assetClass: 'Multi-Asset',
           theme: 'Compliance',
           teamsInvolved: ['Compliance', 'Operations', 'Technology'],
@@ -277,6 +287,7 @@ async function seed() {
           status: 'in-progress',
           priority: 'medium',
           owner: 'James Wilson',
+          assignee: 'Sarah Chen',
           assetClass: 'Derivatives',
           theme: 'Data Integration',
           teamsInvolved: ['Technology', 'Trading'],
@@ -295,6 +306,7 @@ async function seed() {
           status: 'todo',
           priority: 'low',
           owner: 'Sarah Chen',
+          assignee: 'Jennifer Martinez',
           assetClass: 'Equities',
           theme: 'Reporting',
           teamsInvolved: ['Portfolio Management', 'Technology'],
@@ -313,6 +325,7 @@ async function seed() {
           status: 'done',
           priority: 'high',
           owner: 'Jennifer Martinez',
+          assignee: 'David Kim',
           assetClass: 'Fixed Income',
           theme: 'Automation',
           teamsInvolved: ['Operations', 'Technology'],
@@ -331,6 +344,7 @@ async function seed() {
           status: 'in-progress',
           priority: 'urgent',
           owner: 'Michael Rodriguez',
+          assignee: 'Emily Johnson',
           assetClass: 'Derivatives',
           theme: 'Risk Management',
           teamsInvolved: ['Risk', 'Technology'],

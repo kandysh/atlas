@@ -28,6 +28,15 @@ export function getDefaultFieldConfigs(
     },
     {
       workspaceId,
+      key: 'assignee',
+      name: 'Assignee',
+      type: 'editable-owner',
+      options: { choices: [], required: false },
+      order: 2,
+      visible: true,
+    },
+    {
+      workspaceId,
       key: 'status',
       name: 'Status',
       type: 'status',
@@ -43,7 +52,7 @@ export function getDefaultFieldConfigs(
         defaultValue: 'todo',
         required: true,
       },
-      order: 2,
+      order: 3,
       visible: true,
     },
     {
@@ -56,7 +65,7 @@ export function getDefaultFieldConfigs(
         defaultValue: 'medium',
         required: true,
       },
-      order: 3,
+      order: 4,
       visible: true,
     },
     {
@@ -65,7 +74,7 @@ export function getDefaultFieldConfigs(
       name: 'Asset Class',
       type: 'editable-combobox',
       options: { choices: [], required: false },
-      order: 4,
+      order: 5,
       visible: true,
     },
     {
@@ -74,7 +83,7 @@ export function getDefaultFieldConfigs(
       name: 'Theme',
       type: 'editable-combobox',
       options: { choices: [], required: false },
-      order: 5,
+      order: 6,
       visible: false,
     },
     {
@@ -83,7 +92,7 @@ export function getDefaultFieldConfigs(
       name: 'Teams Involved',
       type: 'editable-tags',
       options: { choices: [], required: false },
-      order: 6,
+      order: 7,
       visible: true,
     },
     {
@@ -92,7 +101,7 @@ export function getDefaultFieldConfigs(
       name: 'Problem Statement',
       type: 'editable-text',
       options: { required: false },
-      order: 7,
+      order: 8,
       visible: false,
     },
     {
@@ -101,7 +110,7 @@ export function getDefaultFieldConfigs(
       name: 'Solution Design',
       type: 'editable-text',
       options: { required: false },
-      order: 8,
+      order: 9,
       visible: false,
     },
     {
@@ -110,7 +119,7 @@ export function getDefaultFieldConfigs(
       name: 'Benefits',
       type: 'editable-text',
       options: { required: false },
-      order: 9,
+      order: 10,
       visible: false,
     },
     {
@@ -119,7 +128,7 @@ export function getDefaultFieldConfigs(
       name: 'Estimated Hours',
       type: 'editable-number',
       options: { defaultValue: 0, required: false, suffix: 'h' },
-      order: 10,
+      order: 11,
       visible: true,
     },
     {
@@ -128,7 +137,7 @@ export function getDefaultFieldConfigs(
       name: 'Worked Hours',
       type: 'editable-number',
       options: { defaultValue: 0, required: false, suffix: 'h' },
-      order: 11,
+      order: 12,
       visible: true,
     },
     {
@@ -137,7 +146,7 @@ export function getDefaultFieldConfigs(
       name: 'Saved Hours',
       type: 'editable-number',
       options: { defaultValue: 0, required: false, suffix: 'h' },
-      order: 12,
+      order: 13,
       visible: false,
     },
     {
@@ -146,7 +155,7 @@ export function getDefaultFieldConfigs(
       name: 'Tools',
       type: 'editable-tags',
       options: { choices: [], required: false },
-      order: 13,
+      order: 14,
       visible: false,
     },
     {
@@ -155,7 +164,7 @@ export function getDefaultFieldConfigs(
       name: 'Tags',
       type: 'editable-tags',
       options: { choices: [], required: false },
-      order: 14,
+      order: 15,
       visible: false,
     },
     {
@@ -164,7 +173,7 @@ export function getDefaultFieldConfigs(
       name: 'Other Use Cases',
       type: 'editable-text',
       options: { required: false },
-      order: 15,
+      order: 16,
       visible: false,
     },
     {
@@ -173,7 +182,7 @@ export function getDefaultFieldConfigs(
       name: 'Completion Date',
       type: 'editable-date',
       options: { required: false },
-      order: 16,
+      order: 17,
       visible: true,
     },
   ];

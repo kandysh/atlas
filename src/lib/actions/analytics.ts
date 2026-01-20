@@ -579,17 +579,19 @@ async function getOwnerProductivity(
   filterCondition: SQL | null,
   ownerCellKey: string = 'owner',
 ): Promise<OwnerProductivity[]> {
+  const ownerField = sql.raw(`data->>'${ownerCellKey}'`);
+  
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'status' = 'completed'
-    AND data->>${ownerCellKey} IS NOT NULL
-    AND data->>${ownerCellKey} != ''`;
+    AND ${ownerField} IS NOT NULL
+    AND ${ownerField} != ''`;
   const whereClause = filterCondition
     ? sql`${baseCondition} AND ${filterCondition}`
     : baseCondition;
 
   const result = await db.execute(sql`
     SELECT 
-      data->>${ownerCellKey} as owner,
+      ${ownerField} as owner,
       COUNT(*)::int as completed_tasks,
       AVG(
         EXTRACT(EPOCH FROM (
@@ -599,7 +601,7 @@ async function getOwnerProductivity(
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as total_hours_saved
     FROM ${tasksTable}
     WHERE ${whereClause}
-    GROUP BY data->>${ownerCellKey}
+    GROUP BY ${ownerField}
     ORDER BY completed_tasks DESC
     LIMIT 5
   `);
@@ -817,12 +819,14 @@ async function getKpiSummary(
 // Filter option helpers
 
 async function getOwners(workspaceId: string, ownerCellKey: string = 'owner'): Promise<string[]> {
+  const ownerField = sql.raw(`data->>'${ownerCellKey}'`);
+  
   const result = await db.execute(sql`
-    SELECT DISTINCT data->>${ownerCellKey} as owner
+    SELECT DISTINCT ${ownerField} as owner
     FROM ${tasksTable}
     WHERE workspace_id = ${workspaceId}
-      AND data->>${ownerCellKey} IS NOT NULL
-      AND data->>${ownerCellKey} != ''
+      AND ${ownerField} IS NOT NULL
+      AND ${ownerField} != ''
     ORDER BY owner ASC
   `);
 

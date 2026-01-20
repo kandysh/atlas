@@ -109,7 +109,7 @@ export function FilterControls({
           colorMap={priorityColors}
         />
         <MultiSelectFilter
-          title="Owner"
+          title="Assignee"
           options={owners}
           selected={toArray(filters.assignee)}
           onChange={(values) => handleFilterChange('assignee', values)}
