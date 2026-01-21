@@ -5,7 +5,7 @@ import { registerSseClient, unregisterSseClient } from '@/src/lib/sse/server';
 import { logger } from '@/src/lib/logger';
 import { getWorkspaceBySlug } from '@/src/lib/actions/workspaces';
 
-// GET /api/tasks/[workspaceSlug]/events
+// GET /api/events/[workspaceSlug]
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ workspaceSlug: string }> },
