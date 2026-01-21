@@ -38,10 +38,12 @@ const chartConfig = {
 
 interface TeamImpactQuadrantChartProps {
   data: TeamImpactQuadrantData[];
+  onTeamClick?: (team: string) => void;
 }
 
 export function TeamImpactQuadrantChart({
   data,
+  onTeamClick,
 }: TeamImpactQuadrantChartProps) {
   if (!data || data.length === 0) {
     return (
@@ -122,7 +124,16 @@ export function TeamImpactQuadrantChart({
                 />
               }
             />
-            <Scatter data={data} fill="var(--chart-1)" />
+            <Scatter
+              data={data}
+              fill="var(--chart-1)"
+              onClick={(entry: TeamImpactQuadrantData) => {
+                if (onTeamClick) {
+                  onTeamClick(entry.team);
+                }
+              }}
+              className="cursor-pointer hover:opacity-80"
+            />
           </ScatterChart>
         </ChartContainer>
       </CardContent>

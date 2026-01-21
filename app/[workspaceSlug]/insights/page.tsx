@@ -241,7 +241,7 @@ export default function InsightsPage() {
             <h2 className="text-lg font-medium text-muted-foreground mb-4">
               Core Charts (Operational Backbone)
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <TasksStatusBreakdownDonut
                 chartData={analyticsData.statusCounts}
               />
@@ -266,14 +266,15 @@ export default function InsightsPage() {
             <h2 className="text-lg font-medium text-muted-foreground mb-4">
               Impact & Strategy Charts
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ImpactMatrixChart data={analyticsData.impactMatrix} />
-              <TeamImpactQuadrantChart
-                data={analyticsData.teamImpactQuadrant}
-              />
-              <div className="md:col-span-2">
-                <CumulativeImpactChart data={analyticsData.cumulativeImpact} />
+            <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ImpactMatrixChart data={analyticsData.impactMatrix} />
+                <TeamImpactQuadrantChart
+                  data={analyticsData.teamImpactQuadrant}
+                  onTeamClick={handleTeamClick}
+                />
               </div>
+              <CumulativeImpactChart data={analyticsData.cumulativeImpact} />
             </div>
           </section>
 

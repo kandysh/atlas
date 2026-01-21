@@ -350,12 +350,12 @@ function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
       ? filters.team
       : [filters.team];
     if (teamValues.length === 1) {
-      conditions.push(sql`data->>'teamName' = ${teamValues[0]}`);
+      conditions.push(sql`LOWER(data->>'teamName') = LOWER(${teamValues[0]})`);
     } else {
-      // Match any of the teams
-      const teamValuesList = teamValues.map((t) => sql`${t}`);
+      // Match any of the teams (case insensitive)
+      const teamValuesList = teamValues.map((t) => sql`LOWER(${t})`);
       conditions.push(
-        sql`data->>'teamName' IN (${sql.join(teamValuesList, sql`, `)})`,
+        sql`LOWER(data->>'teamName') IN (${sql.join(teamValuesList, sql`, `)})`,
       );
     }
   }

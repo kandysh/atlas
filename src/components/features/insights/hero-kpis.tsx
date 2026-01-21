@@ -230,8 +230,8 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {[...Array(5)].map((_, i) => (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
           <Card
             key={i}
             className="bg-background/80 backdrop-blur-sm border-border/50"
@@ -249,8 +249,7 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-      {kpis.map((kpi) => {
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{kpis.map((kpi) => {
         const Icon = kpi.icon;
         const isClickable = !!kpi.onClick;
 
