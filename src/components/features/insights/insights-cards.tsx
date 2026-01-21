@@ -10,6 +10,8 @@ import {
   Clock,
   Zap,
   AlertTriangle,
+  Target,
+  Award,
 } from 'lucide-react';
 import { AnalyticsData, AnalyticsFilters } from '@/src/lib/actions/analytics';
 
@@ -52,7 +54,7 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
         id: 'urgent-stuck',
         type: 'critical',
         icon: AlertTriangle,
-        message: `${urgentStuck} urgent task${urgentStuck !== 1 ? 's' : ''} aging >7 days`,
+        message: `${urgentStuck} urgent automation${urgentStuck !== 1 ? 's' : ''} aging >7 days - potential value at risk`,
         action: 'Review Now',
         filter: { priority: 'urgent' },
         priority: 1,
@@ -64,11 +66,59 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
         id: 'high-stuck',
         type: 'warning',
         icon: AlertCircle,
-        message: `${highStuck} high priority task${highStuck !== 1 ? 's' : ''} aging >7 days`,
+        message: `${highStuck} high-impact automation${highStuck !== 1 ? 's' : ''} aging >7 days`,
         action: 'Review',
         filter: { priority: 'high' },
         priority: 2,
       });
+    }
+
+    // Processes demised milestone
+    const processesDemised = data.kpiSummary.totalProcessesDemised;
+    if (processesDemised >= 50) {
+      result.push({
+        id: 'processes-milestone',
+        type: 'success',
+        icon: Target,
+        message: `${processesDemised} processes automated - eliminating manual work at scale!`,
+        action: 'View Portfolio',
+        priority: 3,
+      });
+    }
+
+    // High-impact team recognition
+    const topTeam = data.teamsWorkload[0];
+    if (topTeam && topTeam.savedHrs >= 100) {
+      result.push({
+        id: 'high-impact-team',
+        type: 'success',
+        icon: Award,
+        message: `${topTeam.team} team delivered ${topTeam.savedHrs.toFixed(0)}h saved - leading business impact!`,
+        action: 'View Team',
+        filter: { team: topTeam.team },
+        priority: 4,
+      });
+    }
+
+    // Top impact owner - highlight excellence
+    const topOwner = data.ownerProductivity[0];
+    if (topOwner && data.ownerProductivity.length > 1) {
+      const avgSavedHrs =
+        data.ownerProductivity.reduce((acc, p) => acc + p.totalHoursSaved, 0) /
+        data.ownerProductivity.length;
+      const impactRatio = topOwner.totalHoursSaved / avgSavedHrs;
+
+      if (impactRatio >= 1.5 && topOwner.totalHoursSaved >= 50) {
+        result.push({
+          id: 'top-impact-owner',
+          type: 'success',
+          icon: TrendingUp,
+          message: `${topOwner.owner} delivered ${topOwner.totalHoursSaved.toFixed(0)}h saved - ${impactRatio.toFixed(1)}x above average impact`,
+          action: 'View Work',
+          filter: { assignee: topOwner.owner },
+          priority: 5,
+        });
+      }
     }
 
     // Open tasks warning - only show if ratio is concerning
@@ -79,73 +129,46 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
         id: 'backlog-warning',
         type: 'warning',
         icon: Clock,
-        message: `${Math.round(openTasksRatio * 100)}% of tasks still open - backlog may be growing`,
+        message: `${Math.round(openTasksRatio * 100)}% of automations still in progress - value realization delayed`,
         action: 'Triage',
         filter: { status: 'todo' },
-        priority: 3,
+        priority: 6,
       });
     }
 
-    // Top performer - highlight excellence
-    const topPerformer = data.ownerProductivity[0];
-    if (topPerformer && data.ownerProductivity.length > 1) {
-      const avgCompleted =
-        data.ownerProductivity.reduce((acc, p) => acc + p.completedTasks, 0) /
-        data.ownerProductivity.length;
-      const performanceRatio = topPerformer.completedTasks / avgCompleted;
-
-      if (performanceRatio >= 1.5 && topPerformer.completedTasks >= 5) {
-        result.push({
-          id: 'top-performer',
-          type: 'success',
-          icon: TrendingUp,
-          message: `${topPerformer.owner} is ${performanceRatio.toFixed(1)}x above average in completions`,
-          action: 'View Work',
-          filter: { assignee: topPerformer.owner },
-          priority: 5,
-        });
-      }
-    }
-
-    // Hours efficiency insight
-    if (data.hoursEfficiency.length > 0) {
-      const recentEfficiency =
-        data.hoursEfficiency[data.hoursEfficiency.length - 1];
-      if (recentEfficiency && recentEfficiency.efficiency > 120) {
-        result.push({
-          id: 'over-budget',
-          type: 'warning',
-          icon: Timer,
-          message: `Recent work ${recentEfficiency.efficiency.toFixed(0)}% of estimates - consider refining estimates`,
-          action: 'Details',
-          priority: 4,
-        });
-      } else if (
-        recentEfficiency &&
-        recentEfficiency.efficiency < 80 &&
-        recentEfficiency.efficiency > 0
-      ) {
-        result.push({
-          id: 'under-budget',
-          type: 'success',
-          icon: Zap,
-          message: `Team delivering at ${recentEfficiency.efficiency.toFixed(0)}% of estimates - great efficiency!`,
-          action: 'Details',
-          priority: 6,
-        });
-      }
+    // ROI insight - high efficiency
+    const topROIAsset = data.assetClassROI[0];
+    if (topROIAsset && topROIAsset.roiScore > 10) {
+      result.push({
+        id: 'high-roi',
+        type: 'success',
+        icon: Zap,
+        message: `${topROIAsset.assetClass} automations showing exceptional ROI (${topROIAsset.roiScore.toFixed(1)} hrs/day)`,
+        action: 'Explore',
+        filter: { assetClass: topROIAsset.assetClass },
+        priority: 7,
+      });
     }
 
     // Hours saved celebration
     const hoursSaved = data.kpiSummary.totalHoursSaved;
-    if (hoursSaved >= 100) {
+    if (hoursSaved >= 500) {
       result.push({
         id: 'savings-milestone',
         type: 'success',
         icon: Timer,
-        message: `${hoursSaved.toLocaleString()} hours saved - that's ${Math.round(hoursSaved / 8)} work days!`,
+        message: `${hoursSaved.toLocaleString()}h business value delivered - equivalent to ${Math.round(hoursSaved / 2080)} full-time employees per year!`,
         action: 'Celebrate',
-        priority: 7,
+        priority: 8,
+      });
+    } else if (hoursSaved >= 100) {
+      result.push({
+        id: 'savings-milestone',
+        type: 'success',
+        icon: Timer,
+        message: `${hoursSaved.toLocaleString()}h saved - that's ${Math.round(hoursSaved / 8)} work days of business value!`,
+        action: 'View Impact',
+        priority: 8,
       });
     }
 
