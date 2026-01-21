@@ -12,7 +12,7 @@ export default function HomePage() {
   useEffect(() => {
     // Once workspace is loaded, redirect to it
     if (!isLoading && currentWorkspace) {
-      router.replace(`/${currentWorkspace.id}`);
+      router.replace(`/${currentWorkspace.slug}`);
     }
   }, [currentWorkspace, isLoading, router]);
 

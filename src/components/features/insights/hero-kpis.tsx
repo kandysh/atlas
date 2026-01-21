@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { KpiSummary } from '@/src/lib/actions/analytics';
 import { CheckCircle2, Clock, Target, Timer } from 'lucide-react';
@@ -66,6 +66,8 @@ function AnimatedCounter({
 
 export function HeroKpis({ data, isLoading }: HeroKpisProps) {
   const router = useRouter();
+  const params = useParams();
+  const workspaceSlug = params.workspaceSlug as string;
 
   // Compute derived insights
   const insights = useMemo(() => {
@@ -99,7 +101,7 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
       color: 'text-primary',
       bgColor: 'bg-primary/10',
       borderColor: 'border-l-primary',
-      onClick: () => router.push('/'),
+      onClick: () => router.push(`/${workspaceSlug}`),
       tooltip: 'View all active tasks',
       subtitle: `${insights.completionRate.toFixed(0)}% complete`,
       subtitleColor:
@@ -134,7 +136,7 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
       onClick: () => {
         // Navigate to active dashboard with status filter
         router.push(
-          '/?status=todo&status=in-progress&status=testing&status=blocked',
+          `/${workspaceSlug}?status=todo&status=in-progress&status=testing&status=blocked`,
         );
       },
       tooltip: 'View open tasks',

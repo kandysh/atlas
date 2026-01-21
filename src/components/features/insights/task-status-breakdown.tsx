@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Label, Pie, PieChart, Sector } from 'recharts';
 import { TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
@@ -185,6 +185,8 @@ export function TasksStatusBreakdownDonut({
   onStatusClick,
 }: TasksStatusBreakdownDonutProps) {
   const router = useRouter();
+  const params = useParams();
+  const workspaceSlug = params.workspaceSlug as string;
   const totalTasks = chartData.reduce((acc, curr) => acc + curr.count, 0);
 
   const handleStatusClick = (data: DonutChartData) => {
@@ -193,9 +195,9 @@ export function TasksStatusBreakdownDonut({
     if (urlStatus) {
       // Navigate to completed page for completed status, otherwise active dashboard
       if (urlStatus === 'completed') {
-        router.push('/completed');
+        router.push(`/${workspaceSlug}/completed`);
       } else {
-        router.push(`/?status=${urlStatus}`);
+        router.push(`/${workspaceSlug}?status=${urlStatus}`);
       }
       onStatusClick?.(urlStatus);
     }
