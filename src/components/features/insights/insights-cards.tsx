@@ -14,7 +14,8 @@ import {
   Award,
 } from 'lucide-react';
 import { AnalyticsData, AnalyticsFilters } from '@/src/lib/actions/analytics';
-import { ANNUAL_WORK_HOURS } from '@/src/lib/actions/analytics';
+
+const ANNUAL_WORK_HOURS = 2080; // Standard full-time annual work hours (40h/week * 52 weeks)
 
 interface InsightsCardsProps {
   data: AnalyticsData;

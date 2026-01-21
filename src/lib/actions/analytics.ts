@@ -27,8 +27,7 @@ const tasksTable = tableConfig.schema
   : sql.identifier(tableConfig.name);
 
 // Business impact calculation constants
-export const PROCESS_WEIGHT = 10; // Weight factor for processes in total impact calculation
-export const ANNUAL_WORK_HOURS = 2080; // Standard full-time annual work hours (40h/week * 52 weeks)
+const PROCESS_WEIGHT = 10; // Weight factor for processes in total impact calculation
 
 // Types for analytics queries
 export interface RollingCycle {

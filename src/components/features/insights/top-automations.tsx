@@ -24,7 +24,10 @@ interface TopAutomationsChartProps {
   onTaskClick?: (taskId: string) => void;
 }
 
-export function TopAutomationsChart({ data, onTaskClick }: TopAutomationsChartProps) {
+export function TopAutomationsChart({
+  data,
+  onTaskClick,
+}: TopAutomationsChartProps) {
   if (!data || data.length === 0) {
     return (
       <Card>
@@ -73,7 +76,9 @@ export function TopAutomationsChart({ data, onTaskClick }: TopAutomationsChartPr
               {topTen.map((item, index) => (
                 <TableRow
                   key={item.taskId}
-                  className={onTaskClick ? 'cursor-pointer hover:bg-muted/50' : ''}
+                  className={
+                    onTaskClick ? 'cursor-pointer hover:bg-muted/50' : ''
+                  }
                   onClick={() => onTaskClick?.(item.taskId)}
                 >
                   <TableCell className="font-medium">
@@ -91,7 +96,9 @@ export function TopAutomationsChart({ data, onTaskClick }: TopAutomationsChartPr
                       : item.title}
                   </TableCell>
                   <TableCell className="text-right">{item.savedHrs}</TableCell>
-                  <TableCell className="text-right">{item.processesDemised}</TableCell>
+                  <TableCell className="text-right">
+                    {item.processesDemised}
+                  </TableCell>
                   <TableCell className="text-right font-semibold">
                     {item.totalImpact.toFixed(1)}
                   </TableCell>

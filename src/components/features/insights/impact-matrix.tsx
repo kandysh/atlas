@@ -1,6 +1,13 @@
 'use client';
 
-import { Scatter, ScatterChart, XAxis, YAxis, CartesianGrid, ZAxis } from 'recharts';
+import {
+  Scatter,
+  ScatterChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ZAxis,
+} from 'recharts';
 import { Grid3X3 } from 'lucide-react';
 
 import {
@@ -111,10 +118,7 @@ export function ImpactMatrixChart({ data }: ImpactMatrixChartProps) {
                 />
               }
             />
-            <Scatter
-              data={data}
-              fill="var(--chart-1)"
-            />
+            <Scatter data={data} fill="var(--chart-1)" />
           </ScatterChart>
         </ChartContainer>
       </CardContent>

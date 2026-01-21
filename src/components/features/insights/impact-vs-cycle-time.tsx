@@ -1,6 +1,13 @@
 'use client';
 
-import { Scatter, ScatterChart, XAxis, YAxis, CartesianGrid, ZAxis } from 'recharts';
+import {
+  Scatter,
+  ScatterChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ZAxis,
+} from 'recharts';
 import { Clock } from 'lucide-react';
 
 import {
@@ -42,7 +49,9 @@ export function ImpactVsCycleTimeChart({ data }: ImpactVsCycleTimeChartProps) {
             <Clock className="h-4 w-4" />
             Impact vs Cycle Time
           </CardTitle>
-          <CardDescription>Automation impact relative to delivery time</CardDescription>
+          <CardDescription>
+            Automation impact relative to delivery time
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex h-[300px] items-center justify-center text-muted-foreground">
@@ -60,7 +69,9 @@ export function ImpactVsCycleTimeChart({ data }: ImpactVsCycleTimeChartProps) {
           <Clock className="h-4 w-4" />
           Impact vs Cycle Time
         </CardTitle>
-        <CardDescription>Automation impact relative to delivery time</CardDescription>
+        <CardDescription>
+          Automation impact relative to delivery time
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -101,7 +112,8 @@ export function ImpactVsCycleTimeChart({ data }: ImpactVsCycleTimeChartProps) {
                           <span>Cycle: {payload.cycleDays} days</span>
                           <span>Impact: {payload.totalImpact}</span>
                           <span className="text-xs text-muted-foreground">
-                            {payload.savedHrs}h saved • {payload.processesDemised} processes
+                            {payload.savedHrs}h saved •{' '}
+                            {payload.processesDemised} processes
                           </span>
                         </div>
                       );
@@ -111,10 +123,7 @@ export function ImpactVsCycleTimeChart({ data }: ImpactVsCycleTimeChartProps) {
                 />
               }
             />
-            <Scatter
-              data={data}
-              fill="var(--chart-2)"
-            />
+            <Scatter data={data} fill="var(--chart-2)" />
           </ScatterChart>
         </ChartContainer>
       </CardContent>

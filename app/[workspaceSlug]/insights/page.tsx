@@ -205,7 +205,8 @@ export default function InsightsPage() {
           Business Impact Intelligence
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Comprehensive analytics on business value, efficiency, and strategic impact
+          Comprehensive analytics on business value, efficiency, and strategic
+          impact
           {analyticsLoading && ' • Refreshing...'}
         </p>
       </div>
@@ -308,9 +309,7 @@ export default function InsightsPage() {
               <ImpactVsCycleTimeChart
                 chartData={analyticsData.impactVsCycleTime}
               />
-              <EfficiencyRatioChart
-                chartData={analyticsData.efficiencyRatio}
-              />
+              <EfficiencyRatioChart chartData={analyticsData.efficiencyRatio} />
               <ImpactDensityByTeamChart
                 chartData={analyticsData.impactDensityByTeam}
               />
@@ -344,9 +343,7 @@ export default function InsightsPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <TopAutomationsChart
-                  chartData={analyticsData.topAutomations}
-                />
+                <TopAutomationsChart chartData={analyticsData.topAutomations} />
               </div>
               <ParetoCurveChart
                 data={analyticsData.paretoCurveSavedHours}

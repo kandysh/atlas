@@ -222,7 +222,9 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
           ? 'Streamlined workflows'
           : 'No processes eliminated yet',
       subtitleColor:
-        (data.totalProcessesDemised || 0) > 0 ? 'text-blue-600' : 'text-muted-foreground',
+        (data.totalProcessesDemised || 0) > 0
+          ? 'text-blue-600'
+          : 'text-muted-foreground',
     },
   ];
 

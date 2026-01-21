@@ -1,6 +1,13 @@
 'use client';
 
-import { Bar, Line, ComposedChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import {
+  Bar,
+  Line,
+  ComposedChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { TrendingUp } from 'lucide-react';
 
 import {
@@ -35,7 +42,11 @@ interface ParetoCurveChartProps {
   valueLabel: string;
 }
 
-export function ParetoCurveChart({ data, title, valueLabel }: ParetoCurveChartProps) {
+export function ParetoCurveChart({
+  data,
+  title,
+  valueLabel,
+}: ParetoCurveChartProps) {
   if (!data || data.length === 0) {
     return (
       <Card>
@@ -44,7 +55,9 @@ export function ParetoCurveChart({ data, title, valueLabel }: ParetoCurveChartPr
             <TrendingUp className="h-4 w-4" />
             {title}
           </CardTitle>
-          <CardDescription>Pareto analysis of {valueLabel.toLowerCase()}</CardDescription>
+          <CardDescription>
+            Pareto analysis of {valueLabel.toLowerCase()}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex h-[300px] items-center justify-center text-muted-foreground">
@@ -62,7 +75,9 @@ export function ParetoCurveChart({ data, title, valueLabel }: ParetoCurveChartPr
           <TrendingUp className="h-4 w-4" />
           {title}
         </CardTitle>
-        <CardDescription>Pareto analysis of {valueLabel.toLowerCase()}</CardDescription>
+        <CardDescription>
+          Pareto analysis of {valueLabel.toLowerCase()}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -109,11 +124,16 @@ export function ParetoCurveChart({ data, title, valueLabel }: ParetoCurveChartPr
                     if (name === 'value') {
                       return (
                         <div className="flex flex-col gap-1">
-                          <span className="font-semibold">{payload.displayId}</span>
+                          <span className="font-semibold">
+                            {payload.displayId}
+                          </span>
                           <span className="text-xs">{payload.title}</span>
-                          <span>{valueLabel}: {value}</span>
+                          <span>
+                            {valueLabel}: {value}
+                          </span>
                           <span className="text-xs text-muted-foreground">
-                            {payload.cumulativePercentage.toFixed(1)}% cumulative
+                            {payload.cumulativePercentage.toFixed(1)}%
+                            cumulative
                           </span>
                         </div>
                       );

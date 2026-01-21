@@ -34,13 +34,18 @@ export function ToolsUsedChart({ chartData }: { chartData: ToolsUsed[] }) {
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
 
-    const totalHoursSaved = chartData.reduce((acc, d) => acc + (d.savedHrs || 0), 0);
+    const totalHoursSaved = chartData.reduce(
+      (acc, d) => acc + (d.savedHrs || 0),
+      0,
+    );
     const topTool = chartData.reduce(
       (max, d) => ((d.savedHrs || 0) > (max.savedHrs || 0) ? d : max),
       chartData[0],
     );
     const topPercentage =
-      totalHoursSaved > 0 ? ((topTool.savedHrs || 0) / totalHoursSaved) * 100 : 0;
+      totalHoursSaved > 0
+        ? ((topTool.savedHrs || 0) / totalHoursSaved) * 100
+        : 0;
 
     // Diversity: more tools used = more diverse
     const diversity =

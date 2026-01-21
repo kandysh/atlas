@@ -40,9 +40,14 @@ function AssetClassTooltip({
   if (!active || !payload?.length) return null;
 
   const data = payload[0].payload;
-  const totalHoursSaved = chartData.reduce((acc, d) => acc + (d.savedHrs || 0), 0);
+  const totalHoursSaved = chartData.reduce(
+    (acc, d) => acc + (d.savedHrs || 0),
+    0,
+  );
   const percentage =
-    totalHoursSaved > 0 ? (((data.savedHrs || 0) / totalHoursSaved) * 100).toFixed(1) : 0;
+    totalHoursSaved > 0
+      ? (((data.savedHrs || 0) / totalHoursSaved) * 100).toFixed(1)
+      : 0;
   const isTopAsset = metrics && data.assetClass === metrics.topAsset;
 
   return (
@@ -142,13 +147,20 @@ export function AssetClassPortfolioChart({
   chartData,
   onAssetClassClick,
 }: AssetClassPortfolioChartProps) {
-  const totalHoursSaved = chartData.reduce((acc, curr) => acc + (curr.savedHrs || 0), 0);
+  const totalHoursSaved = chartData.reduce(
+    (acc, curr) => acc + (curr.savedHrs || 0),
+    0,
+  );
 
   const metrics = useMemo(() => {
-    const sorted = [...chartData].sort((a, b) => (b.savedHrs || 0) - (a.savedHrs || 0));
+    const sorted = [...chartData].sort(
+      (a, b) => (b.savedHrs || 0) - (a.savedHrs || 0),
+    );
     const topAsset = sorted[0];
     const topPercentage =
-      totalHoursSaved > 0 ? ((topAsset?.savedHrs || 0) / totalHoursSaved) * 100 : 0;
+      totalHoursSaved > 0
+        ? ((topAsset?.savedHrs || 0) / totalHoursSaved) * 100
+        : 0;
     const diversityScore = chartData.length;
 
     // Concentration risk: if top asset > 60%, it's high concentration

@@ -78,11 +78,7 @@ export function EfficiencyRatioChart({ data }: EfficiencyRatioChartProps) {
                 value.length > 15 ? `${value.slice(0, 15)}...` : value
               }
             />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <ChartTooltip
               cursor={false}
               content={
@@ -94,7 +90,8 @@ export function EfficiencyRatioChart({ data }: EfficiencyRatioChartProps) {
                         <span className="font-semibold">{payload.title}</span>
                         <span>Efficiency: {Number(value).toFixed(2)}</span>
                         <span className="text-xs text-muted-foreground">
-                          {payload.savedHrs}h ÷ {payload.processesDemised} processes
+                          {payload.savedHrs}h ÷ {payload.processesDemised}{' '}
+                          processes
                         </span>
                       </div>
                     );

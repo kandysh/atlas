@@ -1,6 +1,13 @@
 'use client';
 
-import { Scatter, ScatterChart, XAxis, YAxis, CartesianGrid, ZAxis } from 'recharts';
+import {
+  Scatter,
+  ScatterChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ZAxis,
+} from 'recharts';
 import { Target } from 'lucide-react';
 
 import {
@@ -33,7 +40,9 @@ interface TeamImpactQuadrantChartProps {
   data: TeamImpactQuadrantData[];
 }
 
-export function TeamImpactQuadrantChart({ data }: TeamImpactQuadrantChartProps) {
+export function TeamImpactQuadrantChart({
+  data,
+}: TeamImpactQuadrantChartProps) {
   if (!data || data.length === 0) {
     return (
       <Card>
@@ -98,7 +107,9 @@ export function TeamImpactQuadrantChart({ data }: TeamImpactQuadrantChartProps) 
                       return (
                         <div className="flex flex-col gap-1">
                           <span className="font-semibold">{payload.team}</span>
-                          <span>Processes: {payload.totalProcessesDemised}</span>
+                          <span>
+                            Processes: {payload.totalProcessesDemised}
+                          </span>
                           <span>Hours: {payload.totalSavedHrs}</span>
                           <span className="text-xs text-muted-foreground">
                             {payload.taskCount} tasks
@@ -111,10 +122,7 @@ export function TeamImpactQuadrantChart({ data }: TeamImpactQuadrantChartProps) 
                 />
               }
             />
-            <Scatter
-              data={data}
-              fill="var(--chart-1)"
-            />
+            <Scatter data={data} fill="var(--chart-1)" />
           </ScatterChart>
         </ChartContainer>
       </CardContent>

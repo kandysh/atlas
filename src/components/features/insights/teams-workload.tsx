@@ -43,21 +43,33 @@ export function TeamsWorkloadChart({
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
 
-    const totalHoursSaved = chartData.reduce((acc, d) => acc + (d.savedHrs || 0), 0);
-    const totalProcessesDemised = chartData.reduce((acc, d) => acc + (d.processesDemised || 0), 0);
+    const totalHoursSaved = chartData.reduce(
+      (acc, d) => acc + (d.savedHrs || 0),
+      0,
+    );
+    const totalProcessesDemised = chartData.reduce(
+      (acc, d) => acc + (d.processesDemised || 0),
+      0,
+    );
     const avgHoursSaved = totalHoursSaved / chartData.length;
     const maxHoursSaved = Math.max(...chartData.map((d) => d.savedHrs || 0));
 
     // Identify high-impact teams (>150% of average)
-    const highImpactTeams = chartData.filter((d) => (d.savedHrs || 0) > avgHoursSaved * 1.5);
+    const highImpactTeams = chartData.filter(
+      (d) => (d.savedHrs || 0) > avgHoursSaved * 1.5,
+    );
 
     // Calculate impact balance score (lower variance = better balance)
     const variance =
-      chartData.reduce((acc, d) => acc + Math.pow((d.savedHrs || 0) - avgHoursSaved, 2), 0) /
-      chartData.length;
+      chartData.reduce(
+        (acc, d) => acc + Math.pow((d.savedHrs || 0) - avgHoursSaved, 2),
+        0,
+      ) / chartData.length;
     const stdDev = Math.sqrt(variance);
     const balanceScore =
-      avgHoursSaved > 0 ? Math.max(0, 100 - (stdDev / avgHoursSaved) * 100) : 100;
+      avgHoursSaved > 0
+        ? Math.max(0, 100 - (stdDev / avgHoursSaved) * 100)
+        : 100;
 
     return {
       totalHoursSaved,
@@ -90,7 +102,8 @@ export function TeamsWorkloadChart({
     if (!metrics) return chartConfig.savedHrs.color;
     if (savedHrs > metrics.avgHoursSaved * 1.5) return 'var(--chart-1)';
     if (savedHrs > metrics.avgHoursSaved * 1.2) return 'var(--chart-2)';
-    if (savedHrs < metrics.avgHoursSaved * 0.5) return 'var(--muted-foreground)';
+    if (savedHrs < metrics.avgHoursSaved * 0.5)
+      return 'var(--muted-foreground)';
     return chartConfig.savedHrs.color;
   };
 
@@ -177,7 +190,10 @@ export function TeamsWorkloadChart({
               className="cursor-pointer hover:opacity-80 transition-opacity"
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={getBarColor(entry.savedHrs || 0)} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={getBarColor(entry.savedHrs || 0)}
+                />
               ))}
             </Bar>
           </BarChart>

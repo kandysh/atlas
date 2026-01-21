@@ -38,7 +38,9 @@ export function AssetClassROIChart({ data }: AssetClassROIChartProps) {
             <DollarSign className="h-4 w-4" />
             Asset Class ROI
           </CardTitle>
-          <CardDescription>Return on investment by automation type</CardDescription>
+          <CardDescription>
+            Return on investment by automation type
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex h-[300px] items-center justify-center text-muted-foreground">
@@ -56,7 +58,9 @@ export function AssetClassROIChart({ data }: AssetClassROIChartProps) {
           <DollarSign className="h-4 w-4" />
           Asset Class ROI
         </CardTitle>
-        <CardDescription>Return on investment by automation type</CardDescription>
+        <CardDescription>
+          Return on investment by automation type
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -78,11 +82,7 @@ export function AssetClassROIChart({ data }: AssetClassROIChartProps) {
                 value.length > 12 ? `${value.slice(0, 12)}...` : value
               }
             />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <ChartTooltip
               cursor={false}
               content={
@@ -91,10 +91,13 @@ export function AssetClassROIChart({ data }: AssetClassROIChartProps) {
                     const payload = item.payload as AssetClassROIData;
                     return (
                       <div className="flex flex-col gap-1">
-                        <span className="font-semibold">{payload.assetClass}</span>
+                        <span className="font-semibold">
+                          {payload.assetClass}
+                        </span>
                         <span>ROI: {Number(value).toFixed(2)}</span>
                         <span className="text-xs text-muted-foreground">
-                          {payload.savedHrs}h ÷ {payload.avgCycleDays.toFixed(1)} days
+                          {payload.savedHrs}h ÷{' '}
+                          {payload.avgCycleDays.toFixed(1)} days
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {payload.taskCount} tasks

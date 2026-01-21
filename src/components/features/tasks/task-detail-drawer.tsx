@@ -105,7 +105,6 @@ const SPECIAL_FIELDS = new Set([
   'benefits',
   'otherUseCases',
 ]);
-const HOUR_FIELDS = new Set(['currentHrs', 'workedHrs', 'savedHrs']);
 
 export function TaskDetailDrawer({
   task,
@@ -127,28 +126,36 @@ export function TaskDetailDrawer({
     return [...fieldConfigs].sort((a, b) => a.order - b.order);
   }, [fieldConfigs]);
 
+  const hoursFields = useMemo(() => {
+    return new Set(
+      fieldConfigs
+        .filter((f) => f.type === 'editable-number')
+        .map((f) => f.key),
+    );
+  }, [fieldConfigs]);
+
   // Separate fields by category
   const { textFields, propertyFields, hourFields, tagFields } = useMemo(() => {
     const textFields = sortedFieldConfigs.filter((f) =>
       SPECIAL_FIELDS.has(f.key),
     );
-    const hourFields = sortedFieldConfigs.filter((f) => HOUR_FIELDS.has(f.key));
+    const hourFields = sortedFieldConfigs.filter((f) => hoursFields.has(f.key));
     const tagFields = sortedFieldConfigs.filter(
       (f) =>
         (f.type === 'editable-tags' || f.type === 'badge-list') &&
-        !HOUR_FIELDS.has(f.key) &&
+        !hoursFields.has(f.key) &&
         !SPECIAL_FIELDS.has(f.key),
     );
     const propertyFields = sortedFieldConfigs.filter(
       (f) =>
         !SPECIAL_FIELDS.has(f.key) &&
-        !HOUR_FIELDS.has(f.key) &&
+        !hoursFields.has(f.key) &&
         f.type !== 'editable-tags' &&
         f.type !== 'badge-list',
     );
 
     return { textFields, propertyFields, hourFields, tagFields };
-  }, [sortedFieldConfigs]);
+  }, [sortedFieldConfigs, hoursFields]);
 
   if (!task) return null;
 

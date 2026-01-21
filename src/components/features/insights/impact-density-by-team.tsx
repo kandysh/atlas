@@ -29,7 +29,9 @@ interface ImpactDensityByTeamChartProps {
   data: ImpactDensityByTeamData[];
 }
 
-export function ImpactDensityByTeamChart({ data }: ImpactDensityByTeamChartProps) {
+export function ImpactDensityByTeamChart({
+  data,
+}: ImpactDensityByTeamChartProps) {
   if (!data || data.length === 0) {
     return (
       <Card>
@@ -78,11 +80,7 @@ export function ImpactDensityByTeamChart({ data }: ImpactDensityByTeamChartProps
                 value.length > 10 ? `${value.slice(0, 10)}...` : value
               }
             />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <ChartTooltip
               cursor={false}
               content={
@@ -94,7 +92,8 @@ export function ImpactDensityByTeamChart({ data }: ImpactDensityByTeamChartProps
                         <span className="font-semibold">{payload.team}</span>
                         <span>Density: {Number(value).toFixed(2)}</span>
                         <span className="text-xs text-muted-foreground">
-                          {payload.processesDemised} processes ÷ {payload.avgCycleDays.toFixed(1)} days
+                          {payload.processesDemised} processes ÷{' '}
+                          {payload.avgCycleDays.toFixed(1)} days
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {payload.taskCount} tasks

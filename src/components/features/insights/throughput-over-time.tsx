@@ -54,7 +54,10 @@ export function ChartLineInteractive({
     () => ({
       hours: chartData.reduce((acc, curr) => acc + curr.hours, 0),
       count: chartData.reduce((acc, curr) => acc + curr.count, 0),
-      processesDemised: chartData.reduce((acc, curr) => acc + (curr.processesDemised || 0), 0),
+      processesDemised: chartData.reduce(
+        (acc, curr) => acc + (curr.processesDemised || 0),
+        0,
+      ),
     }),
     [chartData],
   );
@@ -68,7 +71,9 @@ export function ChartLineInteractive({
     const key = activeChart as 'hours' | 'count' | 'processesDemised';
     const recentSum = recent.reduce((acc, d) => acc + (d[key] || 0), 0);
     const olderSum =
-      older.length > 0 ? older.reduce((acc, d) => acc + (d[key] || 0), 0) : recentSum;
+      older.length > 0
+        ? older.reduce((acc, d) => acc + (d[key] || 0), 0)
+        : recentSum;
 
     const change = recentSum - olderSum;
     const percentChange = olderSum > 0 ? (change / olderSum) * 100 : 0;
@@ -158,7 +163,8 @@ export function ChartLineInteractive({
                   }}
                   formatter={(value, name) => {
                     if (name === 'hours') return `${value} hours saved`;
-                    if (name === 'processesDemised') return `${value} processes demised`;
+                    if (name === 'processesDemised')
+                      return `${value} processes demised`;
                     return `${value} tasks completed`;
                   }}
                 />

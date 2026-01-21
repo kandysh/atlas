@@ -157,8 +157,10 @@ export function OwnerImpactChart({
       </CardContent>
       {metrics && metrics.topPerformer !== 'N/A' && (
         <CardFooter className="text-xs text-muted-foreground pt-0">
-          🏆 {metrics.topPerformer} leads with {metrics.topHoursSaved.toFixed(0)}hrs saved
-          {metrics.topProcessesDemised > 0 && ` • ${metrics.topProcessesDemised} processes demised`}
+          🏆 {metrics.topPerformer} leads with{' '}
+          {metrics.topHoursSaved.toFixed(0)}hrs saved
+          {metrics.topProcessesDemised > 0 &&
+            ` • ${metrics.topProcessesDemised} processes demised`}
         </CardFooter>
       )}
     </Card>

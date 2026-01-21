@@ -84,11 +84,7 @@ export function CumulativeImpactChart({ data }: CumulativeImpactChartProps) {
                 })
               }
             />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <ChartTooltip
               cursor={false}
               content={
