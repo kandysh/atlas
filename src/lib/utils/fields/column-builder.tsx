@@ -226,7 +226,11 @@ export function renderFieldCell(
     case 'priority':
       return renderPriorityCell(value, onChange as (v: Priority) => void);
     case 'editable-owner':
-      return renderEditableOwnerCell(value, onChange as (v: string) => void, fieldOptions);
+      return renderEditableOwnerCell(
+        value,
+        onChange as (v: string) => void,
+        fieldOptions,
+      );
     case 'editable-combobox':
       return renderEditableComboboxCell(
         value,
@@ -235,9 +239,17 @@ export function renderFieldCell(
         options,
       );
     case 'editable-text':
-      return renderEditableTextCell(value, onChange as (v: string) => void, key);
+      return renderEditableTextCell(
+        value,
+        onChange as (v: string) => void,
+        key,
+      );
     case 'editable-number':
-      return renderEditableNumberCell(value, onChange as (v: number) => void, options);
+      return renderEditableNumberCell(
+        value,
+        onChange as (v: number) => void,
+        options,
+      );
     case 'editable-date':
       return (
         <EditableDateCell
@@ -257,7 +269,10 @@ export function renderFieldCell(
       return renderBadgeList(value);
     case 'checkbox':
       return (
-        <EditableCheckboxCell value={Boolean(value)} onChange={onChange as (v: boolean) => void} />
+        <EditableCheckboxCell
+          value={Boolean(value)}
+          onChange={onChange as (v: boolean) => void}
+        />
       );
     case 'multiselect':
       return renderEditableMultiselectCell(
@@ -337,7 +352,7 @@ function renderEditableComboboxCell(
   // Combine field options and config choices
   const configChoices = (configOptions?.choices as string[]) || [];
   const combined = [...new Set([...fieldOptions, ...configChoices])];
-  
+
   // Ensure all options are strings and filter out null/undefined
   const options = combined
     .filter((opt) => opt != null && opt !== '')
@@ -395,7 +410,7 @@ function renderEditableTagsCell(
   // Combine field options and config choices
   const configChoices = (configOptions?.choices as string[]) || [];
   const combined = [...new Set([...fieldOptions, ...configChoices])];
-  
+
   const options = combined
     .filter((opt) => opt != null && opt !== '')
     .map((opt) => String(opt))
@@ -440,7 +455,7 @@ function renderEditableMultiselectCell(
   // Combine field options and config choices
   const configChoices = (configOptions?.choices as string[]) || [];
   const combined = [...new Set([...fieldOptions, ...configChoices])];
-  
+
   const options = combined
     .filter((opt) => opt != null && opt !== '')
     .map((opt) => String(opt))
@@ -466,7 +481,7 @@ function renderSelectCell(
   // Combine field options and config choices
   const configChoices = (configOptions?.choices as string[]) || [];
   const combined = [...new Set([...fieldOptions, ...configChoices])];
-  
+
   const options = combined
     .filter((opt) => opt != null && opt !== '')
     .map((opt) => String(opt))

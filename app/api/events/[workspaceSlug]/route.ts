@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: Promise<{ workspaceSlug: string }> },
 ) {
   const { workspaceSlug } = await params;
-  
+
   // Look up workspace by slug to get the ID
   const workspaceResult = await getWorkspaceBySlug(workspaceSlug);
   if (!workspaceResult.success) {
@@ -20,7 +20,7 @@ export async function GET(
       headers: { 'Content-Type': 'application/json' },
     });
   }
-  
+
   const workspaceId = workspaceResult.workspace.id;
   const clientId = `${workspaceSlug}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
@@ -49,7 +49,10 @@ export async function GET(
         })}\n\n`;
         controller.enqueue(new TextEncoder().encode(stateMessage));
       } catch (error) {
-        logger.error({ workspaceSlug, workspaceId, clientId, error }, 'Error fetching initial state');
+        logger.error(
+          { workspaceSlug, workspaceId, clientId, error },
+          'Error fetching initial state',
+        );
       }
 
       // Keep connection alive with periodic heartbeat

@@ -21,9 +21,7 @@ export default function HomePage() {
     <div className="flex items-center justify-center min-h-screen">
       <div className="space-y-4 text-center" role="status" aria-live="polite">
         <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-        <p className="text-sm text-muted-foreground">
-          Loading workspace...
-        </p>
+        <p className="text-sm text-muted-foreground">Loading workspace...</p>
       </div>
     </div>
   );

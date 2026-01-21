@@ -118,17 +118,17 @@ type AnalyticsResult =
 
 /**
  * Get all analytics data for a workspace with server-side aggregation
- * 
+ *
  * @param workspaceId - The workspace ID to fetch analytics for
  * @param filters - Optional filters to apply to the analytics data
  * @param filters.ownerCellKey - The JSONB key to use for owner/assignee data (defaults to 'owner')
  *                                This allows analytics to be generated for any owner-like field in your data
  * @returns Promise resolving to analytics data or error
- * 
+ *
  * @example
  * // Use default 'owner' field
  * getAnalytics('workspace-123', { status: 'completed' })
- * 
+ *
  * @example
  * // Use custom 'assignedTo' field for owner charts
  * getAnalytics('workspace-123', { ownerCellKey: 'assignedTo' })
@@ -144,7 +144,7 @@ export async function getAnalytics(
 
     // Build parameterized filter conditions
     const filterCondition = buildFilterCondition(filters);
-    
+
     // Use configured owner cell key or default to 'owner'
     const ownerCellKey = filters.ownerCellKey || 'owner';
 
@@ -288,7 +288,9 @@ function buildFilterCondition(filters: AnalyticsFilters): SQL | null {
     } else {
       // Match any of the teams
       const teamValuesList = teamValues.map((t) => sql`${t}`);
-      conditions.push(sql`data->>'teamName' IN (${sql.join(teamValuesList, sql`, `)})`);
+      conditions.push(
+        sql`data->>'teamName' IN (${sql.join(teamValuesList, sql`, `)})`,
+      );
     }
   }
 
@@ -579,7 +581,7 @@ async function getOwnerProductivity(
   ownerCellKey: string = 'owner',
 ): Promise<OwnerProductivity[]> {
   const ownerField = sql.raw(`data->>'${ownerCellKey}'`);
-  
+
   const baseCondition = sql`workspace_id = ${workspaceId}
     AND data->>'status' = 'completed'
     AND ${ownerField} IS NOT NULL
@@ -816,9 +818,12 @@ async function getKpiSummary(
 
 // Filter option helpers
 
-async function getOwners(workspaceId: string, ownerCellKey: string = 'owner'): Promise<string[]> {
+async function getOwners(
+  workspaceId: string,
+  ownerCellKey: string = 'owner',
+): Promise<string[]> {
   const ownerField = sql.raw(`data->>'${ownerCellKey}'`);
-  
+
   const result = await db.execute(sql`
     SELECT DISTINCT ${ownerField} as owner
     FROM ${tasksTable}

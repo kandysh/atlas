@@ -44,7 +44,7 @@ export function WorkspaceToggler() {
   const handleWorkspaceChange = (workspace: (typeof workspaces)[0]) => {
     setCurrentWorkspace(workspace);
     setOpen(false);
-    
+
     // Navigate to the new workspace's active page
     router.push(`/${workspace.slug}`);
   };
@@ -61,7 +61,7 @@ export function WorkspaceToggler() {
       setDialogOpen(false);
       setNewWorkspaceName('');
       setOpen(false);
-      
+
       // Navigate to the new workspace
       router.push(`/${newWorkspace.slug}`);
     } catch {

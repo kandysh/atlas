@@ -488,7 +488,7 @@ export function EditableTagsCell({
     if (e.key === 'Enter' && searchValue) {
       e.preventDefault();
       const trimmed = searchValue.trim();
-      
+
       // If there's a filtered option, select the first one
       if (filteredOptions.length > 0 && !value.includes(filteredOptions[0])) {
         handleToggle(filteredOptions[0]);

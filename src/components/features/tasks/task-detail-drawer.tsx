@@ -23,13 +23,13 @@ import { Button } from '@/src/components/ui/button';
 import { cn } from '@/src/lib/utils';
 import { Task } from '@/src/lib/types';
 import { FieldConfig } from '@/src/lib/db/schema';
-import {
-  EditableTextCell,
-  EditableNumberCell,
-} from './editable-cells';
+import { EditableTextCell, EditableNumberCell } from './editable-cells';
 
 import { TaskHistory } from './task-history';
-import { extractUniqueFieldValues, renderFieldCell } from '@/src/lib/utils/fields/column-builder';
+import {
+  extractUniqueFieldValues,
+  renderFieldCell,
+} from '@/src/lib/utils/fields/column-builder';
 
 type TaskDetailDrawerProps = {
   task: Task | null;
@@ -166,9 +166,18 @@ export function TaskDetailDrawer({
   // Render a field based on its config
   const renderField = (fieldConfig: FieldConfig) => {
     const { key } = fieldConfig;
-    const value = task[key] as string | number | boolean | string[] | Date | null | undefined;
+    const value = task[key] as
+      | string
+      | number
+      | boolean
+      | string[]
+      | Date
+      | null
+      | undefined;
 
-    const handleChange = (newValue: string | number | boolean | string[] | Date | null | undefined) => {
+    const handleChange = (
+      newValue: string | number | boolean | string[] | Date | null | undefined,
+    ) => {
       onUpdate(task.id, key, newValue);
     };
 

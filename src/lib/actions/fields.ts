@@ -59,7 +59,10 @@ export async function updateFieldVisibility(
 
     return { success: true, field: updatedField };
   } catch (error) {
-    logger.error({ fieldId, visible, error }, 'Error updating field visibility');
+    logger.error(
+      { fieldId, visible, error },
+      'Error updating field visibility',
+    );
     return { success: false, error: 'Failed to update field visibility' };
   }
 }

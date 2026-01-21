@@ -17,7 +17,7 @@ export default function WorkspaceLayout({
     // Once workspaces are loaded, sync URL with context
     if (!isLoading && workspaces.length > 0) {
       const workspace = workspaces.find((w) => w.slug === workspaceSlug);
-      
+
       if (workspace) {
         // Set the workspace from URL if it exists
         setCurrentWorkspace(workspace);
@@ -30,7 +30,11 @@ export default function WorkspaceLayout({
 
   // Show loading state while validating workspace
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Loading...
+      </div>
+    );
   }
 
   // Check if workspace exists

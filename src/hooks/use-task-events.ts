@@ -11,7 +11,11 @@ import { logger } from '@/src/lib/logger';
 /**
  * Hook to listen to task updates via SSE
  */
-export function useTaskEvents(workspaceId: string, workspaceSlug: string, page: number = 0) {
+export function useTaskEvents(
+  workspaceId: string,
+  workspaceSlug: string,
+  page: number = 0,
+) {
   const queryClient = useQueryClient();
   const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -81,7 +85,10 @@ export function useTaskEvents(workspaceId: string, workspaceSlug: string, page: 
 
         switch (data.type) {
           case 'connected':
-            logger.info({ workspaceId, clientId: data.clientId }, 'SSE connected');
+            logger.info(
+              { workspaceId, clientId: data.clientId },
+              'SSE connected',
+            );
             break;
 
           case 'initial_state':
@@ -103,7 +110,10 @@ export function useTaskEvents(workspaceId: string, workspaceSlug: string, page: 
             break;
 
           default:
-            logger.warn({ workspaceId, messageType: data.type }, 'Unknown SSE message type');
+            logger.warn(
+              { workspaceId, messageType: data.type },
+              'Unknown SSE message type',
+            );
         }
       } catch (error) {
         logger.error({ workspaceId, error }, 'Error parsing SSE message');
