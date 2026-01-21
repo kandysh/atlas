@@ -250,7 +250,7 @@ async function seed() {
     const priorities = ['low', 'medium', 'high', 'urgent'];
 
     // Build 100 tasks
-    const totalTasks = 100;
+    const totalTasks = 10000;
     const sampleTasks: {
       sequenceNumber: number;
       data: Record<string, any>;
@@ -340,7 +340,7 @@ async function seed() {
       let completionDate: Date | null = null;
       if (status === 'completed' || status === 'done') {
         // completed sometime in the past (spread across ~5 years)
-        const daysAgo = 200 + daysOffsetFromIndex(i, 2000);
+        const daysAgo = 200 + daysOffsetFromIndex(i, 365);
         completionDate = dateDaysAgo(daysAgo);
       } else if (status === 'in-progress' || status === 'testing') {
         // some planned near-term completion, or already partially completed historically

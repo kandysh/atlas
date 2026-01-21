@@ -28,7 +28,7 @@ export async function getTasks(
       return { success: false, error: 'workspaceId is required' };
     }
 
-    const perPage = 50;
+    const perPage = 1000;
 
     const result = await db
       .select()
