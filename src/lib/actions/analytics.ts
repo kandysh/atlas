@@ -26,6 +26,10 @@ const tasksTable = tableConfig.schema
   ? sql`${sql.identifier(tableConfig.schema)}.${sql.identifier(tableConfig.name)}`
   : sql.identifier(tableConfig.name);
 
+// Business impact calculation constants
+export const PROCESS_WEIGHT = 10; // Weight factor for processes in total impact calculation
+export const ANNUAL_WORK_HOURS = 2080; // Standard full-time annual work hours (40h/week * 52 weeks)
+
 // Types for analytics queries
 export interface RollingCycle {
   month: string;
@@ -996,7 +1000,7 @@ async function getImpactVsCycleTime(
       )) / 86400 as cycle_days,
       COALESCE((data->>'savedHrs')::numeric, 0)::float as saved_hrs,
       COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
-      (COALESCE((data->>'savedHrs')::numeric, 0) + COALESCE((data->>'processesDemised')::numeric, 0) * 10)::float as total_impact
+      (COALESCE((data->>'savedHrs')::numeric, 0) + COALESCE((data->>'processesDemised')::numeric, 0) * ${PROCESS_WEIGHT})::float as total_impact
     FROM ${tasksTable}
     WHERE ${whereClause}
       AND (COALESCE((data->>'processesDemised')::numeric, 0) > 0 
@@ -1034,7 +1038,7 @@ async function getEfficiencyRatio(
       COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
       CASE 
         WHEN COALESCE((data->>'processesDemised')::numeric, 0) > 0 
-        THEN (COALESCE((data->>'savedHrs')::numeric, 0) / COALESCE((data->>'processesDemised')::numeric, 1))::float
+        THEN (COALESCE((data->>'savedHrs')::numeric, 0) / (data->>'processesDemised')::numeric)::float
         ELSE 0
       END as efficiency
     FROM ${tasksTable}
@@ -1241,7 +1245,7 @@ async function getTopAutomations(
       data->>'title' as title,
       COALESCE((data->>'savedHrs')::numeric, 0)::float as saved_hrs,
       COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
-      (COALESCE((data->>'savedHrs')::numeric, 0) + COALESCE((data->>'processesDemised')::numeric, 0) * 10)::float as total_impact,
+      (COALESCE((data->>'savedHrs')::numeric, 0) + COALESCE((data->>'processesDemised')::numeric, 0) * ${PROCESS_WEIGHT})::float as total_impact,
       COALESCE(data->>'completionDate', '') as completion_date
     FROM ${tasksTable}
     WHERE ${whereClause}

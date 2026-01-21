@@ -14,6 +14,7 @@ import {
   Award,
 } from 'lucide-react';
 import { AnalyticsData, AnalyticsFilters } from '@/src/lib/actions/analytics';
+import { ANNUAL_WORK_HOURS } from '@/src/lib/actions/analytics';
 
 interface InsightsCardsProps {
   data: AnalyticsData;
@@ -157,7 +158,7 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
         id: 'savings-milestone',
         type: 'success',
         icon: Timer,
-        message: `${hoursSaved.toLocaleString()}h business value delivered - equivalent to ${Math.round(hoursSaved / 2080)} full-time employees per year!`,
+        message: `${hoursSaved.toLocaleString()}h business value delivered - equivalent to ${Math.round(hoursSaved / ANNUAL_WORK_HOURS)} full-time employees per year!`,
         action: 'Celebrate',
         priority: 8,
       });

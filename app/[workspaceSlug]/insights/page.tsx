@@ -349,12 +349,14 @@ export default function InsightsPage() {
                 />
               </div>
               <ParetoCurveChart
-                chartData={analyticsData.paretoCurveSavedHours}
-                dataKey="savedHours"
+                data={analyticsData.paretoCurveSavedHours}
+                title="Pareto Curve: Saved Hours"
+                valueLabel="Hours Saved"
               />
               <ParetoCurveChart
-                chartData={analyticsData.paretoCurveProcesses}
-                dataKey="processes"
+                data={analyticsData.paretoCurveProcesses}
+                title="Pareto Curve: Processes Demised"
+                valueLabel="Processes Automated"
               />
             </div>
           </section>
