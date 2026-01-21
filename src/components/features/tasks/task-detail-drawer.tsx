@@ -213,7 +213,7 @@ export function TaskDetailDrawer({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                 {task.id}
               </span>
               <h2 className="text-xl font-semibold text-foreground">

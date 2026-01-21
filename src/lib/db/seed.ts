@@ -1,18 +1,97 @@
+/**
+ * Seed script for Atlas - generates up to 100 historical-like tasks
+ *
+ * This file:
+ * - Ensures a default user and workspace exist (using USERINFO env)
+ * - Ensures default field configs are created for a new workspace
+ * - Generates 100 tasks with fields aligned to `getDefaultFieldConfigs`
+ * - Creates `displayId` in the form `TSK-{workspacesequence}-{tasksequence}`
+ * - Adds `createdAt` and `updatedAt` timestamps with reasonable historical spread
+ *
+ * Notes:
+ * - workspace sequence uses `workspace.sequenceNumber` if present, otherwise falls back to `1`
+ * - This script will skip inserting tasks if any tasks already exist for the workspace
+ */
+
 import { getDefaultFieldConfigs } from '../utils';
 import { db } from './index';
 import { workspaces, users, tasks, fieldConfigs } from './schema';
 import { eq } from 'drizzle-orm';
 
+function pick<T>(arr: T[], idx: number) {
+  return arr[idx % arr.length];
+}
+
+function pickMany<T>(arr: T[], idx: number, count: number) {
+  const result: T[] = [];
+  for (let i = 0; i < count; i++) {
+    result.push(arr[(idx + i) % arr.length]);
+  }
+  return result;
+}
+
+function randInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 /**
- * Seed the database with sample data
+ * Create a deterministic-ish offset from an index to spread dates historically
  */
+function daysOffsetFromIndex(i: number, maxDays = 2000) {
+  // simple deterministic pseudo-random-ish mapping using arithmetic
+  return (i * 37) % maxDays;
+}
+
+function dateDaysAgo(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
+}
+
+function dateDaysFromNow(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function computeCreatedUpdatedForTask(
+  idx: number,
+  status: string,
+  completionDate: Date | undefined | null,
+) {
+  // returns { createdAt: Date, updatedAt: Date }
+  if (completionDate) {
+    // Task completed at completionDate; created sometime before that
+    const compMs = completionDate.getTime();
+    const daysBefore = randInt(7, 180); // created 1-~6 months (or more) before completion
+    const createdAt = new Date(compMs - daysBefore * MS_PER_DAY);
+    // updatedAt is completionDate + 0..14 days (small wrap-up)
+    const daysAfter = randInt(0, 14);
+    const updatedAt = new Date(compMs + daysAfter * MS_PER_DAY);
+    return { createdAt, updatedAt };
+  }
+
+  // Not completed: created earlier, updated more recently
+  // Make created earlier for older indices
+  const baseDaysAgo = 30 + daysOffsetFromIndex(idx, 900); // 30..930 days
+  const createdAt = dateDaysAgo(baseDaysAgo);
+  // updatedAt is between createdAt and now (biased toward recent)
+  const updatedDaysAgo = randInt(0, Math.min(30, baseDaysAgo));
+  const updatedAt = dateDaysAgo(updatedDaysAgo);
+  return { createdAt, updatedAt };
+}
+
 async function seed() {
-  console.log('🌱 Seeding database...');
+  console.log(
+    '🌱 Seeding database with historical task data (up to 100 tasks)...',
+  );
 
   try {
-    // Get or create default user
     const userData = JSON.parse(process.env.USERINFO!);
 
+    // Ensure user
     let user = await db.query.users.findFirst({
       where: eq(users.email, userData.details.email),
     });
@@ -31,7 +110,7 @@ async function seed() {
       console.log('✅ Found existing user:', user.email);
     }
 
-    // Get or create default workspace
+    // Ensure workspace
     let workspace = await db.query.workspaces.findFirst({
       where: eq(workspaces.ownerUserId, user.id),
     });
@@ -48,7 +127,7 @@ async function seed() {
       workspace = newWorkspace;
       console.log('✅ Created workspace:', workspace.name);
 
-      // Create default field configurations
+      // create default field configs for new workspace
       const defaultFields = getDefaultFieldConfigs(workspace.id);
       await db.insert(fieldConfigs).values(defaultFields);
       console.log('✅ Created default field configurations');
@@ -56,319 +135,286 @@ async function seed() {
       console.log('✅ Found existing workspace:', workspace.name);
     }
 
-    // Check if tasks already exist
+    // If tasks exist, skip seeding tasks
     const existingTasks = await db.query.tasks.findMany({
       where: eq(tasks.workspaceId, workspace.id),
     });
 
     if (existingTasks.length > 0) {
       console.log(
-        `✅ Found ${existingTasks.length} existing tasks, skipping seed`,
+        `✅ Found ${existingTasks.length} existing tasks, skipping task seed`,
       );
       return;
     }
 
-    // Sample task data (fields aligned with default-field-configs.ts)
-    const sampleTasks = [
-      {
-        sequenceNumber: 1,
-        data: {
-          title: 'Automate Daily Reconciliation Process',
-          status: 'completed',
-          priority: 'high',
-          owner: 'Sarah Chen',
-          assignee: 'David Kim',
-          assetClass: 'Fixed Income',
-          theme: 'Automation',
-          teamName: 'Operations',
-          tools: ['Python', 'SQL', 'Alteryx'],
-          tags: ['reconciliation', 'automation'],
-          savedHrs: 100,
-          processesDemised: 2,
-          otherUseCases: '',
-          completionDate: new Date('2026-01-15'),
-        },
-      },
-      {
-        sequenceNumber: 2,
-        data: {
-          title: 'Build Real-time Portfolio Dashboard',
-          status: 'in-progress',
-          priority: 'urgent',
-          owner: 'Michael Rodriguez',
-          assignee: 'Emily Johnson',
-          assetClass: 'Equities',
-          theme: 'Reporting',
-          teamName: 'Technology',
-          tools: ['Power BI', 'DAX', 'Azure'],
-          tags: ['dashboard', 'reporting'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-02-01'),
-        },
-      },
-      {
-        sequenceNumber: 3,
-        data: {
-          title: 'Implement Automated Trade Validation',
-          status: 'testing',
-          priority: 'high',
-          owner: 'Emily Johnson',
-          assignee: 'James Wilson',
-          assetClass: 'Derivatives',
-          theme: 'Risk Management',
-          teamName: 'Risk',
-          tools: ['Python', 'Pandas', 'NumPy'],
-          tags: ['validation', 'trading'],
-          savedHrs: 80,
-          processesDemised: 1,
-          otherUseCases: '',
-          completionDate: new Date('2026-01-25'),
-        },
-      },
-      {
-        sequenceNumber: 4,
-        data: {
-          title: 'Streamline Fund Accounting Workflows',
-          status: 'todo',
-          priority: 'medium',
-          owner: 'David Kim',
-          assignee: 'Jennifer Martinez',
-          assetClass: 'Multi-Asset',
-          theme: 'Process Improvement',
-          teamName: 'Accounting',
-          tools: ['Excel', 'VBA', 'Power Automate'],
-          tags: ['accounting', 'workflow'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-02-15'),
-        },
-      },
-      {
-        sequenceNumber: 5,
-        data: {
-          title: 'Develop ESG Data Integration Pipeline',
-          status: 'in-progress',
-          priority: 'high',
-          owner: 'Sarah Chen',
-          assignee: 'Michael Rodriguez',
-          assetClass: 'Equities',
-          theme: 'Data Integration',
-          teamName: 'Technology',
-          tools: ['Python', 'API', 'PostgreSQL'],
-          tags: ['esg', 'data'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-02-10'),
-        },
-      },
-      {
-        sequenceNumber: 6,
-        data: {
-          title: 'Optimize Risk Calculation Engine',
-          status: 'done',
-          priority: 'medium',
-          owner: 'James Wilson',
-          assignee: 'Emily Johnson',
-          assetClass: 'Fixed Income',
-          theme: 'Performance',
-          teamName: 'Risk',
-          tools: ['C++', 'CUDA', 'Python'],
-          tags: ['performance', 'risk'],
-          savedHrs: 60,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-01-10'),
-        },
-      },
-      {
-        sequenceNumber: 7,
-        data: {
-          title: 'Create Client Reporting Automation',
-          status: 'todo',
-          priority: 'low',
-          owner: 'Jennifer Martinez',
-          assignee: 'Sarah Chen',
-          assetClass: 'Multi-Asset',
-          theme: 'Automation',
-          teamName: 'Client Services',
-          tools: ['Tableau', 'Python', 'LaTeX'],
-          tags: ['client-reporting'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-03-01'),
-        },
-      },
-      {
-        sequenceNumber: 8,
-        data: {
-          title: 'Enhance Trade Execution Analytics',
-          status: 'in-progress',
-          priority: 'medium',
-          owner: 'Michael Rodriguez',
-          assignee: 'David Kim',
-          assetClass: 'Equities',
-          theme: 'Analytics',
-          teamName: 'Trading',
-          tools: ['R', 'Shiny', 'SQL'],
-          tags: ['analytics', 'execution'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-01-30'),
-        },
-      },
-      {
-        sequenceNumber: 9,
-        data: {
-          title: 'Implement Compliance Monitoring System',
-          status: 'blocked',
-          priority: 'urgent',
-          owner: 'Amanda Lee',
-          assignee: 'James Wilson',
-          assetClass: 'Multi-Asset',
-          theme: 'Compliance',
-          teamName: 'Compliance',
-          tools: ['Splunk', 'Elasticsearch', 'Kibana'],
-          tags: ['compliance'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-02-05'),
-        },
-      },
-      {
-        sequenceNumber: 10,
-        data: {
-          title: 'Build Position Management Tool',
-          status: 'testing',
-          priority: 'high',
-          owner: 'David Kim',
-          assignee: 'Michael Rodriguez',
-          assetClass: 'Fixed Income',
-          theme: 'Portfolio Management',
-          teamName: 'Portfolio Management',
-          tools: ['JavaScript', 'React', 'Node.js'],
-          tags: ['position-management'],
-          savedHrs: 70,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-01-28'),
-        },
-      },
-      {
-        sequenceNumber: 11,
-        data: {
-          title: 'Automate Regulatory Reporting',
-          status: 'completed',
-          priority: 'urgent',
-          owner: 'Emily Johnson',
-          assignee: 'Amanda Lee',
-          assetClass: 'Multi-Asset',
-          theme: 'Compliance',
-          teamName: 'Compliance',
-          tools: ['Python', 'XML', 'XBRL'],
-          tags: ['regulatory'],
-          savedHrs: 150,
-          processesDemised: 3,
-          otherUseCases: '',
-          completionDate: new Date('2026-01-12'),
-        },
-      },
-      {
-        sequenceNumber: 12,
-        data: {
-          title: 'Develop Market Data Aggregation Layer',
-          status: 'in-progress',
-          priority: 'medium',
-          owner: 'James Wilson',
-          assignee: 'Sarah Chen',
-          assetClass: 'Derivatives',
-          theme: 'Data Integration',
-          teamName: 'Technology',
-          tools: ['Kafka', 'Redis', 'Go'],
-          tags: ['market-data'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-02-08'),
-        },
-      },
-      {
-        sequenceNumber: 13,
-        data: {
-          title: 'Create Performance Attribution Dashboard',
-          status: 'todo',
-          priority: 'low',
-          owner: 'Sarah Chen',
-          assignee: 'Jennifer Martinez',
-          assetClass: 'Equities',
-          theme: 'Reporting',
-          teamName: 'Portfolio Management',
-          tools: ['Tableau', 'SQL', 'DAX'],
-          tags: ['attribution', 'reporting'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-03-15'),
-        },
-      },
-      {
-        sequenceNumber: 14,
-        data: {
-          title: 'Implement Cash Management Automation',
-          status: 'done',
-          priority: 'high',
-          owner: 'Jennifer Martinez',
-          assignee: 'David Kim',
-          assetClass: 'Fixed Income',
-          theme: 'Automation',
-          teamName: 'Operations',
-          tools: ['UiPath', 'Python', 'SAP'],
-          tags: ['cash-management', 'automation'],
-          savedHrs: 90,
-          processesDemised: 1,
-          otherUseCases: '',
-          completionDate: new Date('2026-01-18'),
-        },
-      },
-      {
-        sequenceNumber: 15,
-        data: {
-          title: 'Build Counterparty Risk Monitor',
-          status: 'in-progress',
-          priority: 'urgent',
-          owner: 'Michael Rodriguez',
-          assignee: 'Emily Johnson',
-          assetClass: 'Derivatives',
-          theme: 'Risk Management',
-          teamName: 'Risk',
-          tools: ['Python', 'Bloomberg API', 'MongoDB'],
-          tags: ['counterparty', 'risk'],
-          savedHrs: 0,
-          processesDemised: 0,
-          otherUseCases: '',
-          completionDate: new Date('2026-01-31'),
-        },
-      },
+    // Pools of values to generate tasks
+    const owners = [
+      'Sarah Chen',
+      'Michael Rodriguez',
+      'Emily Johnson',
+      'David Kim',
+      'James Wilson',
+      'Jennifer Martinez',
+      'Amanda Lee',
+      'Daniel Park',
+      'Olivia Brown',
+      'Liam Smith',
     ];
+
+    const assignees = [
+      'David Kim',
+      'Emily Johnson',
+      'James Wilson',
+      'Michael Rodriguez',
+      'Sarah Chen',
+      'Jennifer Martinez',
+      'Amanda Lee',
+      'Daniel Park',
+      'Olivia Brown',
+      'Liam Smith',
+    ];
+
+    const assetClasses = [
+      'Equities',
+      'Fixed Income',
+      'Derivatives',
+      'Multi-Asset',
+      'Cash',
+      'Commodities',
+    ];
+
+    const themes = [
+      'Automation',
+      'Reporting',
+      'Risk Management',
+      'Process Improvement',
+      'Data Integration',
+      'Performance',
+      'Compliance',
+      'Analytics',
+      'Portfolio Management',
+    ];
+
+    const teamNames = [
+      'Operations',
+      'Technology',
+      'Risk',
+      'Accounting',
+      'Client Services',
+      'Trading',
+      'Portfolio Management',
+      'Compliance',
+      'Research',
+    ];
+
+    const toolsPool = [
+      'Python',
+      'SQL',
+      'Alteryx',
+      'Power BI',
+      'DAX',
+      'Azure',
+      'Pandas',
+      'NumPy',
+      'Excel',
+      'VBA',
+      'Power Automate',
+      'Tableau',
+      'LaTeX',
+      'R',
+      'Shiny',
+      'Splunk',
+      'Elasticsearch',
+      'Kibana',
+      'JavaScript',
+      'React',
+      'Node.js',
+      'C++',
+      'CUDA',
+      'UiPath',
+      'Kafka',
+      'Redis',
+      'Go',
+      'PostgreSQL',
+      'MongoDB',
+    ];
+
+    const statuses = [
+      'todo',
+      'in-progress',
+      'testing',
+      'done',
+      'completed',
+      'blocked',
+    ];
+    const priorities = ['low', 'medium', 'high', 'urgent'];
+
+    // Build 100 tasks
+    const totalTasks = 100;
+    const sampleTasks: {
+      sequenceNumber: number;
+      data: Record<string, any>;
+    }[] = [];
+
+    for (let i = 1; i <= totalTasks; i++) {
+      const idx = i - 1;
+
+      // status distribution logic to create historical mix
+      let status: string;
+      if (i % 11 === 0) status = 'blocked';
+      else if (i % 7 === 0) status = 'testing';
+      else if (i % 5 === 0) status = 'completed';
+      else if (i % 3 === 0) status = 'in-progress';
+      else status = 'todo';
+
+      // priority skew: more medium, fewer urgent
+      const priority = pick(priorities, (idx * 3) % priorities.length);
+
+      const owner = pick(owners, idx * 2 + 1);
+      const assignee = pick(assignees, idx * 2 + 3);
+
+      const assetClass = pick(assetClasses, idx * 5 + 2);
+      const theme = pick(themes, idx * 7 + 4);
+      const teamName = pick(teamNames, idx * 3 + 2);
+
+      const tools = pickMany(toolsPool, idx * 4, 1 + (idx % 3)); // 1-3 tools
+
+      const tags = [
+        pick(
+          [
+            'automation',
+            'reporting',
+            'risk',
+            'data',
+            'integration',
+            'performance',
+            'compliance',
+            'analytics',
+          ],
+          idx,
+        ),
+      ];
+
+      // savedHrs and processesDemised sensible defaults
+      const savedHrs =
+        status === 'completed' || status === 'done'
+          ? Math.max(0, ((idx * 13) % 200) - (idx % 10))
+          : 0;
+
+      const processesDemised = (idx * 7) % 5; // 0-4
+
+      // Compose semi-realistic title variations
+      const actionVerbs = [
+        'Automate',
+        'Build',
+        'Implement',
+        'Streamline',
+        'Develop',
+        'Optimize',
+        'Create',
+        'Enhance',
+        'Design',
+        'Refactor',
+      ];
+      const objects = [
+        'Daily Reconciliation Process',
+        'Real-time Portfolio Dashboard',
+        'Automated Trade Validation',
+        'Fund Accounting Workflows',
+        'ESG Data Integration Pipeline',
+        'Risk Calculation Engine',
+        'Client Reporting Automation',
+        'Trade Execution Analytics',
+        'Compliance Monitoring System',
+        'Position Management Tool',
+        'Market Data Aggregation Layer',
+        'Performance Attribution Dashboard',
+        'Cash Management Automation',
+        'Counterparty Risk Monitor',
+      ];
+
+      const title = `${pick(actionVerbs, idx)} ${pick(objects, idx + 3)}`;
+
+      // Determine completionDate / plannedCompletion distribution
+      // Use historical dates for completed/done, future approximate for todo/in-progress
+      let completionDate: Date | null = null;
+      if (status === 'completed' || status === 'done') {
+        // completed sometime in the past (spread across ~5 years)
+        const daysAgo = 200 + daysOffsetFromIndex(i, 2000);
+        completionDate = dateDaysAgo(daysAgo);
+      } else if (status === 'in-progress' || status === 'testing') {
+        // some planned near-term completion, or already partially completed historically
+        const daysFromNow = (i % 6) * 10 - 15; // some negative, some positive
+        completionDate =
+          daysFromNow >= 0
+            ? dateDaysFromNow(daysFromNow)
+            : dateDaysAgo(-daysFromNow);
+      } else {
+        // todo / blocked: leave as a future planned date occasionally or null
+        if (i % 4 === 0) {
+          completionDate = dateDaysFromNow(30 + (i % 90));
+        } else {
+          completionDate = null;
+        }
+      }
+
+      // package task data aligning to default-field-configs.ts keys
+      const data: Record<string, any> = {
+        title,
+        status,
+        priority,
+        owner,
+        assignee,
+        assetClass,
+        theme,
+        teamName,
+        tools,
+        tags,
+        savedHrs,
+        processesDemised,
+        otherUseCases: '',
+      };
+
+      if (completionDate) {
+        data.completionDate = completionDate;
+      }
+
+      sampleTasks.push({
+        sequenceNumber: i,
+        data,
+      });
+    }
 
     // Determine workspace sequence (uses workspace.sequenceNumber if available, else fallback to 1)
     const workspaceSequence = (workspace as any).sequenceNumber ?? 1;
 
     // Insert tasks with displayId in form TSK-{workspacesequence}-{tasksequence}
-    await db.insert(tasks).values(
-      sampleTasks.map((task) => ({
+    // Use batch insert and include createdAt/updatedAt
+    const rowsToInsert = sampleTasks.map((task, idx) => {
+      const completionDate: Date | undefined | null = task.data.completionDate;
+      const { createdAt, updatedAt } = computeCreatedUpdatedForTask(
+        idx + 1,
+        task.data.status,
+        completionDate,
+      );
+
+      return {
         workspaceId: workspace.id,
         displayId: `TSK-${workspaceSequence}-${task.sequenceNumber}`,
         sequenceNumber: task.sequenceNumber,
         data: task.data,
-      })),
-    );
+        createdAt,
+        updatedAt,
+      };
+    });
+
+    // Insert in smaller batches to avoid extremely large single inserts
+    const batchSize = 50;
+    for (let i = 0; i < rowsToInsert.length; i += batchSize) {
+      const batch = rowsToInsert.slice(i, i + batchSize);
+      await db.insert(tasks).values(batch);
+      console.log(`Inserted tasks ${i + 1}..${i + batch.length}`);
+    }
 
     console.log(`✅ Created ${sampleTasks.length} sample tasks`);
     console.log('🎉 Seeding completed successfully!');
@@ -378,7 +424,7 @@ async function seed() {
   }
 }
 
-// Run the seed function
+// Run the seed
 seed()
   .then(() => {
     console.log('✅ Seed script finished');
