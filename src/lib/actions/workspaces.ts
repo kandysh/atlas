@@ -9,6 +9,7 @@ import {
 } from '@/src/lib/db';
 import { eq, or } from 'drizzle-orm';
 import { getDefaultFieldConfigs } from '@/src/lib/utils';
+import { logger } from '@/src/lib/logger';
 
 /**
  * Get all workspaces for a user (where user is owner or member)
@@ -43,7 +44,7 @@ export async function getWorkspaces(
 
     return { success: true, workspaces: userWorkspaces };
   } catch (error) {
-    console.error('Error fetching workspaces:', error);
+    logger.error({ userId, error }, 'Error fetching workspaces');
     return { success: false, error: 'Failed to fetch workspaces' };
   }
 }
@@ -91,7 +92,7 @@ export async function getWorkspaceBySlug(
 
     return { success: true, workspace };
   } catch (error) {
-    console.error('Error fetching workspace:', error);
+    logger.error({ slug, error }, 'Error fetching workspace by slug');
     return { success: false, error: 'Failed to fetch workspace' };
   }
 }
@@ -139,7 +140,7 @@ export async function createWorkspace(
 
     return { success: true, workspace };
   } catch (error) {
-    console.error('Error creating workspace:', error);
+    logger.error({ name, ownerUserId, error }, 'Error creating workspace');
     return { success: false, error: 'Failed to create workspace' };
   }
 }

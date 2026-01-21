@@ -18,6 +18,7 @@ import {
   updateFieldVisibility as updateFieldVisibilityAction,
 } from '@/src/lib/actions/fields';
 import { dbTaskToUiTask } from '@/src/lib/utils';
+import { logger } from '@/src/lib/logger';
 import { toast } from 'sonner';
 import { queryKeys } from './keys';
 
@@ -90,7 +91,7 @@ export function useCreateTask(workspaceId: string) {
       toast.success('Task created successfully');
     },
     onError: (error) => {
-      console.error('Failed to create task:', error);
+      logger.error({ workspaceId, error }, 'Failed to create task');
       toast.error('Failed to create task');
     },
   });
@@ -215,7 +216,7 @@ export function useUpdateTask(workspaceId: string, page: number = 0) {
 
     // On error, rollback and show error
     onError: (error, _variables, context) => {
-      console.error('Failed to update task:', error);
+      logger.error({ workspaceId, error }, 'Failed to update task');
 
       if (context?.previousData) {
         queryClient.setQueryData(context.queryKey, context.previousData);
@@ -254,7 +255,7 @@ export function useDeleteTask(workspaceId: string) {
       toast.success('Task deleted');
     },
     onError: (error) => {
-      console.error('Failed to delete task:', error);
+      logger.error({ workspaceId, error }, 'Failed to delete task');
       toast.error('Failed to delete task');
     },
   });
@@ -281,7 +282,7 @@ export function useDeleteTasks(workspaceId: string) {
       toast.success(`${deletedCount} task(s) deleted`);
     },
     onError: (error) => {
-      console.error('Failed to delete tasks:', error);
+      logger.error({ workspaceId, error }, 'Failed to delete tasks');
       toast.error('Failed to delete tasks');
     },
   });
@@ -307,8 +308,8 @@ export function useDuplicateTask(workspaceId: string) {
       });
       toast.success('Task duplicated');
     },
-    onError: (error) => {
-      console.error('Failed to duplicate task:', error);
+    onError: (error, taskId) => {
+      logger.error({ workspaceId, taskId, error }, 'Failed to duplicate task');
       toast.error('Failed to duplicate task');
     },
   });
@@ -340,7 +341,7 @@ export function useUpdateFieldVisibility(workspaceId: string) {
       });
     },
     onError: (error) => {
-      console.error('Failed to update field visibility:', error);
+      logger.error({ workspaceId, error }, 'Failed to update field visibility');
       toast.error('Failed to update column visibility');
     },
   });

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ChevronsUpDown, Plus, Check, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ import { useSidebar } from '@/src/components/ui/sidebar';
 import { toast } from 'sonner';
 
 export function WorkspaceToggler() {
+  const router = useRouter();
   const {
     currentWorkspace,
     setCurrentWorkspace,
@@ -42,6 +44,9 @@ export function WorkspaceToggler() {
   const handleWorkspaceChange = (workspace: (typeof workspaces)[0]) => {
     setCurrentWorkspace(workspace);
     setOpen(false);
+    
+    // Navigate to the new workspace's active page
+    router.push(`/${workspace.id}`);
   };
 
   const handleCreateWorkspace = async () => {
@@ -51,11 +56,14 @@ export function WorkspaceToggler() {
     }
 
     try {
-      await createWorkspace(newWorkspaceName.trim());
+      const newWorkspace = await createWorkspace(newWorkspaceName.trim());
       toast.success(`Workspace "${newWorkspaceName}" created`);
       setDialogOpen(false);
       setNewWorkspaceName('');
       setOpen(false);
+      
+      // Navigate to the new workspace
+      router.push(`/${newWorkspace.id}`);
     } catch {
       toast.error('Failed to create workspace');
     }

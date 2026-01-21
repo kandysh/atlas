@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -29,23 +29,25 @@ import { useTheme } from 'next-themes';
 const navigation = [
   {
     name: 'Active',
-    href: '/',
+    path: '',
     icon: LayoutDashboard,
   },
   {
     name: 'Completed',
-    href: '/completed',
+    path: '/completed',
     icon: CheckCircle2,
   },
   {
     name: 'Insights',
-    href: '/insights',
+    path: '/insights',
     icon: BarChart3,
   },
 ];
 
 export function AppSidebar() {
   const currentPath = usePathname();
+  const params = useParams();
+  const workspaceId = params.workspaceId as string;
   const { state } = useSidebar();
   const { theme, setTheme } = useTheme();
 
@@ -83,12 +85,13 @@ export function AppSidebar() {
       >
         <SidebarMenu className="space-y-1">
           {navigation.map((item) => {
-            const isActive = currentPath === item.href;
+            const href = workspaceId ? `/${workspaceId}${item.path}` : '/';
+            const isActive = currentPath === href;
             return (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild isActive={isActive}>
                   <Link
-                    href={item.href}
+                    href={href}
                     className={cn(
                       'w-full flex items-center gap-3 py-2.5 text-sm rounded-lg transition-all duration-200',
                       state === 'collapsed' ? 'justify-center px-0' : 'px-3',

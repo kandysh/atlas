@@ -1,98 +1,30 @@
 'use client';
 
-import { TasksDataTable } from '@/src/components/features/tasks';
-import { Task } from '@/src/lib/types';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@/src/providers';
-import { useWorkspaceTasks } from '@/src/lib/query/hooks';
+import { Loader2 } from 'lucide-react';
 
-export default function Page() {
-  const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace();
+export default function HomePage() {
+  const router = useRouter();
+  const { currentWorkspace, isLoading } = useWorkspace();
 
-  // Always call hooks before any early returns
-  const workspaceId = currentWorkspace?.id || '';
-  const { data, isLoading, error } = useWorkspaceTasks(workspaceId, 0);
+  useEffect(() => {
+    // Once workspace is loaded, redirect to it
+    if (!isLoading && currentWorkspace) {
+      router.replace(`/${currentWorkspace.id}`);
+    }
+  }, [currentWorkspace, isLoading, router]);
 
-  // Show loading state while workspace is loading
-  if (workspaceLoading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Active Tasks
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Loading workspace...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error if no workspace available
-  if (!currentWorkspace) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Active Tasks
-          </h1>
-          <p className="text-sm text-destructive mt-1">
-            No workspace available. Please create or join a workspace.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Get tasks from DB only - single source of truth
-  const tasks = data?.tasks || [];
-  const dbTasks = data?.dbTasks || [];
-
-  // Filter out completed tasks for active board
-  const activeTasks: Task[] = tasks.filter(
-    (task) => task.status !== 'completed',
-  );
-
-  // Filter dbTasks to match active tasks for delete ID mapping
-  const activeDbTasks = dbTasks
-    .filter((dbTask) => activeTasks.some((t) => t.id === dbTask.displayId))
-    .map((t) => ({ id: t.id, displayId: t.displayId }));
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Active Tasks
-          </h1>
-          <p className="text-sm text-destructive mt-1">
-            Error loading tasks. Showing cached data if available.
-          </p>
-        </div>
-        <TasksDataTable
-          data={activeTasks}
-          dbTasks={activeDbTasks}
-          workspaceId={workspaceId}
-        />
-      </div>
-    );
-  }
-
+  // Show loading state
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Active Tasks</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {currentWorkspace.name} • {activeTasks.length} active tasks
-          {isLoading && ' • Loading...'}
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="space-y-4 text-center" role="status" aria-live="polite">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+        <p className="text-sm text-muted-foreground">
+          Loading workspace...
         </p>
       </div>
-
-      <TasksDataTable
-        data={activeTasks}
-        dbTasks={activeDbTasks}
-        workspaceId={workspaceId}
-      />
     </div>
   );
 }

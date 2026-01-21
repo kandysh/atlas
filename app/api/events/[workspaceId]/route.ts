@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { db, tasks } from '@/src/lib/db';
 import { eq, desc } from 'drizzle-orm';
 import { registerSseClient, unregisterSseClient } from '@/src/lib/sse/server';
+import { logger } from '@/src/lib/logger';
 
 // GET /api/tasks/[workspaceId]/events
 export async function GET(
@@ -36,7 +37,7 @@ export async function GET(
         })}\n\n`;
         controller.enqueue(new TextEncoder().encode(stateMessage));
       } catch (error) {
-        console.error('Error fetching initial state:', error);
+        logger.error({ workspaceId, clientId, error }, 'Error fetching initial state');
       }
 
       // Keep connection alive with periodic heartbeat
@@ -44,7 +45,7 @@ export async function GET(
         try {
           controller.enqueue(new TextEncoder().encode(': heartbeat\n\n'));
         } catch (error) {
-          console.error('Heartbeat failed:', error);
+          logger.error({ workspaceId, clientId, error }, 'Heartbeat failed');
           clearInterval(heartbeatInterval);
         }
       }, 30000); // 30 seconds

@@ -2,6 +2,7 @@
 
 import { db, fieldConfigs, FieldConfig } from '@/src/lib/db';
 import { eq, asc } from 'drizzle-orm';
+import { logger } from '@/src/lib/logger';
 
 /**
  * Get field configurations for a workspace
@@ -24,7 +25,7 @@ export async function getFields(
 
     return { success: true, fields };
   } catch (error) {
-    console.error('Error fetching fields:', error);
+    logger.error({ workspaceId, error }, 'Error fetching fields');
     return { success: false, error: 'Failed to fetch fields' };
   }
 }
@@ -58,7 +59,7 @@ export async function updateFieldVisibility(
 
     return { success: true, field: updatedField };
   } catch (error) {
-    console.error('Error updating field visibility:', error);
+    logger.error({ fieldId, visible, error }, 'Error updating field visibility');
     return { success: false, error: 'Failed to update field visibility' };
   }
 }
@@ -85,7 +86,7 @@ export async function updateFieldsVisibility(
 
     return { success: true };
   } catch (error) {
-    console.error('Error updating field visibilities:', error);
+    logger.error({ updates, error }, 'Error updating field visibilities');
     return { success: false, error: 'Failed to update field visibilities' };
   }
 }

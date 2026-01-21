@@ -3,6 +3,7 @@
 import { db, users, User } from '@/src/lib/db';
 import { eq } from 'drizzle-orm';
 import { getUserInfo } from '@/src/lib/utils/user-info';
+import { logger } from '@/src/lib/logger';
 
 /**
  * Initialize or get current user from USERINFO environment variable
@@ -39,7 +40,7 @@ export async function initUser(): Promise<
 
     return { success: true, user };
   } catch (error) {
-    console.error('Error initializing user:', error);
+    logger.error({ error }, 'Error initializing user');
     return { success: false, error: 'Failed to initialize user' };
   }
 }
@@ -53,7 +54,7 @@ export async function getCurrentUserId(): Promise<number | null> {
     const userInfo = getUserInfo();
     return userInfo?.id ?? null;
   } catch (error) {
-    console.error('Error getting current user ID:', error);
+    logger.error({ error }, 'Error getting current user ID');
     return null;
   }
 }
