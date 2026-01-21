@@ -18,7 +18,7 @@ import {
   TopAutomationData,
   ParetoCurveData,
 } from '@/src/lib/types/analytics';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 
 // Get the actual table name from the schema (handles env-specific table naming and schema prefix)
 const tableConfig = getTableConfig(tasks);
@@ -383,7 +383,7 @@ async function getStatusCounts(
     : sql`workspace_id = ${workspaceId}`;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       COALESCE(data->>'status', 'todo') as status,
       COUNT(*)::int as count
     FROM ${tasksTable}
@@ -421,7 +421,7 @@ async function getThroughputOverTime(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM-01') as date,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as hours,
       COUNT(*)::int as count,
@@ -432,14 +432,19 @@ async function getThroughputOverTime(
     ORDER BY date ASC
   `);
 
-  return (result.rows as { date: string; hours: number; count: number; processes_demised: number }[]).map(
-    (row) => ({
-      date: row.date,
-      hours: row.hours,
-      count: row.count,
-      processesDemised: row.processes_demised,
-    }),
-  );
+  return (
+    result.rows as {
+      date: string;
+      hours: number;
+      count: number;
+      processes_demised: number;
+    }[]
+  ).map((row) => ({
+    date: row.date,
+    hours: row.hours,
+    count: row.count,
+    processesDemised: row.processes_demised,
+  }));
 }
 
 async function getCycleTimeData(
@@ -455,7 +460,7 @@ async function getCycleTimeData(
 
   const result = await db.execute(sql`
     WITH cycle_points AS (
-      SELECT 
+      SELECT
         TO_CHAR((data->>'completionDate')::timestamp, 'Month') as month,
         TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM') as month_sort,
         EXTRACT(EPOCH FROM (
@@ -465,7 +470,7 @@ async function getCycleTimeData(
       WHERE ${whereClause}
     ),
     monthly_avg AS (
-      SELECT 
+      SELECT
         TRIM(month) as month,
         month_sort,
         AVG(cycle_days)::float as avg_cycle_days
@@ -473,11 +478,11 @@ async function getCycleTimeData(
       GROUP BY month, month_sort
       ORDER BY month_sort ASC
     )
-    SELECT 
+    SELECT
       month,
       avg_cycle_days,
       AVG(avg_cycle_days) OVER (
-        ORDER BY month_sort 
+        ORDER BY month_sort
         ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
       )::float as rolling_avg
     FROM monthly_avg
@@ -509,11 +514,11 @@ async function getHoursSavedWorked(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM') as month,
       SUM(COALESCE((data->>'workedHrs')::numeric, 0))::float as worked,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved,
-      (SUM(COALESCE((data->>'savedHrs')::numeric, 0)) - 
+      (SUM(COALESCE((data->>'savedHrs')::numeric, 0)) -
        SUM(COALESCE((data->>'workedHrs')::numeric, 0)))::float as net
     FROM ${tasksTable}
     WHERE ${whereClause}
@@ -555,7 +560,7 @@ async function getRemainingWorkTrend(
 
   const result = await db.execute(sql`
     WITH date_range AS (
-      SELECT 
+      SELECT
         DATE_TRUNC('month', MIN(created_at)) as start_month,
         DATE_TRUNC('month', GREATEST(
           MAX(created_at),
@@ -572,7 +577,7 @@ async function getRemainingWorkTrend(
       ) as month
     ),
     created_per_month AS (
-      SELECT 
+      SELECT
         DATE_TRUNC('month', created_at) as month,
         COUNT(*)::int as created
       FROM ${tasksTable}
@@ -580,16 +585,16 @@ async function getRemainingWorkTrend(
       GROUP BY DATE_TRUNC('month', created_at)
     ),
     completed_per_month AS (
-      SELECT 
+      SELECT
         DATE_TRUNC('month', (data->>'completionDate')::timestamp) as month,
         COUNT(*)::int as completed
       FROM ${tasksTable}
       WHERE ${completedWhereClause}
       GROUP BY DATE_TRUNC('month', (data->>'completionDate')::timestamp)
     )
-    SELECT 
+    SELECT
       TO_CHAR(m.month, 'Month') as month,
-      (SUM(COALESCE(c.created, 0)) OVER (ORDER BY m.month) - 
+      (SUM(COALESCE(c.created, 0)) OVER (ORDER BY m.month) -
        SUM(COALESCE(cp.completed, 0)) OVER (ORDER BY m.month))::int as remaining
     FROM months m
     LEFT JOIN created_per_month c ON c.month = m.month
@@ -613,7 +618,7 @@ async function getToolsUsed(
 
   const result = await db.execute(sql`
     WITH tool_tasks AS (
-      SELECT 
+      SELECT
         LOWER(tool) as tool,
         t.id,
         COALESCE((t.data->>'savedHrs')::numeric, 0) as saved_hrs
@@ -623,7 +628,7 @@ async function getToolsUsed(
         AND tool IS NOT NULL
         AND tool != ''
     )
-    SELECT 
+    SELECT
       tool,
       COUNT(*)::int as count,
       SUM(saved_hrs)::float as saved_hrs
@@ -668,7 +673,7 @@ async function getOwnerProductivity(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       ${ownerField} as owner,
       COUNT(*)::int as completed_tasks,
       AVG(
@@ -711,7 +716,7 @@ async function getTeamsWorkload(
     : sql`workspace_id = ${workspaceId}`;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       LOWER(data->>'teamName') as team,
       COUNT(*)::int as count,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved_hrs,
@@ -725,7 +730,14 @@ async function getTeamsWorkload(
     LIMIT 10
   `);
 
-  return (result.rows as { team: string; count: number; saved_hrs: number; processes_demised: number }[]).map((row) => ({
+  return (
+    result.rows as {
+      team: string;
+      count: number;
+      saved_hrs: number;
+      processes_demised: number;
+    }[]
+  ).map((row) => ({
     team: row.team,
     count: row.count,
     savedHrs: row.saved_hrs || 0,
@@ -742,7 +754,7 @@ async function getAssetClassDistribution(
     : sql`workspace_id = ${workspaceId}`;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned') as asset_class,
       COUNT(*)::int as count,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved_hrs
@@ -760,14 +772,14 @@ async function getAssetClassDistribution(
     'var(--chart-5)',
   ];
 
-  return (result.rows as { asset_class: string; count: number; saved_hrs: number }[]).map(
-    (row, index) => ({
-      assetClass: row.asset_class,
-      count: row.count,
-      savedHrs: row.saved_hrs || 0,
-      fill: colors[index % colors.length],
-    }),
-  );
+  return (
+    result.rows as { asset_class: string; count: number; saved_hrs: number }[]
+  ).map((row, index) => ({
+    assetClass: row.asset_class,
+    count: row.count,
+    savedHrs: row.saved_hrs || 0,
+    fill: colors[index % colors.length],
+  }));
 }
 
 async function getPriorityAging(
@@ -782,18 +794,18 @@ async function getPriorityAging(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       COALESCE(data->>'priority', 'medium') as priority,
       COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 3)::int as bucket_0_3,
-      COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 3 
+      COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 3
         AND EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 7)::int as bucket_3_7,
-      COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 7 
+      COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 7
         AND EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 <= 14)::int as bucket_7_14,
       COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400 > 14)::int as bucket_14_plus
     FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY COALESCE(data->>'priority', 'medium')
-    ORDER BY 
+    ORDER BY
       CASE COALESCE(data->>'priority', 'medium')
         WHEN 'urgent' THEN 1
         WHEN 'high' THEN 2
@@ -831,13 +843,13 @@ async function getHoursEfficiency(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM') as month,
       SUM(COALESCE((data->>'currentHrs')::numeric, 0))::float as current_hrs,
       SUM(COALESCE((data->>'workedHrs')::numeric, 0))::float as worked_hrs,
-      CASE 
-        WHEN SUM(COALESCE((data->>'currentHrs')::numeric, 0)) > 0 
-        THEN (SUM(COALESCE((data->>'workedHrs')::numeric, 0)) / 
+      CASE
+        WHEN SUM(COALESCE((data->>'currentHrs')::numeric, 0)) > 0
+        THEN (SUM(COALESCE((data->>'workedHrs')::numeric, 0)) /
               SUM(COALESCE((data->>'currentHrs')::numeric, 0)) * 100)::float
         ELSE 0
       END as efficiency
@@ -871,11 +883,11 @@ async function getKpiSummary(
     : sql`workspace_id = ${workspaceId}`;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       COUNT(*)::int as total_tasks,
       COUNT(*) FILTER (WHERE data->>'status' NOT IN ('completed', 'done'))::int as open_tasks,
       AVG(
-        CASE WHEN data->>'status' IN ('completed', 'done') 
+        CASE WHEN data->>'status' IN ('completed', 'done')
           AND data->>'completionDate' IS NOT NULL
         THEN EXTRACT(EPOCH FROM (
           (data->>'completionDate')::timestamp - created_at
@@ -920,7 +932,7 @@ async function getCumulativeImpact(
 
   const result = await db.execute(sql`
     WITH monthly_data AS (
-      SELECT 
+      SELECT
         TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM-01') as date,
         SUM(COALESCE((data->>'processesDemised')::numeric, 0))::float as processes,
         SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as hours
@@ -928,7 +940,7 @@ async function getCumulativeImpact(
       WHERE ${whereClause}
       GROUP BY TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM-01')
     )
-    SELECT 
+    SELECT
       date,
       SUM(processes) OVER (ORDER BY date)::float as cumulative_processes,
       SUM(hours) OVER (ORDER BY date)::float as cumulative_hours
@@ -936,13 +948,17 @@ async function getCumulativeImpact(
     ORDER BY date ASC
   `);
 
-  return (result.rows as { date: string; cumulative_processes: number; cumulative_hours: number }[]).map(
-    (row) => ({
-      date: row.date,
-      cumulativeProcesses: row.cumulative_processes,
-      cumulativeHours: row.cumulative_hours,
-    }),
-  );
+  return (
+    result.rows as {
+      date: string;
+      cumulative_processes: number;
+      cumulative_hours: number;
+    }[]
+  ).map((row) => ({
+    date: row.date,
+    cumulativeProcesses: row.cumulative_processes,
+    cumulativeHours: row.cumulative_hours,
+  }));
 }
 
 async function getImpactMatrix(
@@ -956,7 +972,7 @@ async function getImpactMatrix(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       id as task_id,
       data->>'title' as title,
       COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
@@ -964,20 +980,26 @@ async function getImpactMatrix(
       COALESCE(data->>'assetClass', 'Unassigned') as asset_class
     FROM ${tasksTable}
     WHERE ${whereClause}
-      AND (COALESCE((data->>'processesDemised')::numeric, 0) > 0 
+      AND (COALESCE((data->>'processesDemised')::numeric, 0) > 0
         OR COALESCE((data->>'savedHrs')::numeric, 0) > 0)
     LIMIT 100
   `);
 
-  return (result.rows as { task_id: string; title: string; processes_demised: number; saved_hrs: number; asset_class: string }[]).map(
-    (row) => ({
-      taskId: row.task_id,
-      title: row.title || 'Untitled',
-      processesDemised: row.processes_demised,
-      savedHrs: row.saved_hrs,
-      assetClass: row.asset_class,
-    }),
-  );
+  return (
+    result.rows as {
+      task_id: string;
+      title: string;
+      processes_demised: number;
+      saved_hrs: number;
+      asset_class: string;
+    }[]
+  ).map((row) => ({
+    taskId: row.task_id,
+    title: row.title || 'Untitled',
+    processesDemised: row.processes_demised,
+    savedHrs: row.saved_hrs,
+    assetClass: row.asset_class,
+  }));
 }
 
 async function getImpactVsCycleTime(
@@ -992,7 +1014,7 @@ async function getImpactVsCycleTime(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       id as task_id,
       data->>'title' as title,
       EXTRACT(EPOCH FROM (
@@ -1003,21 +1025,28 @@ async function getImpactVsCycleTime(
       (COALESCE((data->>'savedHrs')::numeric, 0) + COALESCE((data->>'processesDemised')::numeric, 0) * ${PROCESS_WEIGHT})::float as total_impact
     FROM ${tasksTable}
     WHERE ${whereClause}
-      AND (COALESCE((data->>'processesDemised')::numeric, 0) > 0 
+      AND (COALESCE((data->>'processesDemised')::numeric, 0) > 0
         OR COALESCE((data->>'savedHrs')::numeric, 0) > 0)
     LIMIT 100
   `);
 
-  return (result.rows as { task_id: string; title: string; cycle_days: number; total_impact: number; saved_hrs: number; processes_demised: number }[]).map(
-    (row) => ({
-      taskId: row.task_id,
-      title: row.title || 'Untitled',
-      cycleDays: row.cycle_days || 0,
-      totalImpact: row.total_impact,
-      savedHrs: row.saved_hrs,
-      processesDemised: row.processes_demised,
-    }),
-  );
+  return (
+    result.rows as {
+      task_id: string;
+      title: string;
+      cycle_days: number;
+      total_impact: number;
+      saved_hrs: number;
+      processes_demised: number;
+    }[]
+  ).map((row) => ({
+    taskId: row.task_id,
+    title: row.title || 'Untitled',
+    cycleDays: row.cycle_days || 0,
+    totalImpact: row.total_impact,
+    savedHrs: row.saved_hrs,
+    processesDemised: row.processes_demised,
+  }));
 }
 
 async function getEfficiencyRatio(
@@ -1031,13 +1060,13 @@ async function getEfficiencyRatio(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       id as task_id,
       data->>'title' as title,
       COALESCE((data->>'savedHrs')::numeric, 0)::float as saved_hrs,
       COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
-      CASE 
-        WHEN COALESCE((data->>'processesDemised')::numeric, 0) > 0 
+      CASE
+        WHEN COALESCE((data->>'processesDemised')::numeric, 0) > 0
         THEN (COALESCE((data->>'savedHrs')::numeric, 0) / (data->>'processesDemised')::numeric)::float
         ELSE 0
       END as efficiency
@@ -1047,15 +1076,21 @@ async function getEfficiencyRatio(
     LIMIT 100
   `);
 
-  return (result.rows as { task_id: string; title: string; efficiency: number; saved_hrs: number; processes_demised: number }[]).map(
-    (row) => ({
-      taskId: row.task_id,
-      title: row.title || 'Untitled',
-      efficiency: row.efficiency,
-      savedHrs: row.saved_hrs,
-      processesDemised: row.processes_demised,
-    }),
-  );
+  return (
+    result.rows as {
+      task_id: string;
+      title: string;
+      efficiency: number;
+      saved_hrs: number;
+      processes_demised: number;
+    }[]
+  ).map((row) => ({
+    taskId: row.task_id,
+    title: row.title || 'Untitled',
+    efficiency: row.efficiency,
+    savedHrs: row.saved_hrs,
+    processesDemised: row.processes_demised,
+  }));
 }
 
 async function getImpactDensityByTeam(
@@ -1072,7 +1107,7 @@ async function getImpactDensityByTeam(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       LOWER(data->>'teamName') as team,
       SUM(COALESCE((data->>'processesDemised')::numeric, 0))::float as processes_demised,
       AVG(
@@ -1081,9 +1116,9 @@ async function getImpactDensityByTeam(
         )) / 86400
       )::float as avg_cycle_days,
       COUNT(*)::int as task_count,
-      CASE 
-        WHEN AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400) > 0 
-        THEN (SUM(COALESCE((data->>'processesDemised')::numeric, 0)) / 
+      CASE
+        WHEN AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400) > 0
+        THEN (SUM(COALESCE((data->>'processesDemised')::numeric, 0)) /
               AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400))::float
         ELSE 0
       END as impact_density
@@ -1094,15 +1129,21 @@ async function getImpactDensityByTeam(
     LIMIT 10
   `);
 
-  return (result.rows as { team: string; processes_demised: number; avg_cycle_days: number; task_count: number; impact_density: number }[]).map(
-    (row) => ({
-      team: row.team,
-      impactDensity: row.impact_density,
-      processesDemised: row.processes_demised,
-      avgCycleDays: row.avg_cycle_days || 0,
-      taskCount: row.task_count,
-    }),
-  );
+  return (
+    result.rows as {
+      team: string;
+      processes_demised: number;
+      avg_cycle_days: number;
+      task_count: number;
+      impact_density: number;
+    }[]
+  ).map((row) => ({
+    team: row.team,
+    impactDensity: row.impact_density,
+    processesDemised: row.processes_demised,
+    avgCycleDays: row.avg_cycle_days || 0,
+    taskCount: row.task_count,
+  }));
 }
 
 async function getTeamImpactQuadrant(
@@ -1118,7 +1159,7 @@ async function getTeamImpactQuadrant(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       LOWER(data->>'teamName') as team,
       SUM(COALESCE((data->>'processesDemised')::numeric, 0))::float as total_processes_demised,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as total_saved_hrs,
@@ -1130,14 +1171,19 @@ async function getTeamImpactQuadrant(
     LIMIT 20
   `);
 
-  return (result.rows as { team: string; total_processes_demised: number; total_saved_hrs: number; task_count: number }[]).map(
-    (row) => ({
-      team: row.team,
-      totalProcessesDemised: row.total_processes_demised,
-      totalSavedHrs: row.total_saved_hrs,
-      taskCount: row.task_count,
-    }),
-  );
+  return (
+    result.rows as {
+      team: string;
+      total_processes_demised: number;
+      total_saved_hrs: number;
+      task_count: number;
+    }[]
+  ).map((row) => ({
+    team: row.team,
+    totalProcessesDemised: row.total_processes_demised,
+    totalSavedHrs: row.total_saved_hrs,
+    taskCount: row.task_count,
+  }));
 }
 
 async function getAssetClassROI(
@@ -1152,7 +1198,7 @@ async function getAssetClassROI(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned') as asset_class,
       SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved_hrs,
       AVG(
@@ -1161,9 +1207,9 @@ async function getAssetClassROI(
         )) / 86400
       )::float as avg_cycle_days,
       COUNT(*)::int as task_count,
-      CASE 
-        WHEN AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400) > 0 
-        THEN (SUM(COALESCE((data->>'savedHrs')::numeric, 0)) / 
+      CASE
+        WHEN AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400) > 0
+        THEN (SUM(COALESCE((data->>'savedHrs')::numeric, 0)) /
               AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400))::float
         ELSE 0
       END as roi_score
@@ -1174,15 +1220,21 @@ async function getAssetClassROI(
     LIMIT 15
   `);
 
-  return (result.rows as { asset_class: string; saved_hrs: number; avg_cycle_days: number; task_count: number; roi_score: number }[]).map(
-    (row) => ({
-      assetClass: row.asset_class,
-      roiScore: row.roi_score,
-      savedHrs: row.saved_hrs,
-      avgCycleDays: row.avg_cycle_days || 0,
-      taskCount: row.task_count,
-    }),
-  );
+  return (
+    result.rows as {
+      asset_class: string;
+      saved_hrs: number;
+      avg_cycle_days: number;
+      task_count: number;
+      roi_score: number;
+    }[]
+  ).map((row) => ({
+    assetClass: row.asset_class,
+    roiScore: row.roi_score,
+    savedHrs: row.saved_hrs,
+    avgCycleDays: row.avg_cycle_days || 0,
+    taskCount: row.task_count,
+  }));
 }
 
 async function getToolsImpact(
@@ -1195,7 +1247,7 @@ async function getToolsImpact(
 
   const result = await db.execute(sql`
     WITH tool_tasks AS (
-      SELECT 
+      SELECT
         LOWER(tool) as tool,
         t.id,
         COALESCE((t.data->>'savedHrs')::numeric, 0) as saved_hrs,
@@ -1207,7 +1259,7 @@ async function getToolsImpact(
         AND tool != ''
         AND t.data->>'status' IN ('done', 'completed')
     )
-    SELECT 
+    SELECT
       tool,
       SUM(saved_hrs)::float as saved_hrs,
       SUM(processes_demised)::float as processes_demised,
@@ -1218,14 +1270,19 @@ async function getToolsImpact(
     LIMIT 15
   `);
 
-  return (result.rows as { tool: string; saved_hrs: number; processes_demised: number; task_count: number }[]).map(
-    (row) => ({
-      tool: row.tool,
-      savedHrs: row.saved_hrs,
-      processesDemised: row.processes_demised,
-      taskCount: row.task_count,
-    }),
-  );
+  return (
+    result.rows as {
+      tool: string;
+      saved_hrs: number;
+      processes_demised: number;
+      task_count: number;
+    }[]
+  ).map((row) => ({
+    tool: row.tool,
+    savedHrs: row.saved_hrs,
+    processesDemised: row.processes_demised,
+    taskCount: row.task_count,
+  }));
 }
 
 async function getTopAutomations(
@@ -1239,7 +1296,7 @@ async function getTopAutomations(
     : baseCondition;
 
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       id as task_id,
       display_id,
       data->>'title' as title,
@@ -1253,17 +1310,25 @@ async function getTopAutomations(
     LIMIT 10
   `);
 
-  return (result.rows as { task_id: string; display_id: string; title: string; saved_hrs: number; processes_demised: number; total_impact: number; completion_date: string }[]).map(
-    (row) => ({
-      taskId: row.task_id,
-      displayId: row.display_id,
-      title: row.title || 'Untitled',
-      savedHrs: row.saved_hrs,
-      processesDemised: row.processes_demised,
-      totalImpact: row.total_impact,
-      completionDate: row.completion_date,
-    }),
-  );
+  return (
+    result.rows as {
+      task_id: string;
+      display_id: string;
+      title: string;
+      saved_hrs: number;
+      processes_demised: number;
+      total_impact: number;
+      completion_date: string;
+    }[]
+  ).map((row) => ({
+    taskId: row.task_id,
+    displayId: row.display_id,
+    title: row.title || 'Untitled',
+    savedHrs: row.saved_hrs,
+    processesDemised: row.processes_demised,
+    totalImpact: row.total_impact,
+    completionDate: row.completion_date,
+  }));
 }
 
 async function getParetoCurveSavedHours(
@@ -1279,7 +1344,7 @@ async function getParetoCurveSavedHours(
 
   const result = await db.execute(sql`
     WITH ranked_tasks AS (
-      SELECT 
+      SELECT
         id as task_id,
         display_id,
         data->>'title' as title,
@@ -1290,7 +1355,7 @@ async function getParetoCurveSavedHours(
       LIMIT 50
     ),
     cumulative AS (
-      SELECT 
+      SELECT
         task_id,
         display_id,
         title,
@@ -1301,7 +1366,7 @@ async function getParetoCurveSavedHours(
     total AS (
       SELECT SUM(value) as total_value FROM ranked_tasks
     )
-    SELECT 
+    SELECT
       c.task_id,
       c.display_id,
       c.title,
@@ -1313,16 +1378,23 @@ async function getParetoCurveSavedHours(
     ORDER BY c.value DESC
   `);
 
-  return (result.rows as { task_id: string; display_id: string; title: string; value: number; cumulative_value: number; cumulative_percentage: number }[]).map(
-    (row) => ({
-      taskId: row.task_id,
-      displayId: row.display_id,
-      title: row.title || 'Untitled',
-      value: row.value,
-      cumulativeValue: row.cumulative_value,
-      cumulativePercentage: row.cumulative_percentage || 0,
-    }),
-  );
+  return (
+    result.rows as {
+      task_id: string;
+      display_id: string;
+      title: string;
+      value: number;
+      cumulative_value: number;
+      cumulative_percentage: number;
+    }[]
+  ).map((row) => ({
+    taskId: row.task_id,
+    displayId: row.display_id,
+    title: row.title || 'Untitled',
+    value: row.value,
+    cumulativeValue: row.cumulative_value,
+    cumulativePercentage: row.cumulative_percentage || 0,
+  }));
 }
 
 async function getParetoCurveProcesses(
@@ -1338,7 +1410,7 @@ async function getParetoCurveProcesses(
 
   const result = await db.execute(sql`
     WITH ranked_tasks AS (
-      SELECT 
+      SELECT
         id as task_id,
         display_id,
         data->>'title' as title,
@@ -1349,7 +1421,7 @@ async function getParetoCurveProcesses(
       LIMIT 50
     ),
     cumulative AS (
-      SELECT 
+      SELECT
         task_id,
         display_id,
         title,
@@ -1360,7 +1432,7 @@ async function getParetoCurveProcesses(
     total AS (
       SELECT SUM(value) as total_value FROM ranked_tasks
     )
-    SELECT 
+    SELECT
       c.task_id,
       c.display_id,
       c.title,
@@ -1372,16 +1444,23 @@ async function getParetoCurveProcesses(
     ORDER BY c.value DESC
   `);
 
-  return (result.rows as { task_id: string; display_id: string; title: string; value: number; cumulative_value: number; cumulative_percentage: number }[]).map(
-    (row) => ({
-      taskId: row.task_id,
-      displayId: row.display_id,
-      title: row.title || 'Untitled',
-      value: row.value,
-      cumulativeValue: row.cumulative_value,
-      cumulativePercentage: row.cumulative_percentage || 0,
-    }),
-  );
+  return (
+    result.rows as {
+      task_id: string;
+      display_id: string;
+      title: string;
+      value: number;
+      cumulative_value: number;
+      cumulative_percentage: number;
+    }[]
+  ).map((row) => ({
+    taskId: row.task_id,
+    displayId: row.display_id,
+    title: row.title || 'Untitled',
+    value: row.value,
+    cumulativeValue: row.cumulative_value,
+    cumulativePercentage: row.cumulative_percentage || 0,
+  }));
 }
 
 // Filter option helpers

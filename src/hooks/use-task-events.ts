@@ -6,7 +6,7 @@ import { Task as DbTask } from '@/src/lib/db';
 import { Task as UiTask } from '@/src/lib/types';
 import { queryKeys } from '@/src/lib/query/keys';
 import { dbTaskToUiTask } from '@/src/lib/utils';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 
 /**
  * Hook to listen to task updates via SSE

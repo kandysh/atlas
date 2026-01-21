@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { db, tasks } from '@/src/lib/db';
 import { eq, desc } from 'drizzle-orm';
 import { registerSseClient, unregisterSseClient } from '@/src/lib/sse/server';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 import { getWorkspaceBySlug } from '@/src/lib/actions/workspaces';
 
 // GET /api/events/[workspaceSlug]

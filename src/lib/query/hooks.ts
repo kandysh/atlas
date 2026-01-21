@@ -18,7 +18,7 @@ import {
   updateFieldVisibility as updateFieldVisibilityAction,
 } from '@/src/lib/actions/fields';
 import { dbTaskToUiTask } from '@/src/lib/utils';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 import { toast } from 'sonner';
 import { queryKeys } from './keys';
 

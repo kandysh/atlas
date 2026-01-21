@@ -5,7 +5,7 @@ import { ReactNode, useState } from 'react';
 import { Loader2, AlertTriangle, Plus } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 
 interface WorkspaceLoaderProps {
   children: ReactNode;

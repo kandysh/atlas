@@ -3,7 +3,7 @@
 import { db, users, User } from '@/src/lib/db';
 import { eq } from 'drizzle-orm';
 import { getUserInfo } from '@/src/lib/utils/user-info';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 
 /**
  * Initialize or get current user from USERINFO environment variable

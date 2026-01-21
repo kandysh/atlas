@@ -9,7 +9,7 @@ import {
 } from '@/src/lib/db';
 import { eq, or } from 'drizzle-orm';
 import { getDefaultFieldConfigs } from '@/src/lib/utils';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 
 /**
  * Get all workspaces for a user (where user is owner or member)

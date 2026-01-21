@@ -5,7 +5,7 @@ import { eq, desc, sql } from 'drizzle-orm';
 import { generateTaskDisplayId } from '@/src/lib/utils';
 import { broadcastTaskUpdate } from '@/src/lib/sse/server';
 import { getCurrentUserId } from './user';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 
 export type TasksResult = {
   tasks: Task[];

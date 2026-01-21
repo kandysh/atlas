@@ -1,5 +1,5 @@
 import { Task } from '@/src/lib/db';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 
 // Store active SSE connections
 // In production, use Redis or another shared store for multi-instance deployments

@@ -2,7 +2,7 @@
 
 import { db, fieldConfigs, FieldConfig } from '@/src/lib/db';
 import { eq, asc } from 'drizzle-orm';
-import { logger } from '@/src/lib/logger';
+import { logger } from '@/src/lib/logger/logger';
 
 /**
  * Get field configurations for a workspace
