@@ -47,7 +47,7 @@ const navigation = [
 export function AppSidebar() {
   const currentPath = usePathname();
   const params = useParams();
-  const workspaceId = params.workspaceId as string;
+  const workspaceSlug = params.workspaceSlug as string;
   const { state } = useSidebar();
   const { theme, setTheme } = useTheme();
 
@@ -85,7 +85,7 @@ export function AppSidebar() {
       >
         <SidebarMenu className="space-y-1">
           {navigation.map((item) => {
-            const href = workspaceId ? `/${workspaceId}${item.path}` : '/';
+            const href = workspaceSlug ? `/${workspaceSlug}${item.path}` : '/';
             const isActive = currentPath === href;
             return (
               <SidebarMenuItem key={item.name}>

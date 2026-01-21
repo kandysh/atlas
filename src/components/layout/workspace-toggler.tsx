@@ -46,7 +46,7 @@ export function WorkspaceToggler() {
     setOpen(false);
     
     // Navigate to the new workspace's active page
-    router.push(`/${workspace.id}`);
+    router.push(`/${workspace.slug}`);
   };
 
   const handleCreateWorkspace = async () => {
@@ -63,7 +63,7 @@ export function WorkspaceToggler() {
       setOpen(false);
       
       // Navigate to the new workspace
-      router.push(`/${newWorkspace.id}`);
+      router.push(`/${newWorkspace.slug}`);
     } catch {
       toast.error('Failed to create workspace');
     }

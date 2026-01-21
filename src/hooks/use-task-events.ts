@@ -11,7 +11,7 @@ import { logger } from '@/src/lib/logger';
 /**
  * Hook to listen to task updates via SSE
  */
-export function useTaskEvents(workspaceId: string, page: number = 0) {
+export function useTaskEvents(workspaceId: string, workspaceSlug: string, page: number = 0) {
   const queryClient = useQueryClient();
   const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -63,10 +63,10 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
   );
 
   useEffect(() => {
-    if (!workspaceId) return;
+    if (!workspaceId || !workspaceSlug) return;
 
-    // Create EventSource connection
-    const eventSource = new EventSource(`/api/events/${workspaceId}`);
+    // Create EventSource connection using slug in URL
+    const eventSource = new EventSource(`/api/events/${workspaceSlug}`);
     eventSourceRef.current = eventSource;
 
     // Handle connection open
@@ -124,7 +124,7 @@ export function useTaskEvents(workspaceId: string, page: number = 0) {
       eventSource.close();
       eventSourceRef.current = null;
     };
-  }, [workspaceId, page, queryClient, updateTaskInCache]);
+  }, [workspaceId, workspaceSlug, page, queryClient, updateTaskInCache]);
 
   return {
     // Note: isConnected status should be tracked via state if needed for rendering

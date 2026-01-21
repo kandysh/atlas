@@ -3,14 +3,26 @@ import { db, tasks } from '@/src/lib/db';
 import { eq, desc } from 'drizzle-orm';
 import { registerSseClient, unregisterSseClient } from '@/src/lib/sse/server';
 import { logger } from '@/src/lib/logger';
+import { getWorkspaceBySlug } from '@/src/lib/actions/workspaces';
 
-// GET /api/tasks/[workspaceId]/events
+// GET /api/tasks/[workspaceSlug]/events
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ workspaceId: string }> },
+  { params }: { params: Promise<{ workspaceSlug: string }> },
 ) {
-  const { workspaceId } = await params;
-  const clientId = `${workspaceId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  const { workspaceSlug } = await params;
+  
+  // Look up workspace by slug to get the ID
+  const workspaceResult = await getWorkspaceBySlug(workspaceSlug);
+  if (!workspaceResult.success) {
+    return new Response(JSON.stringify({ error: 'Workspace not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  
+  const workspaceId = workspaceResult.workspace.id;
+  const clientId = `${workspaceSlug}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
   // Create a ReadableStream for SSE
   const stream = new ReadableStream({
@@ -37,7 +49,7 @@ export async function GET(
         })}\n\n`;
         controller.enqueue(new TextEncoder().encode(stateMessage));
       } catch (error) {
-        logger.error({ workspaceId, clientId, error }, 'Error fetching initial state');
+        logger.error({ workspaceSlug, workspaceId, clientId, error }, 'Error fetching initial state');
       }
 
       // Keep connection alive with periodic heartbeat
@@ -45,7 +57,7 @@ export async function GET(
         try {
           controller.enqueue(new TextEncoder().encode(': heartbeat\n\n'));
         } catch (error) {
-          logger.error({ workspaceId, clientId, error }, 'Heartbeat failed');
+          logger.error({ workspaceSlug, clientId, error }, 'Heartbeat failed');
           clearInterval(heartbeatInterval);
         }
       }, 30000); // 30 seconds
