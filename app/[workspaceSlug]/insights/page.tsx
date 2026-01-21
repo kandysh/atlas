@@ -2,25 +2,17 @@
 
 import { useCallback } from 'react';
 import {
-  CumulativeFlowChart,
   CycleTimeChart,
   TasksStatusBreakdownDonut,
   ChartLineInteractive,
   ToolsUsedChart,
   OwnerImpactChart,
-  TeamsWorkloadChart,
   AssetClassPortfolioChart,
   PriorityAgingChart,
   CumulativeImpactChart,
   ImpactMatrixChart,
   ImpactVsCycleTimeChart,
-  EfficiencyRatioChart,
-  ImpactDensityByTeamChart,
   TeamImpactQuadrantChart,
-  AssetClassROIChart,
-  ToolsImpactChart,
-  TopAutomationsChart,
-  ParetoCurveChart,
   HeroKpis,
   FilterControls,
   InsightsCards,
@@ -166,24 +158,15 @@ export default function InsightsPage() {
     statusCounts: [],
     throughputOverTime: [],
     cycleTime: [],
-    remainingWorkTrend: [],
     toolsUsed: [],
     assetClasses: [],
     ownerProductivity: [],
-    teamsWorkload: [],
     assetClassDistribution: [],
     priorityAging: [],
     cumulativeImpact: [],
     impactMatrix: [],
     impactVsCycleTime: [],
-    efficiencyRatio: [],
-    impactDensityByTeam: [],
     teamImpactQuadrant: [],
-    assetClassROI: [],
-    toolsImpact: [],
-    topAutomations: [],
-    paretoCurveSavedHours: [],
-    paretoCurveProcesses: [],
     kpiSummary: {
       totalTasks: 0,
       openTasks: 0,
@@ -246,8 +229,6 @@ export default function InsightsPage() {
           <ChartSkeleton />
           <ChartSkeleton />
           <ChartSkeleton />
-          <DonutChartSkeleton />
-          <ChartSkeleton />
           <ChartSkeleton />
           <ChartSkeleton />
           <ChartSkeleton />
@@ -255,122 +236,58 @@ export default function InsightsPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Section: Executive Summary */}
+          {/* Section: Core Charts (Operational Backbone) */}
           <section>
             <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Executive Summary
-            </h2>
-            <div className="grid grid-cols-1 gap-4">
-              <CumulativeImpactChart
-                chartData={analyticsData.cumulativeImpact}
-              />
-              <ImpactMatrixChart chartData={analyticsData.impactMatrix} />
-            </div>
-          </section>
-
-          {/* Section: Core Metrics */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Core Metrics
+              Core Charts (Operational Backbone)
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               <TasksStatusBreakdownDonut
                 chartData={analyticsData.statusCounts}
               />
-              <CumulativeFlowChart
-                chartData={analyticsData.remainingWorkTrend}
+              <CycleTimeChart chartData={analyticsData.cycleTime} />
+              <ChartLineInteractive
+                chartData={analyticsData.throughputOverTime}
               />
               <PriorityAgingChart
                 chartData={analyticsData.priorityAging}
                 onPriorityClick={handlePriorityClick}
               />
-            </div>
-          </section>
-
-          {/* Section: Value Throughput */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Value Throughput
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <ChartLineInteractive
-                chartData={analyticsData.throughputOverTime}
-              />
-              <CycleTimeChart chartData={analyticsData.cycleTime} />
-            </div>
-          </section>
-
-          {/* Section: Delivery Quality */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Delivery Quality
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <ImpactVsCycleTimeChart
-                chartData={analyticsData.impactVsCycleTime}
-              />
-              <EfficiencyRatioChart chartData={analyticsData.efficiencyRatio} />
-              <ImpactDensityByTeamChart
-                chartData={analyticsData.impactDensityByTeam}
-              />
-            </div>
-          </section>
-
-          {/* Section: Team & Resources */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Team & Resources
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <OwnerImpactChart
-                chartData={analyticsData.ownerProductivity}
-                onOwnerClick={handleOwnerClick}
-              />
-              <TeamsWorkloadChart
-                chartData={analyticsData.teamsWorkload}
-                onTeamClick={handleTeamClick}
-              />
-              <TeamImpactQuadrantChart
-                chartData={analyticsData.teamImpactQuadrant}
-              />
-            </div>
-          </section>
-
-          {/* Section: Portfolio Intelligence */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Portfolio Intelligence
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <TopAutomationsChart chartData={analyticsData.topAutomations} />
-              </div>
-              <ParetoCurveChart
-                data={analyticsData.paretoCurveSavedHours}
-                title="Pareto Curve: Saved Hours"
-                valueLabel="Hours Saved"
-              />
-              <ParetoCurveChart
-                data={analyticsData.paretoCurveProcesses}
-                title="Pareto Curve: Processes Demised"
-                valueLabel="Processes Automated"
-              />
-            </div>
-          </section>
-
-          {/* Section: Strategic Analysis */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Strategic Analysis
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               <AssetClassPortfolioChart
                 chartData={analyticsData.assetClassDistribution}
                 onAssetClassClick={handleAssetClassClick}
               />
-              <AssetClassROIChart chartData={analyticsData.assetClassROI} />
               <ToolsUsedChart chartData={analyticsData.toolsUsed} />
-              <ToolsImpactChart chartData={analyticsData.toolsImpact} />
+            </div>
+          </section>
+
+          {/* Section: Impact & Strategy Charts (New Layer) */}
+          <section>
+            <h2 className="text-lg font-medium text-muted-foreground mb-4">
+              Impact & Strategy Charts
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ImpactMatrixChart data={analyticsData.impactMatrix} />
+              <TeamImpactQuadrantChart
+                data={analyticsData.teamImpactQuadrant}
+              />
+              <div className="md:col-span-2">
+                <CumulativeImpactChart data={analyticsData.cumulativeImpact} />
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Quality & Insight Charts */}
+          <section>
+            <h2 className="text-lg font-medium text-muted-foreground mb-4">
+              Quality & Insight Charts
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ImpactVsCycleTimeChart data={analyticsData.impactVsCycleTime} />
+              <OwnerImpactChart
+                chartData={analyticsData.ownerProductivity}
+                onOwnerClick={handleOwnerClick}
+              />
             </div>
           </section>
         </div>
