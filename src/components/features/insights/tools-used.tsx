@@ -34,13 +34,13 @@ export function ToolsUsedChart({ chartData }: { chartData: ToolsUsed[] }) {
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
 
-    const totalUsage = chartData.reduce((acc, d) => acc + d.count, 0);
+    const totalHoursSaved = chartData.reduce((acc, d) => acc + (d.savedHrs || 0), 0);
     const topTool = chartData.reduce(
-      (max, d) => (d.count > max.count ? d : max),
+      (max, d) => ((d.savedHrs || 0) > (max.savedHrs || 0) ? d : max),
       chartData[0],
     );
     const topPercentage =
-      totalUsage > 0 ? (topTool.count / totalUsage) * 100 : 0;
+      totalHoursSaved > 0 ? ((topTool.savedHrs || 0) / totalHoursSaved) * 100 : 0;
 
     // Diversity: more tools used = more diverse
     const diversity =
@@ -51,9 +51,9 @@ export function ToolsUsedChart({ chartData }: { chartData: ToolsUsed[] }) {
           : 'low';
 
     return {
-      totalUsage,
+      totalHoursSaved,
       topTool: topTool.tool,
-      topCount: topTool.count,
+      topHoursSaved: topTool.savedHrs || 0,
       topPercentage,
       toolCount: chartData.length,
       diversity,
@@ -84,12 +84,12 @@ export function ToolsUsedChart({ chartData }: { chartData: ToolsUsed[] }) {
               content={
                 <ChartTooltipContent
                   formatter={(value) => {
-                    if (!metrics) return `${value} uses`;
+                    if (!metrics) return `${value} hours saved`;
                     const percentage = (
-                      ((value as number) / metrics.totalUsage) *
+                      ((value as number) / metrics.totalHoursSaved) *
                       100
                     ).toFixed(1);
-                    return `${value} uses (${percentage}%)`;
+                    return `${value} hours saved (${percentage}%)`;
                   }}
                 />
               }
@@ -103,7 +103,7 @@ export function ToolsUsedChart({ chartData }: { chartData: ToolsUsed[] }) {
             />
             <PolarGrid strokeDasharray="3 3" />
             <Radar
-              dataKey="count"
+              dataKey="savedHrs"
               fill={chartConfig.tool.color}
               fillOpacity={0.5}
               stroke={chartConfig.tool.color}
@@ -115,9 +115,9 @@ export function ToolsUsedChart({ chartData }: { chartData: ToolsUsed[] }) {
       {metrics && (
         <CardFooter className="flex-col gap-1.5 text-xs pt-0">
           <div className="flex items-center justify-between w-full">
-            <span className="text-muted-foreground">Most used:</span>
+            <span className="text-muted-foreground">Highest impact:</span>
             <span className="font-medium capitalize">
-              {metrics.topTool} ({metrics.topPercentage.toFixed(0)}%)
+              {metrics.topTool} ({metrics.topHoursSaved.toFixed(0)}hrs)
             </span>
           </div>
           <div className="flex items-center justify-between w-full">

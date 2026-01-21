@@ -8,7 +8,7 @@ import {
   TasksStatusBreakdownDonut,
   ChartLineInteractive,
   ToolsUsedChart,
-  OwnerProductivityChart,
+  OwnerImpactChart,
   TeamsWorkloadChart,
   AssetClassPortfolioChart,
   PriorityAgingChart,
@@ -167,11 +167,23 @@ export default function InsightsPage() {
     assetClassDistribution: [],
     priorityAging: [],
     hoursEfficiency: [],
+    cumulativeImpact: [],
+    impactMatrix: [],
+    impactVsCycleTime: [],
+    efficiencyRatio: [],
+    impactDensityByTeam: [],
+    teamImpactQuadrant: [],
+    assetClassROI: [],
+    toolsImpact: [],
+    topAutomations: [],
+    paretoCurveSavedHours: [],
+    paretoCurveProcesses: [],
     kpiSummary: {
       totalTasks: 0,
       openTasks: 0,
       avgCycleDays: 0,
       totalHoursSaved: 0,
+      totalProcessesDemised: 0,
     },
     owners: [],
     teams: [],
@@ -275,7 +287,7 @@ export default function InsightsPage() {
               Team & Resources
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <OwnerProductivityChart
+              <OwnerImpactChart
                 chartData={analyticsData.ownerProductivity}
                 onOwnerClick={handleOwnerClick}
               />

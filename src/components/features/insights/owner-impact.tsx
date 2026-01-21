@@ -21,44 +21,46 @@ import {
 import { OwnerProductivity } from '@/src/lib/actions/analytics';
 
 const chartConfig = {
-  completedTasks: {
-    label: 'Completed',
+  totalHoursSaved: {
+    label: 'Hours Saved',
     color: 'var(--chart-1)',
   },
-  avgCycleDays: {
-    label: 'Avg Cycle (days)',
+  totalProcessesDemised: {
+    label: 'Processes Demised',
     color: 'var(--chart-2)',
   },
 } satisfies ChartConfig;
 
-interface OwnerProductivityChartProps {
+interface OwnerImpactChartProps {
   chartData: OwnerProductivity[];
   onOwnerClick?: (owner: string) => void;
 }
 
-export function OwnerProductivityChart({
+export function OwnerImpactChart({
   chartData,
   onOwnerClick,
-}: OwnerProductivityChartProps) {
+}: OwnerImpactChartProps) {
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
 
-    const totalCompleted = chartData.reduce(
-      (acc, d) => acc + d.completedTasks,
-      0,
-    );
-    const avgCompleted = totalCompleted / chartData.length;
     const topPerformer = chartData[0];
     const totalHoursSaved = chartData.reduce(
       (acc, d) => acc + d.totalHoursSaved,
       0,
     );
+    const totalProcessesDemised = chartData.reduce(
+      (acc, d) => acc + (d.totalProcessesDemised || 0),
+      0,
+    );
+    const avgHoursSaved = totalHoursSaved / chartData.length;
 
     return {
       topPerformer: topPerformer?.owner || 'N/A',
-      topCount: topPerformer?.completedTasks || 0,
-      avgCompleted,
+      topHoursSaved: topPerformer?.totalHoursSaved || 0,
+      topProcessesDemised: topPerformer?.totalProcessesDemised || 0,
+      avgHoursSaved,
       totalHoursSaved,
+      totalProcessesDemised,
       teamSize: chartData.length,
     };
   }, [chartData]);
@@ -84,18 +86,18 @@ export function OwnerProductivityChart({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-4 w-4 text-amber-500" />
-            Top Performers
+            Owner Impact
           </CardTitle>
-          {metrics && metrics.topCount > metrics.avgCompleted * 1.3 && (
+          {metrics && metrics.topHoursSaved > metrics.avgHoursSaved * 1.5 && (
             <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
               <TrendingUp className="h-3 w-3" />
-              Standout
+              High Impact
             </span>
           )}
         </div>
         <CardDescription>
           {metrics
-            ? `${metrics.teamSize} contributors • ${metrics.totalHoursSaved.toFixed(0)}hrs saved total`
+            ? `${metrics.teamSize} contributors • ${metrics.totalHoursSaved.toFixed(0)}hrs saved • ${metrics.totalProcessesDemised} processes demised`
             : 'Loading...'}
         </CardDescription>
       </CardHeader>
@@ -125,17 +127,16 @@ export function OwnerProductivityChart({
               content={
                 <ChartTooltipContent
                   formatter={(value, name, item) => {
-                    if (name === 'avgCycleDays') {
-                      return `${Number(value).toFixed(1)} days`;
-                    }
                     const owner = item?.payload as OwnerProductivity;
-                    if (owner) {
+                    if (name === 'totalHoursSaved') {
                       return (
                         <div className="flex flex-col gap-1">
-                          <span>{value} tasks completed</span>
-                          <span className="text-xs text-muted-foreground">
-                            {owner.totalHoursSaved.toFixed(1)}hrs saved
-                          </span>
+                          <span>{value} hours saved</span>
+                          {owner && owner.totalProcessesDemised > 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              {owner.totalProcessesDemised} processes demised
+                            </span>
+                          )}
                         </div>
                       );
                     }
@@ -145,8 +146,8 @@ export function OwnerProductivityChart({
               }
             />
             <Bar
-              dataKey="completedTasks"
-              fill={chartConfig.completedTasks.color}
+              dataKey="totalHoursSaved"
+              fill={chartConfig.totalHoursSaved.color}
               radius={4}
               onClick={handleBarClick}
               className="cursor-pointer hover:opacity-80 transition-opacity"
@@ -156,7 +157,8 @@ export function OwnerProductivityChart({
       </CardContent>
       {metrics && metrics.topPerformer !== 'N/A' && (
         <CardFooter className="text-xs text-muted-foreground pt-0">
-          🏆 {metrics.topPerformer} leads with {metrics.topCount} completions
+          🏆 {metrics.topPerformer} leads with {metrics.topHoursSaved.toFixed(0)}hrs saved
+          {metrics.topProcessesDemised > 0 && ` • ${metrics.topProcessesDemised} processes demised`}
         </CardFooter>
       )}
     </Card>

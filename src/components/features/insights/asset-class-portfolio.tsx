@@ -20,8 +20,8 @@ import {
 import { AssetClassDistribution } from '@/src/lib/actions/analytics';
 
 const chartConfig = {
-  count: {
-    label: 'Count',
+  savedHrs: {
+    label: 'Hours Saved',
   },
 } satisfies ChartConfig;
 
@@ -29,19 +29,20 @@ const chartConfig = {
 function AssetClassTooltip({
   active,
   payload,
-  totalTasks,
+  chartData,
   metrics,
 }: {
   active?: boolean;
   payload?: Array<{ payload: AssetClassDistribution }>;
-  totalTasks: number;
-  metrics: { topAsset: string; topCount: number } | null;
+  chartData: AssetClassDistribution[];
+  metrics: { topAsset: string; topHoursSaved: number } | null;
 }) {
   if (!active || !payload?.length) return null;
 
   const data = payload[0].payload;
+  const totalHoursSaved = chartData.reduce((acc, d) => acc + (d.savedHrs || 0), 0);
   const percentage =
-    totalTasks > 0 ? ((data.count / totalTasks) * 100).toFixed(1) : 0;
+    totalHoursSaved > 0 ? (((data.savedHrs || 0) / totalHoursSaved) * 100).toFixed(1) : 0;
   const isTopAsset = metrics && data.assetClass === metrics.topAsset;
 
   return (
@@ -62,8 +63,8 @@ function AssetClassTooltip({
       </div>
       <div className="space-y-1 text-xs">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Tasks:</span>
-          <span className="font-medium">{data.count}</span>
+          <span className="text-muted-foreground">Hours Saved:</span>
+          <span className="font-medium">{(data.savedHrs || 0).toFixed(1)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Portfolio share:</span>
@@ -141,13 +142,13 @@ export function AssetClassPortfolioChart({
   chartData,
   onAssetClassClick,
 }: AssetClassPortfolioChartProps) {
-  const totalTasks = chartData.reduce((acc, curr) => acc + curr.count, 0);
+  const totalHoursSaved = chartData.reduce((acc, curr) => acc + (curr.savedHrs || 0), 0);
 
   const metrics = useMemo(() => {
-    const sorted = [...chartData].sort((a, b) => b.count - a.count);
+    const sorted = [...chartData].sort((a, b) => (b.savedHrs || 0) - (a.savedHrs || 0));
     const topAsset = sorted[0];
     const topPercentage =
-      totalTasks > 0 ? ((topAsset?.count || 0) / totalTasks) * 100 : 0;
+      totalHoursSaved > 0 ? ((topAsset?.savedHrs || 0) / totalHoursSaved) * 100 : 0;
     const diversityScore = chartData.length;
 
     // Concentration risk: if top asset > 60%, it's high concentration
@@ -160,12 +161,12 @@ export function AssetClassPortfolioChart({
 
     return {
       topAsset: topAsset?.assetClass || 'N/A',
-      topCount: topAsset?.count || 0,
+      topHoursSaved: topAsset?.savedHrs || 0,
       topPercentage,
       diversityScore,
       concentrationRisk,
     };
-  }, [chartData, totalTasks]);
+  }, [chartData, totalHoursSaved]);
 
   const handlePieClick = (data: { assetClass: string }) => {
     if (onAssetClassClick && data?.assetClass) {
@@ -194,12 +195,12 @@ export function AssetClassPortfolioChart({
             <ChartTooltip
               cursor={false}
               content={
-                <AssetClassTooltip totalTasks={totalTasks} metrics={metrics} />
+                <AssetClassTooltip chartData={chartData} metrics={metrics} />
               }
             />
             <Pie
               data={chartData}
-              dataKey="count"
+              dataKey="savedHrs"
               nameKey="assetClass"
               innerRadius={50}
               outerRadius={75}
@@ -225,14 +226,14 @@ export function AssetClassPortfolioChart({
                           y={(viewBox.cy || 0) - 6}
                           className="fill-foreground text-2xl font-bold"
                         >
-                          {totalTasks.toLocaleString()}
+                          {totalHoursSaved.toFixed(0)}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 14}
                           className="fill-muted-foreground text-xs"
                         >
-                          Total Tasks
+                          Hours Saved
                         </tspan>
                       </text>
                     );

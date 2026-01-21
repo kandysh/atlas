@@ -22,7 +22,7 @@ import {
 import { ThroughPutOverTimeData } from '@/src/lib/types';
 
 export const description =
-  'An interactive bar chart showing completed tasks and hours saved over time.';
+  'An interactive bar chart showing completed tasks, hours saved, and processes demised over time.';
 
 const chartConfig = {
   throughput: {
@@ -33,8 +33,12 @@ const chartConfig = {
     color: 'var(--chart-1)',
   },
   count: {
-    label: 'Completed',
+    label: 'Tasks Completed',
     color: 'var(--chart-2)',
+  },
+  processesDemised: {
+    label: 'Processes Demised',
+    color: 'var(--chart-3)',
   },
 } satisfies ChartConfig;
 
@@ -50,6 +54,7 @@ export function ChartLineInteractive({
     () => ({
       hours: chartData.reduce((acc, curr) => acc + curr.hours, 0),
       count: chartData.reduce((acc, curr) => acc + curr.count, 0),
+      processesDemised: chartData.reduce((acc, curr) => acc + (curr.processesDemised || 0), 0),
     }),
     [chartData],
   );
@@ -60,10 +65,10 @@ export function ChartLineInteractive({
     const recent = chartData.slice(-3);
     const older = chartData.slice(-6, -3);
 
-    const key = activeChart as 'hours' | 'count';
-    const recentSum = recent.reduce((acc, d) => acc + d[key], 0);
+    const key = activeChart as 'hours' | 'count' | 'processesDemised';
+    const recentSum = recent.reduce((acc, d) => acc + (d[key] || 0), 0);
     const olderSum =
-      older.length > 0 ? older.reduce((acc, d) => acc + d[key], 0) : recentSum;
+      older.length > 0 ? older.reduce((acc, d) => acc + (d[key] || 0), 0) : recentSum;
 
     const change = recentSum - olderSum;
     const percentChange = olderSum > 0 ? (change / olderSum) * 100 : 0;
@@ -83,14 +88,14 @@ export function ChartLineInteractive({
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 sm:py-0!">
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            Throughput
+            Value Throughput
           </CardTitle>
           <CardDescription className="text-xs">
             {avgPerMonth.toFixed(1)} tasks/month avg
           </CardDescription>
         </div>
         <div className="flex">
-          {(['count', 'hours'] as const).map((key) => {
+          {(['count', 'hours', 'processesDemised'] as const).map((key) => {
             const chart = key as keyof typeof chartConfig;
             const isActive = activeChart === chart;
             return (
@@ -153,6 +158,7 @@ export function ChartLineInteractive({
                   }}
                   formatter={(value, name) => {
                     if (name === 'hours') return `${value} hours saved`;
+                    if (name === 'processesDemised') return `${value} processes demised`;
                     return `${value} tasks completed`;
                   }}
                 />

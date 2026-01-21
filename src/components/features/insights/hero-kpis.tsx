@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { KpiSummary } from '@/src/lib/actions/analytics';
-import { CheckCircle2, Clock, Target, Timer } from 'lucide-react';
+import { CheckCircle2, Clock, Target, Timer, TrendingDown } from 'lucide-react';
 import { AnalyticsFilters } from '@/src/lib/actions/analytics';
 
 interface HeroKpisProps {
@@ -208,12 +208,28 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
       subtitleColor:
         data.totalHoursSaved > 0 ? 'text-purple-600' : 'text-muted-foreground',
     },
+    {
+      label: 'Processes Demised',
+      value: data.totalProcessesDemised || 0,
+      icon: TrendingDown,
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-l-blue-500',
+      decimals: 0,
+      tooltip: 'Total processes eliminated through automation',
+      subtitle:
+        (data.totalProcessesDemised || 0) > 0
+          ? 'Streamlined workflows'
+          : 'No processes eliminated yet',
+      subtitleColor:
+        (data.totalProcessesDemised || 0) > 0 ? 'text-blue-600' : 'text-muted-foreground',
+    },
   ];
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {[...Array(5)].map((_, i) => (
           <Card
             key={i}
             className="bg-background/80 backdrop-blur-sm border-border/50"
@@ -231,7 +247,7 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
         const isClickable = !!kpi.onClick;
