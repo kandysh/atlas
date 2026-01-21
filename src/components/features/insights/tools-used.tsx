@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Wrench } from 'lucide-react';
 
 import {
@@ -21,12 +21,12 @@ import {
 
 import { ToolsUsed } from '@/src/lib/types';
 
-export const description = 'A radar chart showing tool usage distribution';
+export const description = 'A bar chart showing tool usage and business impact';
 
 const chartConfig = {
-  tool: {
-    label: 'Tool',
-    color: 'var(--chart-4)',
+  savedHrs: {
+    label: 'Hours Saved',
+    color: 'var(--chart-1)',
   },
 } satisfies ChartConfig;
 
@@ -65,56 +65,70 @@ export function ToolsUsedChart({ chartData }: { chartData: ToolsUsed[] }) {
     };
   }, [chartData]);
 
+  // Limit to top 10 tools for better visualization
+  const topTools = useMemo(() => {
+    return chartData.slice(0, 10);
+  }, [chartData]);
+
   return (
     <Card>
-      <CardHeader className="items-center pb-2">
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2">
           <Wrench className="h-4 w-4 text-muted-foreground" />
-          Tools Utilization
+          Tools Used
         </CardTitle>
         <CardDescription>
           {metrics
-            ? `${metrics.toolCount} tools in use across projects`
-            : 'Tool usage distribution'}
+            ? `${metrics.toolCount} tools used - ${metrics.totalHoursSaved.toFixed(0)}hrs saved`
+            : 'Tool usage and business impact'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-62.5"
-        >
-          <RadarChart data={chartData}>
+      <CardContent>
+        <ChartContainer config={chartConfig} className="h-[300px]">
+          <BarChart
+            data={topTools}
+            layout="vertical"
+            margin={{ left: 60, right: 20 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <XAxis type="number" />
+            <YAxis
+              type="category"
+              dataKey="tool"
+              width={50}
+              tick={{ fontSize: 11 }}
+              tickFormatter={(value) =>
+                value.length > 10 ? value.slice(0, 10) + '…' : value
+              }
+            />
             <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
-                  formatter={(value) => {
+                  formatter={(value, name, item) => {
+                    const tool = item?.payload as ToolsUsed;
                     if (!metrics) return `${value} hours saved`;
                     const percentage = (
                       ((value as number) / metrics.totalHoursSaved) *
                       100
                     ).toFixed(1);
-                    return `${value} hours saved (${percentage}%)`;
+                    return (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium capitalize">
+                          {tool.tool}
+                        </span>
+                        <span>{value} hours saved ({percentage}%)</span>
+                        <span className="text-xs text-muted-foreground">
+                          {tool.count} tasks
+                        </span>
+                      </div>
+                    );
                   }}
                 />
               }
             />
-            <PolarAngleAxis
-              dataKey="tool"
-              tick={{ fontSize: 11 }}
-              tickFormatter={(value) =>
-                value.length > 8 ? value.slice(0, 8) + '…' : value
-              }
-            />
-            <PolarGrid strokeDasharray="3 3" />
-            <Radar
-              dataKey="savedHrs"
-              fill={chartConfig.tool.color}
-              fillOpacity={0.5}
-              stroke={chartConfig.tool.color}
-              strokeWidth={2}
-            />
-          </RadarChart>
+            <Bar dataKey="savedHrs" fill={chartConfig.savedHrs.color} radius={4} />
+          </BarChart>
         </ChartContainer>
       </CardContent>
       {metrics && (
