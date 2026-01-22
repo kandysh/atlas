@@ -1,6 +1,7 @@
 // Task feature components
 export { TasksDataTable } from './tasks-data-table';
 export { DynamicToolbar } from './dynamic-toolbar';
+export { PageHeader } from './page-header';
 export {
   EditableTextCell,
   EditableNumberCell,

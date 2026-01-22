@@ -1,6 +1,6 @@
 'use client';
 
-import { TasksDataTable } from '@/src/components/features/tasks';
+import { TasksDataTable, PageHeader } from '@/src/components/features/tasks';
 import { Task } from '@/src/lib/types';
 import { useWorkspace } from '@/src/providers';
 import { useWorkspaceTasks } from '@/src/lib/query/hooks';
@@ -18,7 +18,7 @@ export default function CompletedPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Completed Tasks
+            Projects
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Loading workspace...
@@ -34,7 +34,7 @@ export default function CompletedPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Completed Tasks
+            Projects
           </h1>
           <p className="text-sm text-destructive mt-1">
             No workspace available. Please create or join a workspace.
@@ -63,7 +63,7 @@ export default function CompletedPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Completed Tasks
+            Projects
           </h1>
           <p className="text-sm text-destructive mt-1">
             Error loading tasks. Showing cached data if available.
@@ -78,17 +78,15 @@ export default function CompletedPage() {
     );
   }
 
+  const subtitle = `${currentWorkspace.name} • ${completedTasks.length} completed projects${isLoading ? ' • Loading...' : ''}`;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Completed Tasks
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {currentWorkspace.name} • {completedTasks.length} completed tasks
-          {isLoading && ' • Loading...'}
-        </p>
-      </div>
+      <PageHeader
+        title="Projects"
+        subtitle={subtitle}
+        workspaceId={workspaceId}
+      />
 
       <TasksDataTable
         data={completedTasks}

@@ -236,10 +236,10 @@ export default function InsightsPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Section: Core Charts (Operational Backbone) */}
+          {/* Section: Core Insights */}
           <section>
             <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Core Charts (Operational Backbone)
+              Core Insights
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <TasksStatusBreakdownDonut
@@ -261,10 +261,10 @@ export default function InsightsPage() {
             </div>
           </section>
 
-          {/* Section: Impact & Strategy Charts (New Layer) */}
+          {/* Section: Impact Insights */}
           <section>
             <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Impact & Strategy Charts
+              Impact Insights
             </h2>
             <div className="grid grid-cols-1 gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -278,10 +278,10 @@ export default function InsightsPage() {
             </div>
           </section>
 
-          {/* Section: Quality & Insight Charts */}
+          {/* Section: Quality Insights */}
           <section>
             <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Quality & Insight Charts
+              Quality Insights
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ImpactVsCycleTimeChart data={analyticsData.impactVsCycleTime} />
