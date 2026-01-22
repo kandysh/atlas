@@ -1,6 +1,6 @@
 'use client';
 
-import { TasksDataTable } from '@/src/components/features/tasks';
+import { TasksDataTable, PageHeader } from '@/src/components/features/tasks';
 import { Task } from '@/src/lib/types';
 import { useWorkspace } from '@/src/providers';
 import { useWorkspaceTasks } from '@/src/lib/query/hooks';
@@ -18,7 +18,7 @@ export default function Page() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Active Tasks
+            Tasks
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Loading workspace...
@@ -34,7 +34,7 @@ export default function Page() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Active Tasks
+            Tasks
           </h1>
           <p className="text-sm text-destructive mt-1">
             No workspace available. Please create or join a workspace.
@@ -63,7 +63,7 @@ export default function Page() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Active Tasks
+            Tasks
           </h1>
           <p className="text-sm text-destructive mt-1">
             Error loading tasks. Showing cached data if available.
@@ -78,15 +78,15 @@ export default function Page() {
     );
   }
 
+  const subtitle = `${currentWorkspace.name} • ${activeTasks.length} active tasks${isLoading ? ' • Loading...' : ''}`;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Active Tasks</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {currentWorkspace.name} • {activeTasks.length} active tasks
-          {isLoading && ' • Loading...'}
-        </p>
-      </div>
+      <PageHeader
+        title="Tasks"
+        subtitle={subtitle}
+        workspaceId={workspaceId}
+      />
 
       <TasksDataTable
         data={activeTasks}

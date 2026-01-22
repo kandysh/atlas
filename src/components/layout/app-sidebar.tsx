@@ -28,12 +28,12 @@ import { useTheme } from 'next-themes';
 
 const navigation = [
   {
-    name: 'Active',
+    name: 'Tasks',
     path: '',
     icon: LayoutDashboard,
   },
   {
-    name: 'Completed',
+    name: 'Projects',
     path: '/completed',
     icon: CheckCircle2,
   },
