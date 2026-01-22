@@ -43,3 +43,11 @@ next-env.d.ts
 
 # docker
 docker-compose.override.yml
+<<<<<<< HEAD
+=======
+
+/docs
+
+#claude
+.claude
+>>>>>>> 5e57751 (beta changes)
