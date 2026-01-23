@@ -250,7 +250,7 @@ async function seed() {
     const priorities = ['low', 'medium', 'high', 'urgent'];
 
     // Build 100 tasks
-    const totalTasks = 10000;
+    const totalTasks = 100;
     const sampleTasks: {
       sequenceNumber: number;
       data: Record<string, any>;

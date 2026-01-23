@@ -165,7 +165,7 @@ const renderSectorShape = (props: SectorShapeProps) => {
   );
 };
 
-type TasksStatusBreakdownDonutProps = {
+type ProjectStatusBreakdownDonutProps = {
   chartData: DonutChartData[];
   onStatusClick?: (status: string) => void;
 };
@@ -180,10 +180,10 @@ const statusUrlMap: Record<string, string> = {
   Blocked: 'blocked',
 };
 
-export function TasksStatusBreakdownDonut({
+export function ProjectStatusBreakdownDonut({
   chartData,
   onStatusClick,
-}: TasksStatusBreakdownDonutProps) {
+}: ProjectStatusBreakdownDonutProps) {
   const router = useRouter();
   const params = useParams();
   const workspaceSlug = params.workspaceSlug as string;
@@ -252,7 +252,7 @@ export function TasksStatusBreakdownDonut({
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
         <CardTitle className="flex items-center gap-2">
-          Task Status
+          Project Status
           <span
             className={`inline-flex items-center gap-1 text-xs font-normal px-2 py-0.5 rounded-full ${
               metrics.healthStatus === 'good'
@@ -271,7 +271,7 @@ export function TasksStatusBreakdownDonut({
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-62.5"
+          className="mx-auto aspect-square h-[280px]"
         >
           <PieChart>
             <ChartTooltip

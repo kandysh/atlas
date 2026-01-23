@@ -95,14 +95,14 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
 
   const kpis = [
     {
-      label: 'Total Tasks',
+      label: 'Total Projects',
       value: data.totalTasks,
       icon: Target,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
       borderColor: 'border-l-primary',
       onClick: () => router.push(`/${workspaceSlug}`),
-      tooltip: 'View all active tasks',
+      tooltip: 'View all active projects',
       subtitle: `${insights.completionRate.toFixed(0)}% complete`,
       subtitleColor:
         insights.completionRate >= 70
@@ -112,7 +112,7 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
             : 'text-muted-foreground',
     },
     {
-      label: 'Open Tasks',
+      label: 'Open Projects',
       value: data.openTasks,
       icon: Clock,
       color:
@@ -134,12 +134,12 @@ export function HeroKpis({ data, isLoading }: HeroKpisProps) {
             ? 'border-l-amber-500'
             : 'border-l-red-500',
       onClick: () => {
-        // Navigate to active dashboard with status filter
+        // Navigate to active dashboard with high-priority open items filter
         router.push(
-          `/${workspaceSlug}?status=todo&status=in-progress&status=testing&status=blocked`,
+          `/${workspaceSlug}?status=todo&status=in-progress&priority=high&priority=urgent`,
         );
       },
-      tooltip: 'View open tasks',
+      tooltip: 'View high-priority open projects',
       subtitle:
         insights.backlogHealth === 'healthy'
           ? 'Backlog healthy'

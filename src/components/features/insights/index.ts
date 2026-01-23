@@ -1,17 +1,12 @@
 // Insights feature components
 export { default as CycleTimeChart } from './cycle-time';
-export { TasksStatusBreakdownDonut } from './task-status-breakdown';
+export { ProjectStatusBreakdownDonut } from './project-status-breakdown';
 export { ChartLineInteractive } from './throughput-over-time';
-export { ToolsUsedChart } from './tools-used';
+export { ToolsUsedRadar } from './tools-used-radar';
+export { TeamImpactChart } from './team-impact';
 // Active chart components
-export { OwnerImpactChart } from './owner-impact';
 export { AssetClassPortfolioChart } from './asset-class-portfolio';
 export { PriorityAgingChart } from './priority-aging';
-// Business Impact Intelligence Platform components
-export { CumulativeImpactChart } from './cumulative-impact';
-export { ImpactMatrixChart } from './impact-matrix';
-export { ImpactVsCycleTimeChart } from './impact-vs-cycle-time';
-export { TeamImpactQuadrantChart } from './team-impact-quadrant';
 // Dashboard components
 export { HeroKpis } from './hero-kpis';
 export { FilterControls } from './filter-controls';

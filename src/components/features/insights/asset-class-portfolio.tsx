@@ -72,6 +72,14 @@ function AssetClassTooltip({
           <span className="font-medium">{(data.savedHrs || 0).toFixed(1)}</span>
         </div>
         <div className="flex justify-between">
+          <span className="text-muted-foreground">Processes Demised:</span>
+          <span className="font-medium">{data.processesDemised || 0}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Projects:</span>
+          <span className="font-medium">{data.count}</span>
+        </div>
+        <div className="flex justify-between">
           <span className="text-muted-foreground">Portfolio share:</span>
           <span className="font-medium">{percentage}%</span>
         </div>
@@ -201,7 +209,7 @@ export function AssetClassPortfolioChart({
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square h-[280px]"
         >
           <PieChart>
             <ChartTooltip

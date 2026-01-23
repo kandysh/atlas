@@ -3,16 +3,12 @@
 import { useCallback } from 'react';
 import {
   CycleTimeChart,
-  TasksStatusBreakdownDonut,
+  ProjectStatusBreakdownDonut,
   ChartLineInteractive,
-  ToolsUsedChart,
-  OwnerImpactChart,
+  ToolsUsedRadar,
+  TeamImpactChart,
   AssetClassPortfolioChart,
   PriorityAgingChart,
-  CumulativeImpactChart,
-  ImpactMatrixChart,
-  ImpactVsCycleTimeChart,
-  TeamImpactQuadrantChart,
   HeroKpis,
   FilterControls,
   InsightsCards,
@@ -103,7 +99,7 @@ export default function InsightsPage() {
       <div className="space-y-6 p-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-balance">
-            Business Impact Intelligence
+            Insights
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Loading workspace...
@@ -128,7 +124,7 @@ export default function InsightsPage() {
       <div className="space-y-6 p-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-balance">
-            Business Impact Intelligence
+            Insights
           </h1>
           <p className="text-sm text-destructive mt-1">
             No workspace available. Please create or join a workspace.
@@ -143,7 +139,7 @@ export default function InsightsPage() {
       <div className="space-y-6 p-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-balance">
-            Business Impact Intelligence
+            Insights
           </h1>
           <p className="text-sm text-destructive mt-1">
             Error loading analytics. Please try again.
@@ -158,14 +154,15 @@ export default function InsightsPage() {
     statusCounts: [],
     throughputOverTime: [],
     cycleTime: [],
+    hoursSavedWorked: [],
+    remainingWorkTrend: [],
     toolsUsed: [],
     assetClasses: [],
     ownerProductivity: [],
+    teamsWorkload: [],
     assetClassDistribution: [],
     priorityAging: [],
-    cumulativeImpact: [],
-    impactMatrix: [],
-    impactVsCycleTime: [],
+    hoursEfficiency: [],
     teamImpactQuadrant: [],
     kpiSummary: {
       totalTasks: 0,
@@ -185,11 +182,10 @@ export default function InsightsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-semibold tracking-tight text-balance">
-          Business Impact Intelligence
+          Insights
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Comprehensive analytics on business value, efficiency, and strategic
-          impact
+          {currentWorkspace.name}
           {analyticsLoading && ' • Refreshing...'}
         </p>
       </div>
@@ -235,62 +231,27 @@ export default function InsightsPage() {
           <ChartSkeleton />
         </div>
       ) : (
-        <div className="space-y-8">
-          {/* Section: Core Charts (Operational Backbone) */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Core Charts (Operational Backbone)
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <TasksStatusBreakdownDonut
-                chartData={analyticsData.statusCounts}
-              />
-              <CycleTimeChart chartData={analyticsData.cycleTime} />
-              <ChartLineInteractive
-                chartData={analyticsData.throughputOverTime}
-              />
-              <PriorityAgingChart
-                chartData={analyticsData.priorityAging}
-                onPriorityClick={handlePriorityClick}
-              />
-              <AssetClassPortfolioChart
-                chartData={analyticsData.assetClassDistribution}
-                onAssetClassClick={handleAssetClassClick}
-              />
-              <ToolsUsedChart chartData={analyticsData.toolsUsed} />
-            </div>
-          </section>
-
-          {/* Section: Impact & Strategy Charts (New Layer) */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Impact & Strategy Charts
-            </h2>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ImpactMatrixChart data={analyticsData.impactMatrix} />
-                <TeamImpactQuadrantChart
-                  data={analyticsData.teamImpactQuadrant}
-                  onTeamClick={handleTeamClick}
-                />
-              </div>
-              <CumulativeImpactChart data={analyticsData.cumulativeImpact} />
-            </div>
-          </section>
-
-          {/* Section: Quality & Insight Charts */}
-          <section>
-            <h2 className="text-lg font-medium text-muted-foreground mb-4">
-              Quality & Insight Charts
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ImpactVsCycleTimeChart data={analyticsData.impactVsCycleTime} />
-              <OwnerImpactChart
-                chartData={analyticsData.ownerProductivity}
-                onOwnerClick={handleOwnerClick}
-              />
-            </div>
-          </section>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ProjectStatusBreakdownDonut
+            chartData={analyticsData.statusCounts}
+          />
+          <CycleTimeChart chartData={analyticsData.cycleTime} />
+          <ChartLineInteractive
+            chartData={analyticsData.throughputOverTime}
+          />
+          <PriorityAgingChart
+            chartData={analyticsData.priorityAging}
+            onPriorityClick={handlePriorityClick}
+          />
+          <AssetClassPortfolioChart
+            chartData={analyticsData.assetClassDistribution}
+            onAssetClassClick={handleAssetClassClick}
+          />
+          <ToolsUsedRadar chartData={analyticsData.toolsUsed} />
+          <TeamImpactChart
+            data={analyticsData.teamImpactQuadrant}
+            onTeamClick={handleTeamClick}
+          />
         </div>
       )}
     </div>

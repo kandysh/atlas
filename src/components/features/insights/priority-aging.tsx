@@ -127,7 +127,7 @@ export function PriorityAgingChart({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[250px] w-full">
+        <ChartContainer config={chartConfig} className="h-[320px] w-full">
           <BarChart
             accessibilityLayer
             data={chartData}
@@ -145,6 +145,7 @@ export function PriorityAgingChart({
               cursor={false}
               content={
                 <ChartTooltipContent
+                  indicator="dot"
                   formatter={(value, name) => {
                     const label =
                       chartConfig[name as keyof typeof chartConfig]?.label ||

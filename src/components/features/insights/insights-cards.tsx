@@ -8,7 +8,6 @@ import {
   TrendingUp,
   Timer,
   Clock,
-  Zap,
   AlertTriangle,
   Target,
   Award,
@@ -135,20 +134,6 @@ export function InsightsCards({ data, onFilterChange }: InsightsCardsProps) {
         action: 'Triage',
         filter: { status: 'todo' },
         priority: 6,
-      });
-    }
-
-    // ROI insight - high efficiency
-    const topROIAsset = data.assetClassROI[0];
-    if (topROIAsset && topROIAsset.roiScore > 10) {
-      result.push({
-        id: 'high-roi',
-        type: 'success',
-        icon: Zap,
-        message: `${topROIAsset.assetClass} automations showing exceptional ROI (${topROIAsset.roiScore.toFixed(1)} hrs/day)`,
-        action: 'Explore',
-        filter: { assetClass: topROIAsset.assetClass },
-        priority: 7,
       });
     }
 

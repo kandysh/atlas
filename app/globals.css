@@ -293,22 +293,29 @@
     background-color: var(--priority-urgent);
   }
 
-  /* Updated checkbox styles */
+  /* Checkbox styles */
   input[type='checkbox'] {
     appearance: none;
     width: 16px;
     height: 16px;
     border: 1.5px solid var(--border);
     border-radius: 4px;
-    background: transparent;
+    background: var(--background);
     cursor: pointer;
     position: relative;
     transition: all 0.15s ease;
+    box-sizing: border-box;
+    flex-shrink: 0;
   }
 
   input[type='checkbox']:hover {
     border-color: var(--primary);
     background: oklch(from var(--primary) l c h / 0.08);
+  }
+
+  input[type='checkbox']:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 
   input[type='checkbox']:checked {
@@ -317,18 +324,86 @@
   }
 
   input[type='checkbox']:checked::after {
-    content: '';
+    content: '✓';
     position: absolute;
-    left: 4.5px;
-    top: 1.5px;
-    width: 4px;
-    height: 7px;
-    border: solid var(--primary-foreground);
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -55%);
+    color: var(--primary-foreground);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  input[type='checkbox']:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Data Table Row Selection Checkboxes */
+  .data-table-checkbox {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    background: var(--background);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  .data-table-checkbox:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2.5px oklch(from var(--primary) l c h / 0.12);
+    transform: scale(1.05);
+  }
+
+  .data-table-checkbox:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  .data-table-checkbox:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.2);
+  }
+
+  .data-table-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -55%);
+    color: var(--primary-foreground);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .data-table-checkbox:checked:hover {
+    box-shadow: 0 0 0 3.5px oklch(from var(--primary) l c h / 0.25);
+  }
+
+  .dark .data-table-checkbox:hover {
+    box-shadow: 0 0 0 2.5px oklch(from var(--primary) l c h / 0.2);
+  }
+
+  .dark .data-table-checkbox:checked {
+    box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.3);
+  }
+
+  .dark .data-table-checkbox:checked:hover {
+    box-shadow: 0 0 0 3.5px oklch(from var(--primary) l c h / 0.35);
   }
 
   /* Custom Scrollbar Styles */
+
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;

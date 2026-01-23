@@ -7,16 +7,7 @@ import {
   DonutChartData,
   ThroughPutOverTimeData,
   ToolsUsed,
-  CumulativeImpactData,
-  ImpactMatrixData,
-  ImpactVsCycleTimeData,
-  EfficiencyRatioData,
-  ImpactDensityByTeamData,
   TeamImpactQuadrantData,
-  AssetClassROIData,
-  ToolsImpactData,
-  TopAutomationData,
-  ParetoCurveData,
 } from '@/src/lib/types/analytics';
 import { logger } from '@/src/lib/logger/logger';
 
@@ -68,6 +59,7 @@ export interface AssetClassDistribution {
   assetClass: string;
   count: number;
   savedHrs: number;
+  processesDemised: number;
   fill: string;
   [key: string]: string | number;
 }
@@ -123,18 +115,8 @@ export type AnalyticsData = {
   hoursEfficiency: HoursEfficiency[];
   // KPI summary
   kpiSummary: KpiSummary;
-  // New Business Impact Intelligence dashboards
-  cumulativeImpact: CumulativeImpactData[];
-  impactMatrix: ImpactMatrixData[];
-  impactVsCycleTime: ImpactVsCycleTimeData[];
-  efficiencyRatio: EfficiencyRatioData[];
-  impactDensityByTeam: ImpactDensityByTeamData[];
+  // Active Business Impact Intelligence dashboards
   teamImpactQuadrant: TeamImpactQuadrantData[];
-  assetClassROI: AssetClassROIData[];
-  toolsImpact: ToolsImpactData[];
-  topAutomations: TopAutomationData[];
-  paretoCurveSavedHours: ParetoCurveData[];
-  paretoCurveProcesses: ParetoCurveData[];
   // Filter options
   owners: string[];
   teams: string[];
@@ -194,18 +176,8 @@ export async function getAnalytics(
       priorityAgingResult,
       hoursEfficiencyResult,
       kpiSummaryResult,
-      // New Business Impact queries
-      cumulativeImpactResult,
-      impactMatrixResult,
-      impactVsCycleTimeResult,
-      efficiencyRatioResult,
-      impactDensityByTeamResult,
+      // Active Business Impact queries
       teamImpactQuadrantResult,
-      assetClassROIResult,
-      toolsImpactResult,
-      topAutomationsResult,
-      paretoCurveSavedHoursResult,
-      paretoCurveProcessesResult,
       // Filter options
       ownersResult,
       teamsResult,
@@ -226,18 +198,8 @@ export async function getAnalytics(
       getPriorityAging(workspaceId, filterCondition),
       getHoursEfficiency(workspaceId, filterCondition),
       getKpiSummary(workspaceId, filterCondition),
-      // New Business Impact queries
-      getCumulativeImpact(workspaceId, filterCondition),
-      getImpactMatrix(workspaceId, filterCondition),
-      getImpactVsCycleTime(workspaceId, filterCondition),
-      getEfficiencyRatio(workspaceId, filterCondition),
-      getImpactDensityByTeam(workspaceId, filterCondition),
+      // Active Business Impact queries
       getTeamImpactQuadrant(workspaceId, filterCondition),
-      getAssetClassROI(workspaceId, filterCondition),
-      getToolsImpact(workspaceId, filterCondition),
-      getTopAutomations(workspaceId, filterCondition),
-      getParetoCurveSavedHours(workspaceId, filterCondition),
-      getParetoCurveProcesses(workspaceId, filterCondition),
       // Filter options
       getOwners(workspaceId, ownerCellKey),
       getTeams(workspaceId),
@@ -262,18 +224,8 @@ export async function getAnalytics(
         priorityAging: priorityAgingResult,
         hoursEfficiency: hoursEfficiencyResult,
         kpiSummary: kpiSummaryResult,
-        // New Business Impact Intelligence dashboards
-        cumulativeImpact: cumulativeImpactResult,
-        impactMatrix: impactMatrixResult,
-        impactVsCycleTime: impactVsCycleTimeResult,
-        efficiencyRatio: efficiencyRatioResult,
-        impactDensityByTeam: impactDensityByTeamResult,
+        // Active Business Impact Intelligence dashboards
         teamImpactQuadrant: teamImpactQuadrantResult,
-        assetClassROI: assetClassROIResult,
-        toolsImpact: toolsImpactResult,
-        topAutomations: topAutomationsResult,
-        paretoCurveSavedHours: paretoCurveSavedHoursResult,
-        paretoCurveProcesses: paretoCurveProcessesResult,
         // Filter options
         owners: ownersResult,
         teams: teamsResult,
@@ -756,7 +708,8 @@ async function getAssetClassDistribution(
     SELECT
       COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned') as asset_class,
       COUNT(*)::int as count,
-      SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved_hrs
+      SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved_hrs,
+      SUM(COALESCE((data->>'processesDemised')::numeric, 0))::int as processes_demised
     FROM ${tasksTable}
     WHERE ${whereClause}
     GROUP BY COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned')
@@ -772,11 +725,17 @@ async function getAssetClassDistribution(
   ];
 
   return (
-    result.rows as { asset_class: string; count: number; saved_hrs: number }[]
+    result.rows as {
+      asset_class: string;
+      count: number;
+      saved_hrs: number;
+      processes_demised: number;
+    }[]
   ).map((row, index) => ({
     assetClass: row.asset_class,
     count: row.count,
     savedHrs: row.saved_hrs || 0,
+    processesDemised: row.processes_demised || 0,
     fill: colors[index % colors.length],
   }));
 }
@@ -916,234 +875,7 @@ async function getKpiSummary(
   };
 }
 
-// New Business Impact Intelligence query functions
-
-async function getCumulativeImpact(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<CumulativeImpactData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')
-    AND data->>'completionDate' IS NOT NULL`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    WITH monthly_data AS (
-      SELECT
-        TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM-01') as date,
-        SUM(COALESCE((data->>'processesDemised')::numeric, 0))::float as processes,
-        SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as hours
-      FROM ${tasksTable}
-      WHERE ${whereClause}
-      GROUP BY TO_CHAR((data->>'completionDate')::timestamp, 'YYYY-MM-01')
-    )
-    SELECT
-      date,
-      SUM(processes) OVER (ORDER BY date)::float as cumulative_processes,
-      SUM(hours) OVER (ORDER BY date)::float as cumulative_hours
-    FROM monthly_data
-    ORDER BY date ASC
-  `);
-
-  return (
-    result.rows as {
-      date: string;
-      cumulative_processes: number;
-      cumulative_hours: number;
-    }[]
-  ).map((row) => ({
-    date: row.date,
-    cumulativeProcesses: row.cumulative_processes,
-    cumulativeHours: row.cumulative_hours,
-  }));
-}
-
-async function getImpactMatrix(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<ImpactMatrixData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    SELECT
-      id as task_id,
-      data->>'title' as title,
-      COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
-      COALESCE((data->>'savedHrs')::numeric, 0)::float as saved_hrs,
-      COALESCE(data->>'assetClass', 'Unassigned') as asset_class
-    FROM ${tasksTable}
-    WHERE ${whereClause}
-      AND (COALESCE((data->>'processesDemised')::numeric, 0) > 0
-        OR COALESCE((data->>'savedHrs')::numeric, 0) > 0)
-    LIMIT 100
-  `);
-
-  return (
-    result.rows as {
-      task_id: string;
-      title: string;
-      processes_demised: number;
-      saved_hrs: number;
-      asset_class: string;
-    }[]
-  ).map((row) => ({
-    taskId: row.task_id,
-    title: row.title || 'Untitled',
-    processesDemised: row.processes_demised,
-    savedHrs: row.saved_hrs,
-    assetClass: row.asset_class,
-  }));
-}
-
-async function getImpactVsCycleTime(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<ImpactVsCycleTimeData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')
-    AND data->>'completionDate' IS NOT NULL`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    SELECT
-      id as task_id,
-      data->>'title' as title,
-      EXTRACT(EPOCH FROM (
-        (data->>'completionDate')::timestamp - created_at
-      )) / 86400 as cycle_days,
-      COALESCE((data->>'savedHrs')::numeric, 0)::float as saved_hrs,
-      COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
-      (COALESCE((data->>'savedHrs')::numeric, 0) + COALESCE((data->>'processesDemised')::numeric, 0) * ${PROCESS_WEIGHT})::float as total_impact
-    FROM ${tasksTable}
-    WHERE ${whereClause}
-      AND (COALESCE((data->>'processesDemised')::numeric, 0) > 0
-        OR COALESCE((data->>'savedHrs')::numeric, 0) > 0)
-    LIMIT 100
-  `);
-
-  return (
-    result.rows as {
-      task_id: string;
-      title: string;
-      cycle_days: number;
-      total_impact: number;
-      saved_hrs: number;
-      processes_demised: number;
-    }[]
-  ).map((row) => ({
-    taskId: row.task_id,
-    title: row.title || 'Untitled',
-    cycleDays: row.cycle_days || 0,
-    totalImpact: row.total_impact,
-    savedHrs: row.saved_hrs,
-    processesDemised: row.processes_demised,
-  }));
-}
-
-async function getEfficiencyRatio(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<EfficiencyRatioData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    SELECT
-      id as task_id,
-      data->>'title' as title,
-      COALESCE((data->>'savedHrs')::numeric, 0)::float as saved_hrs,
-      COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
-      CASE
-        WHEN COALESCE((data->>'processesDemised')::numeric, 0) > 0
-        THEN (COALESCE((data->>'savedHrs')::numeric, 0) / (data->>'processesDemised')::numeric)::float
-        ELSE 0
-      END as efficiency
-    FROM ${tasksTable}
-    WHERE ${whereClause}
-      AND COALESCE((data->>'processesDemised')::numeric, 0) > 0
-    LIMIT 100
-  `);
-
-  return (
-    result.rows as {
-      task_id: string;
-      title: string;
-      efficiency: number;
-      saved_hrs: number;
-      processes_demised: number;
-    }[]
-  ).map((row) => ({
-    taskId: row.task_id,
-    title: row.title || 'Untitled',
-    efficiency: row.efficiency,
-    savedHrs: row.saved_hrs,
-    processesDemised: row.processes_demised,
-  }));
-}
-
-async function getImpactDensityByTeam(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<ImpactDensityByTeamData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')
-    AND data->>'completionDate' IS NOT NULL
-    AND data->>'teamName' IS NOT NULL
-    AND data->>'teamName' != ''`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    SELECT
-      LOWER(data->>'teamName') as team,
-      SUM(COALESCE((data->>'processesDemised')::numeric, 0))::float as processes_demised,
-      AVG(
-        EXTRACT(EPOCH FROM (
-          (data->>'completionDate')::timestamp - created_at
-        )) / 86400
-      )::float as avg_cycle_days,
-      COUNT(*)::int as task_count,
-      CASE
-        WHEN AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400) > 0
-        THEN (SUM(COALESCE((data->>'processesDemised')::numeric, 0)) /
-              AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400))::float
-        ELSE 0
-      END as impact_density
-    FROM ${tasksTable}
-    WHERE ${whereClause}
-    GROUP BY LOWER(data->>'teamName')
-    ORDER BY impact_density DESC
-    LIMIT 10
-  `);
-
-  return (
-    result.rows as {
-      team: string;
-      processes_demised: number;
-      avg_cycle_days: number;
-      task_count: number;
-      impact_density: number;
-    }[]
-  ).map((row) => ({
-    team: row.team,
-    impactDensity: row.impact_density,
-    processesDemised: row.processes_demised,
-    avgCycleDays: row.avg_cycle_days || 0,
-    taskCount: row.task_count,
-  }));
-}
+// Active Business Impact Intelligence query function
 
 async function getTeamImpactQuadrant(
   workspaceId: string,
@@ -1182,283 +914,6 @@ async function getTeamImpactQuadrant(
     totalProcessesDemised: row.total_processes_demised,
     totalSavedHrs: row.total_saved_hrs,
     taskCount: row.task_count,
-  }));
-}
-
-async function getAssetClassROI(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<AssetClassROIData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')
-    AND data->>'completionDate' IS NOT NULL`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    SELECT
-      COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned') as asset_class,
-      SUM(COALESCE((data->>'savedHrs')::numeric, 0))::float as saved_hrs,
-      AVG(
-        EXTRACT(EPOCH FROM (
-          (data->>'completionDate')::timestamp - created_at
-        )) / 86400
-      )::float as avg_cycle_days,
-      COUNT(*)::int as task_count,
-      CASE
-        WHEN AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400) > 0
-        THEN (SUM(COALESCE((data->>'savedHrs')::numeric, 0)) /
-              AVG(EXTRACT(EPOCH FROM ((data->>'completionDate')::timestamp - created_at)) / 86400))::float
-        ELSE 0
-      END as roi_score
-    FROM ${tasksTable}
-    WHERE ${whereClause}
-    GROUP BY COALESCE(NULLIF(data->>'assetClass', ''), 'Unassigned')
-    ORDER BY roi_score DESC
-    LIMIT 15
-  `);
-
-  return (
-    result.rows as {
-      asset_class: string;
-      saved_hrs: number;
-      avg_cycle_days: number;
-      task_count: number;
-      roi_score: number;
-    }[]
-  ).map((row) => ({
-    assetClass: row.asset_class,
-    roiScore: row.roi_score,
-    savedHrs: row.saved_hrs,
-    avgCycleDays: row.avg_cycle_days || 0,
-    taskCount: row.task_count,
-  }));
-}
-
-async function getToolsImpact(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<ToolsImpactData[]> {
-  const whereClause = filterCondition
-    ? sql`workspace_id = ${workspaceId} AND ${filterCondition}`
-    : sql`workspace_id = ${workspaceId}`;
-
-  const result = await db.execute(sql`
-    WITH tool_tasks AS (
-      SELECT
-        LOWER(tool) as tool,
-        t.id,
-        COALESCE((t.data->>'savedHrs')::numeric, 0) as saved_hrs,
-        COALESCE((t.data->>'processesDemised')::numeric, 0) as processes_demised
-      FROM ${tasksTable} t,
-        jsonb_array_elements_text(COALESCE(t.data->'tools', '[]'::jsonb)) as tool
-      WHERE ${whereClause}
-        AND tool IS NOT NULL
-        AND tool != ''
-        AND t.data->>'status' IN ('done', 'completed')
-    )
-    SELECT
-      tool,
-      SUM(saved_hrs)::float as saved_hrs,
-      SUM(processes_demised)::float as processes_demised,
-      COUNT(*)::int as task_count
-    FROM tool_tasks
-    GROUP BY tool
-    ORDER BY saved_hrs DESC, processes_demised DESC
-    LIMIT 15
-  `);
-
-  return (
-    result.rows as {
-      tool: string;
-      saved_hrs: number;
-      processes_demised: number;
-      task_count: number;
-    }[]
-  ).map((row) => ({
-    tool: row.tool,
-    savedHrs: row.saved_hrs,
-    processesDemised: row.processes_demised,
-    taskCount: row.task_count,
-  }));
-}
-
-async function getTopAutomations(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<TopAutomationData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    SELECT
-      id as task_id,
-      display_id,
-      data->>'title' as title,
-      COALESCE((data->>'savedHrs')::numeric, 0)::float as saved_hrs,
-      COALESCE((data->>'processesDemised')::numeric, 0)::float as processes_demised,
-      (COALESCE((data->>'savedHrs')::numeric, 0) + COALESCE((data->>'processesDemised')::numeric, 0) * ${PROCESS_WEIGHT})::float as total_impact,
-      COALESCE(data->>'completionDate', '') as completion_date
-    FROM ${tasksTable}
-    WHERE ${whereClause}
-    ORDER BY total_impact DESC
-    LIMIT 10
-  `);
-
-  return (
-    result.rows as {
-      task_id: string;
-      display_id: string;
-      title: string;
-      saved_hrs: number;
-      processes_demised: number;
-      total_impact: number;
-      completion_date: string;
-    }[]
-  ).map((row) => ({
-    taskId: row.task_id,
-    displayId: row.display_id,
-    title: row.title || 'Untitled',
-    savedHrs: row.saved_hrs,
-    processesDemised: row.processes_demised,
-    totalImpact: row.total_impact,
-    completionDate: row.completion_date,
-  }));
-}
-
-async function getParetoCurveSavedHours(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<ParetoCurveData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')
-    AND COALESCE((data->>'savedHrs')::numeric, 0) > 0`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    WITH ranked_tasks AS (
-      SELECT
-        id as task_id,
-        display_id,
-        data->>'title' as title,
-        COALESCE((data->>'savedHrs')::numeric, 0)::float as value
-      FROM ${tasksTable}
-      WHERE ${whereClause}
-      ORDER BY value DESC
-      LIMIT 50
-    ),
-    cumulative AS (
-      SELECT
-        task_id,
-        display_id,
-        title,
-        value,
-        SUM(value) OVER (ORDER BY value DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as cumulative_value
-      FROM ranked_tasks
-    ),
-    total AS (
-      SELECT SUM(value) as total_value FROM ranked_tasks
-    )
-    SELECT
-      c.task_id,
-      c.display_id,
-      c.title,
-      c.value,
-      c.cumulative_value,
-      (c.cumulative_value / NULLIF(t.total_value, 0) * 100)::float as cumulative_percentage
-    FROM cumulative c
-    CROSS JOIN total t
-    ORDER BY c.value DESC
-  `);
-
-  return (
-    result.rows as {
-      task_id: string;
-      display_id: string;
-      title: string;
-      value: number;
-      cumulative_value: number;
-      cumulative_percentage: number;
-    }[]
-  ).map((row) => ({
-    taskId: row.task_id,
-    displayId: row.display_id,
-    title: row.title || 'Untitled',
-    value: row.value,
-    cumulativeValue: row.cumulative_value,
-    cumulativePercentage: row.cumulative_percentage || 0,
-  }));
-}
-
-async function getParetoCurveProcesses(
-  workspaceId: string,
-  filterCondition: SQL | null,
-): Promise<ParetoCurveData[]> {
-  const baseCondition = sql`workspace_id = ${workspaceId}
-    AND data->>'status' IN ('done', 'completed')
-    AND COALESCE((data->>'processesDemised')::numeric, 0) > 0`;
-  const whereClause = filterCondition
-    ? sql`${baseCondition} AND ${filterCondition}`
-    : baseCondition;
-
-  const result = await db.execute(sql`
-    WITH ranked_tasks AS (
-      SELECT
-        id as task_id,
-        display_id,
-        data->>'title' as title,
-        COALESCE((data->>'processesDemised')::numeric, 0)::float as value
-      FROM ${tasksTable}
-      WHERE ${whereClause}
-      ORDER BY value DESC
-      LIMIT 50
-    ),
-    cumulative AS (
-      SELECT
-        task_id,
-        display_id,
-        title,
-        value,
-        SUM(value) OVER (ORDER BY value DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as cumulative_value
-      FROM ranked_tasks
-    ),
-    total AS (
-      SELECT SUM(value) as total_value FROM ranked_tasks
-    )
-    SELECT
-      c.task_id,
-      c.display_id,
-      c.title,
-      c.value,
-      c.cumulative_value,
-      (c.cumulative_value / NULLIF(t.total_value, 0) * 100)::float as cumulative_percentage
-    FROM cumulative c
-    CROSS JOIN total t
-    ORDER BY c.value DESC
-  `);
-
-  return (
-    result.rows as {
-      task_id: string;
-      display_id: string;
-      title: string;
-      value: number;
-      cumulative_value: number;
-      cumulative_percentage: number;
-    }[]
-  ).map((row) => ({
-    taskId: row.task_id,
-    displayId: row.display_id,
-    title: row.title || 'Untitled',
-    value: row.value,
-    cumulativeValue: row.cumulative_value,
-    cumulativePercentage: row.cumulative_percentage || 0,
   }));
 }
 

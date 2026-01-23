@@ -277,7 +277,7 @@ export function DynamicToolbar({
             </Button>
           )}
 
-          {/* Add Task */}
+          {/* Add Project */}
           {onAddTask && (
             <Button
               onClick={onAddTask}
@@ -285,7 +285,7 @@ export function DynamicToolbar({
               className="h-9 gap-1.5 bg-primary hover:bg-primary/90 shadow-sm rounded-lg"
             >
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">New Task</span>
+              <span className="hidden sm:inline">New Project</span>
             </Button>
           )}
         </div>

@@ -18,7 +18,7 @@ export default function CompletedPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Completed Tasks
+            Completed Projects
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Loading workspace...
@@ -34,7 +34,7 @@ export default function CompletedPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Completed Tasks
+            Completed Projects
           </h1>
           <p className="text-sm text-destructive mt-1">
             No workspace available. Please create or join a workspace.
@@ -48,12 +48,12 @@ export default function CompletedPage() {
   const tasks = data?.tasks || [];
   const dbTasks = data?.dbTasks || [];
 
-  // Filter to only show completed tasks
+  // Filter to only show completed projects
   const completedTasks: Task[] = tasks.filter(
     (task) => task.status === 'completed',
   );
 
-  // Filter dbTasks to match completed tasks for delete ID mapping
+  // Filter dbTasks to match completed projects for delete ID mapping
   const completedDbTasks = dbTasks
     .filter((dbTask) => completedTasks.some((t) => t.id === dbTask.displayId))
     .map((t) => ({ id: t.id, displayId: t.displayId }));
@@ -63,7 +63,7 @@ export default function CompletedPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            Completed Tasks
+            Completed Projects
           </h1>
           <p className="text-sm text-destructive mt-1">
             Error loading tasks. Showing cached data if available.
@@ -82,10 +82,10 @@ export default function CompletedPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">
-          Completed Tasks
+          Completed Projects
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {currentWorkspace.name} • {completedTasks.length} completed tasks
+          {currentWorkspace.name} • {completedTasks.length} completed projects
           {isLoading && ' • Loading...'}
         </p>
       </div>

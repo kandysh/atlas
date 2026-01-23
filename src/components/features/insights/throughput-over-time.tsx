@@ -126,7 +126,7 @@ export function ChartLineInteractive({
       <CardContent className="px-2 sm:p-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-62.5 w-full"
+          className="aspect-auto h-[320px] w-full"
         >
           <BarChart
             accessibilityLayer
@@ -153,6 +153,7 @@ export function ChartLineInteractive({
             <ChartTooltip
               content={
                 <ChartTooltipContent
+                  indicator="dot"
                   className="w-40"
                   nameKey={activeChart}
                   labelFormatter={(value) => {

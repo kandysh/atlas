@@ -217,7 +217,7 @@ export function TaskDetailDrawer({
                 {task.id}
               </span>
               <h2 className="text-xl font-semibold text-foreground">
-                Task Details
+                Project Details
               </h2>
             </div>
             <Button

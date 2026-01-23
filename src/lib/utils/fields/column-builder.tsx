@@ -82,7 +82,6 @@ export function extractUniqueFieldValues(
         .flatMap((value) => value as string[])
         .filter((value) => value != null && value !== '')
         .map((value) => String(value));
-      console.log(values, field.key);
       uniqueValues[field.key] = Array.from(new Set(values)).sort();
     } else {
       // For single-value fields

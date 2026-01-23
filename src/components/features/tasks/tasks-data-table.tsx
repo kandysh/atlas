@@ -209,7 +209,7 @@ export function TasksDataTable({
         columns={columns}
         data={data}
         onRowClick={handleRowClick}
-        emptyStateMessage="No tasks found."
+        emptyStateMessage="No projects found."
         initialColumnFilters={columnFilters}
         onColumnFiltersChange={setColumnFilters}
         initialGlobalFilter={globalFilter}

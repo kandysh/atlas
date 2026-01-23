@@ -116,7 +116,7 @@ export default function CycleTimeChart({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="h-[320px]">
           <LineChart
             accessibilityLayer
             data={chartData}
@@ -145,6 +145,7 @@ export default function CycleTimeChart({
               cursor={false}
               content={
                 <ChartTooltipContent
+                  indicator="dot"
                   formatter={(value, name) => {
                     const label =
                       name === 'rollingAvg' ? 'Rolling avg' : 'Monthly avg';

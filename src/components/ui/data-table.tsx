@@ -173,7 +173,8 @@ export function DataTable<TData, TValue>({
                       onChange={(e) =>
                         table.toggleAllPageRowsSelected(e.target.checked)
                       }
-                      className="rounded border-border bg-background transition-all duration-200 hover:scale-110 cursor-pointer"
+                      className="data-table-checkbox"
+                      data-testid="select-all-checkbox"
                     />
                   </th>
                 )}
@@ -217,12 +218,15 @@ export function DataTable<TData, TValue>({
                     )}
                     */}
                     {enableRowSelection && (
-                      <td className="px-4 py-3 sticky left-0 bg-card z-10">
+                      <td className={cn(
+                        'px-4 py-3 sticky left-0 z-10',
+                        row.getIsSelected() ? 'bg-primary/5' : 'bg-card'
+                      )}>
                         <input
                           type="checkbox"
                           checked={row.getIsSelected()}
                           onChange={(e) => row.toggleSelected(e.target.checked)}
-                          className="rounded border-border bg-background transition-all duration-200 hover:scale-110 cursor-pointer"
+                          className="data-table-checkbox"
                         />
                       </td>
                     )}
