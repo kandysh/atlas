@@ -219,39 +219,60 @@ export default function InsightsPage() {
 
       {/* Charts Grid */}
       {analyticsLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <DonutChartSkeleton />
-          <ChartSkeleton />
-          <ChartSkeleton />
-          <ChartSkeleton />
-          <ChartSkeleton />
-          <ChartSkeleton />
-          <ChartSkeleton />
-          <ChartSkeleton />
-          <ChartSkeleton />
+        <div className="space-y-4">
+          {/* Row 1: 3 compact charts */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <DonutChartSkeleton />
+            <DonutChartSkeleton />
+            <ChartSkeleton />
+          </div>
+          {/* Row 2: 2 medium charts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ChartSkeleton />
+            <ChartSkeleton />
+          </div>
+          {/* Row 3: 1 large chart */}
+          <div className="grid grid-cols-1 gap-4">
+            <ChartSkeleton />
+          </div>
+          {/* Row 4: 1 large chart */}
+          <div className="grid grid-cols-1 gap-4">
+            <ChartSkeleton />
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ProjectStatusBreakdownDonut
-            chartData={analyticsData.statusCounts}
-          />
-          <CycleTimeChart chartData={analyticsData.cycleTime} />
-          <ChartLineInteractive
-            chartData={analyticsData.throughputOverTime}
-          />
-          <PriorityAgingChart
-            chartData={analyticsData.priorityAging}
-            onPriorityClick={handlePriorityClick}
-          />
-          <AssetClassPortfolioChart
-            chartData={analyticsData.assetClassDistribution}
-            onAssetClassClick={handleAssetClassClick}
-          />
-          <ToolsUsedRadar chartData={analyticsData.toolsUsed} />
-          <TeamImpactChart
-            data={analyticsData.teamImpactQuadrant}
-            onTeamClick={handleTeamClick}
-          />
+        <div className="space-y-4">
+          {/* Row 1: Compact Charts - Donuts and Simple Bar Chart */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <ProjectStatusBreakdownDonut
+              chartData={analyticsData.statusCounts}
+            />
+            <AssetClassPortfolioChart
+              chartData={analyticsData.assetClassDistribution}
+              onAssetClassClick={handleAssetClassClick}
+            />
+            <PriorityAgingChart
+              chartData={analyticsData.priorityAging}
+              onPriorityClick={handlePriorityClick}
+            />
+          </div>
+
+          {/* Row 2: Medium Charts - Line and Bar Charts */}
+          <div className="grid grid-cols-1 gap-4">
+            <ChartLineInteractive
+              chartData={analyticsData.throughputOverTime}
+            />
+          </div>
+
+          {/* Row 3: Large Chart - Tools Used Radar (needs symmetric space) */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <CycleTimeChart chartData={analyticsData.cycleTime} />
+            <ToolsUsedRadar chartData={analyticsData.toolsUsed} />
+            <TeamImpactChart
+              data={analyticsData.teamImpactQuadrant}
+              onTeamClick={handleTeamClick}
+            />
+          </div>
         </div>
       )}
     </div>

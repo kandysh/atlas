@@ -1,5 +1,9 @@
 import { AppSidebar, WorkspaceLoader } from '@/src/components/layout';
-import { SidebarProvider, SidebarInset } from '@/src/components/ui/sidebar';
+import {
+  SidebarProvider,
+  SidebarInset,
+  SIDEBAR_COOKIE_NAME,
+} from '@/src/components/ui/sidebar';
 import ReactQueryProvider from '@/src/providers/react-query-provider';
 import { WorkspaceProvider } from '@/src/providers/workspace-provider';
 import { ThemeProvider } from '@/src/providers/theme-provider';
@@ -7,6 +11,7 @@ import { Toaster } from 'sonner';
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { cookies } from 'next/headers';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -25,11 +30,13 @@ export const metadata: Metadata = {
   description: 'Multi-tenant task management platform',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const isSideBarOpen = cookieStore.get(SIDEBAR_COOKIE_NAME)?.value === 'true';
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -44,7 +51,7 @@ export default function RootLayout({
           <ReactQueryProvider>
             <WorkspaceProvider>
               <WorkspaceLoader>
-                <SidebarProvider defaultOpen={true}>
+                <SidebarProvider defaultOpen={isSideBarOpen}>
                   <AppSidebar />
                   <SidebarInset>
                     <main className="flex flex-1 flex-col gap-4 p-4 md:p-6">

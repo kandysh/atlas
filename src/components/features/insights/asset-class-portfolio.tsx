@@ -190,7 +190,7 @@ export function AssetClassPortfolioChart({
 
   const handlePieClick = (data: { assetClass: string }) => {
     if (onAssetClassClick && data?.assetClass) {
-      onAssetClassClick(data.assetClass);
+      onAssetClassClick(data.assetClass.toLowerCase());
     }
   };
 
